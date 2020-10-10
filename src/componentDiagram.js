@@ -1,8 +1,8 @@
 import * as dagreD3 from 'dagre-d3';
 import * as d3 from 'd3';
-import { getRepositoryUrl } from 'util';
-import { bindShapes } from 'componentDiagramShapes';
-import EventSource from 'eventSource';
+import { getRepositoryUrl } from './util';
+import { bindShapes } from './componentDiagramShapes';
+import EventSource from './eventSource';
 
 export const DEFAULT_TARGET_COUNT = 10;
 const IDEAL_CHILD_COUNT = 3;
@@ -257,7 +257,7 @@ export class ComponentDiagram extends EventSource {
   constructor(container) {
     super();
 
-    this.parent = container;
+    this.parent = d3.select(container);
     this.targetCount = DEFAULT_TARGET_COUNT;
     this.element = this.parent
       .append('svg')

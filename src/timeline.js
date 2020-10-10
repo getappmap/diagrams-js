@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
-import { getLabel, fullyQualifiedFunctionName } from 'util';
+import { getLabel, fullyQualifiedFunctionName } from './util';
 import { flamegraph } from 'd3-flame-graph';
-import EventSource from 'eventSource';
+import EventSource from './eventSource';
 
 // really just a magic number
 const FONT_SIZE = 9;
@@ -80,7 +80,7 @@ export default class Timeline extends EventSource {
   constructor(container) {
     super();
 
-    this.parent = container;
+    this.parent = d3.select(container);
     this.timelineGroup = this.parent
       .append('div')
       .attr('id', 'timeline-group');

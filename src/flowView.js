@@ -4,8 +4,8 @@ import {
   has,
   tokenizeIdentifier,
   capitalizeString,
-} from 'util';
-import EventSource from 'eventSource';
+} from './util';
+import EventSource from './eventSource';
 
 const NodeType = {
   Event: 'event',
@@ -337,7 +337,7 @@ export default class FlowView extends EventSource {
   constructor(container) {
     super();
 
-    this.parent = container;
+    this.parent = d3.select(container);
     this.svg = this.parent
       .append('svg')
       .attr('width', window.innerWidth)

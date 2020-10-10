@@ -3,20 +3,21 @@
   "version": "1.0.0",
   "description": "d3 visualizations of appmap.org data",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rollup -c rollup.config.js",
+    "serve": "rollup -c rollup.config.js --watch",
+    "lint": "eslint src"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/appmaporg/d3-appmap.git"
   },
+  "directories": {
+    "example": "examples"
+  },
   "keywords": [
     "d3",
     "appmap",
     "uml"
-  ],
-  "author": [
-    "kevin@app.land",
-    "dustin@app.land"
   ],
   "license": "MIT",
   "bugs": {
@@ -24,8 +25,17 @@
   },
   "homepage": "https://github.com/appmaporg/d3-appmap",
   "dependencies": {
-    "d3": "^6.2.0",
+    "d3": "^5.16.0",
     "d3-flame-graph": "^3.1.1",
+    "dagre-d3": "^0.6.4",
     "sql-formatter": "^2.3.3"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.3.12",
+    "@rollup/plugin-commonjs": "^15.1.0",
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "eslint": "^7.11.0",
+    "rollup": "^2.29.0",
+    "rollup-plugin-serve": "^1.0.4"
   }
 }
