@@ -1,6 +1,6 @@
 {
   "name": "d3-appmap",
-  "version": "1.0.0",
+  "version": "0.1.2",
   "description": "d3 visualizations of appmap.org data",
   "scripts": {
     "build": "rollup -c rollup.config.js",
