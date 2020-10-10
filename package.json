@@ -1,0 +1,31 @@
+{
+  "name": "d3-appmap",
+  "version": "1.0.0",
+  "description": "d3 visualizations of appmap.org data",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appmaporg/d3-appmap.git"
+  },
+  "keywords": [
+    "d3",
+    "appmap",
+    "uml"
+  ],
+  "author": [
+    "kevin@app.land",
+    "dustin@app.land"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/appmaporg/d3-appmap/issues"
+  },
+  "homepage": "https://github.com/appmaporg/d3-appmap",
+  "dependencies": {
+    "d3": "^6.2.0",
+    "d3-flame-graph": "^3.1.1",
+    "sql-formatter": "^2.3.3"
+  }
+}
