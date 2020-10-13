@@ -1,21 +1,22 @@
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import serve from 'rollup-plugin-serve';
+import * as meta from "./package.json";
 
 export default {
-  input: 'src/appmap.js',
+  input: 'src/index.js',
   output: [
     {
-      file: 'dist/d3-appmap.js',
+      file: `dist/${meta.name}.js`,
       name: 'appmap',
       format: 'umd',
       globals: {
         d3: 'd3'
       }
-    },
+    }
   ],
   external: ['d3'],
-  plugins: [nodeResolve(), commonjs(), serve({
+  plugins: [nodeResolve(), commonjs() /*, serve({
     contentBase: ['dist', 'examples']
-  })]
+  }) */]
 };

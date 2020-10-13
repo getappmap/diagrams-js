@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('d3')) :
-	typeof define === 'function' && define.amd ? define(['d3'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.appmap = factory(global.d3));
-}(this, (function (d3$1) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'd3'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.appmap = {}, global.d3));
+}(this, (function (exports, d3$1) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -23347,8 +23347,12 @@
 	  return rootNode;
 	}
 
-	const appmap = { buildCallTree, EventInfo, ComponentDiagram, FlowView, Timeline };
+	exports.BuildCallTree = buildCallTree;
+	exports.ComponentDiagram = ComponentDiagram;
+	exports.EventInfo = EventInfo;
+	exports.FlowView = FlowView;
+	exports.Timeline = Timeline;
 
-	return appmap;
+	Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
