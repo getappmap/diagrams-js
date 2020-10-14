@@ -32,11 +32,12 @@
     "sql-formatter": "^2.3.3"
   },
   "devDependencies": {
-    "webpack-cli": "^3.3.12",
     "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "eslint": "^7.11.0",
     "rollup": "^2.29.0",
-    "rollup-plugin-serve": "^1.0.4"
+    "rollup-plugin-scss": "^2.6.1",
+    "rollup-plugin-serve": "^1.0.4",
+    "webpack-cli": "^3.3.12"
   }
 }
