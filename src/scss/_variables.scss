@@ -1,3 +1,28 @@
+$themes: (
+  'dark': (
+    'background': #010306,
+    'edge': #242C41,
+    'highlight': #FF07AA,
+    'label-light': lighten(#808b98, 35),
+    'label-dark': #010306,
+    'color-package': #6FDDD6,
+    'color-class': #4362b1,
+    'color-database': #9C2FBA,
+    'color-io': #f92672,
+  ),
+  'light': (
+    'background': #FFFFFF,
+    'edge': #889fa5,
+    'highlight': #474554,
+    'label-light': #FFFFFF,
+    'label-dark': #ffffff,
+    'color-package': #008b69,
+    'color-class': #919191,
+    'color-database': #474554,
+    'color-io': #8685ef,
+  )
+);
+
 $gray1: #010306;
 $black: #010306;
 $gray2: #242C41; //#171e2f;
@@ -14,11 +39,6 @@ $teal: #6FDDD6;
 $yellow: #EBDF90;
 $white: lighten($gray4, 35); // aaaalmost pure white. softened a bit.
 
-// Alerts
-$success: linear-gradient(90deg, rgba(113,149,41,1) 0%, rgba(143,196,19,1) 100%);
-$danger: linear-gradient(90deg, rgba(222,25,50,1) 0%, rgba(196,19,92,1) 100%);
-$general: linear-gradient(90deg, rgba(67,98,177,1) 0%, rgba(84,10,159,1) 100%);
-
 $col-int: #f92672;
 $col-string: #a6e22e;
 $col-bool: #66d9ef;
@@ -26,4 +46,3 @@ $col-float: #fd971f;
 $col-object: #ae81ff;
 
 $border-radius: .5rem;
-

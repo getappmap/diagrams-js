@@ -35,6 +35,8 @@
     "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "eslint": "^7.11.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
     "rollup": "^2.29.0",
     "rollup-plugin-scss": "^2.6.1",
     "rollup-plugin-serve": "^1.0.4",
