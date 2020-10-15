@@ -7,6 +7,10 @@ import EventSource from './eventSource';
 export const DEFAULT_TARGET_COUNT = 10;
 const IDEAL_CHILD_COUNT = 3;
 
+const defaultOptions = {
+  theme: 'light',
+};
+
 function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
   if (!graphDefinition
       || !graphDefinition.package_calls
@@ -53,7 +57,7 @@ function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
     delete diagramCalls[pkg];
 
     // 2. Remove all calls to this package as well
-    Object.values(diagramCalls).forEach(set => set.delete(pkg));
+    Object.values(diagramCalls).forEach((set) => set.delete(pkg));
 
     // 3. Add all the calls to each class in this package. The parent should be
     // the package (if it's present in the call graph), or the class.
@@ -97,7 +101,7 @@ function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
 
   const entries = Object.entries(diagramCalls).map(([k, vs]) => [k, [...vs]]);
   const edges = entries
-    .map(([k, vs]) => vs.map(v => [k, v]))
+    .map(([k, vs]) => vs.map((v) => [k, v]))
     .flat()
     .filter(([v, w]) => v !== w);
   const nodes = Object.values(edges.flat(2).reduce((obj, id) => {
@@ -212,8 +216,8 @@ function renderGraph(componentDiagram) {
   componentDiagram.graphGroup = componentDiagram.element.select('g.output');
   componentDiagram.graphGroup
     .selectAll('g.node')
-    .on('click', id => componentDiagram.highlight(id))
-    .on('dblclick', id => componentDiagram.focus(id));
+    .on('click', (id) => componentDiagram.highlight(id))
+    .on('dblclick', (id) => componentDiagram.focus(id));
 
   componentDiagram.labelGroup = componentDiagram.graphGroup
     .append('g')
@@ -254,15 +258,16 @@ function renderGraph(componentDiagram) {
 }
 
 export class ComponentDiagram extends EventSource {
-  constructor(container) {
+  constructor(container, options = {}) {
     super();
+
+    const diagramOptions = { ...defaultOptions, ...options };
 
     this.parent = d3.select(container);
     this.targetCount = DEFAULT_TARGET_COUNT;
     this.element = this.parent
       .append('svg')
-      .attr('id', 'component-diagram-svg')
-      .attr('class', 'no-selection');
+      .attr('class', `appmap appmap--${diagramOptions.theme}`);
   }
 
   render(data = null) {
@@ -278,7 +283,7 @@ export class ComponentDiagram extends EventSource {
       .setDefaultEdgeLabel(function() { return {}; });
 
     const { nodes, edges } = mixedDiagram(this.currentDiagramModel, this.targetCount);
-    nodes.forEach(node => setNode(this.graph, node));
+    nodes.forEach((node) => setNode(this.graph, node));
     edges.forEach(([start, end]) => {
       if (start !== end) {
         setEdge(this.graph, start, end);
