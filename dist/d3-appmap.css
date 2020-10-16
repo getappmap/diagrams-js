@@ -1,0 +1,121 @@
+html {
+  height: 100%;
+  max-height: 100%; }
+
+body {
+  margin: 0;
+  height: auto;
+  width: 100%; }
+
+.appmap {
+  user-select: none; }
+  .appmap .node.highlight rect, .appmap .node.highlight circle, .appmap .node.highlight ellipse, .appmap .node.highlight path, .appmap .node.highlight polygon {
+    stroke-width: 4px; }
+  .appmap .edgePath path {
+    stroke-width: 2px; }
+  .appmap .nodeLabels {
+    pointer-events: none; }
+    .appmap .nodeLabels .package.dim {
+      opacity: 1; }
+
+.appmap--dark {
+  background-color: #010306; }
+  .appmap--dark .node.dim .label {
+    fill: #181a1d; }
+  .appmap--dark .node.package {
+    fill: #6FDDD6; }
+    .appmap--dark .node.package .label {
+      fill: #010306; }
+    .appmap--dark .node.package.dim {
+      fill: #0c191b; }
+  .appmap--dark .node.class {
+    fill: #4362b1; }
+    .appmap--dark .node.class.dim {
+      fill: #080d17; }
+  .appmap--dark .node.database {
+    fill: #9C2FBA; }
+    .appmap--dark .node.database path {
+      stroke: #010306; }
+    .appmap--dark .node.database.dim > .shape {
+      fill: #110718; }
+  .appmap--dark .node.http {
+    fill: #FF07AA; }
+    .appmap--dark .node.http.dim {
+      fill: #1a0316; }
+  .appmap--dark .node.io {
+    fill: #f92672; }
+    .appmap--dark .node.io.dim {
+      fill: #1a0711; }
+  .appmap--dark .node .label {
+    fill: #e3e5e8; }
+  .appmap--dark .node.highlight rect, .appmap--dark .node.highlight circle, .appmap--dark .node.highlight ellipse, .appmap--dark .node.highlight path, .appmap--dark .node.highlight polygon {
+    stroke: #FF07AA; }
+  .appmap--dark .edgePath.highlight path {
+    stroke: #FF07AA; }
+  .appmap--dark .edgePath.highlight marker {
+    fill: #FF07AA; }
+  .appmap--dark .edgePath.dim marker {
+    fill: #05070c; }
+  .appmap--dark .edgePath.dim path {
+    stroke: #05070c; }
+  .appmap--dark .edgePath path {
+    stroke: #242C41; }
+  .appmap--dark .edgePath marker {
+    fill: #242C41; }
+  .appmap--dark .nodeLabels {
+    fill: #e3e5e8; }
+    .appmap--dark .nodeLabels .dim {
+      opacity: 10%; }
+    .appmap--dark .nodeLabels .package {
+      fill: #010306; }
+
+.appmap--light {
+  background-color: #FFFFFF; }
+  .appmap--light .node.dim .label {
+    fill: white; }
+  .appmap--light .node.package {
+    fill: #008b69; }
+    .appmap--light .node.package .label {
+      fill: #ffffff; }
+    .appmap--light .node.package.dim {
+      fill: #e6f3f0; }
+  .appmap--light .node.class {
+    fill: #919191; }
+    .appmap--light .node.class.dim {
+      fill: #f4f4f4; }
+  .appmap--light .node.database {
+    fill: #474554; }
+    .appmap--light .node.database path {
+      stroke: #ffffff; }
+    .appmap--light .node.database.dim > .shape {
+      fill: #edecee; }
+  .appmap--light .node.http {
+    fill: #474554; }
+    .appmap--light .node.http.dim {
+      fill: #edecee; }
+  .appmap--light .node.io {
+    fill: #8685ef; }
+    .appmap--light .node.io.dim {
+      fill: #f3f3fd; }
+  .appmap--light .node .label {
+    fill: #FFFFFF; }
+  .appmap--light .node.highlight rect, .appmap--light .node.highlight circle, .appmap--light .node.highlight ellipse, .appmap--light .node.highlight path, .appmap--light .node.highlight polygon {
+    stroke: #474554; }
+  .appmap--light .edgePath.highlight path {
+    stroke: #474554; }
+  .appmap--light .edgePath.highlight marker {
+    fill: #474554; }
+  .appmap--light .edgePath.dim marker {
+    fill: #f3f5f6; }
+  .appmap--light .edgePath.dim path {
+    stroke: #f3f5f6; }
+  .appmap--light .edgePath path {
+    stroke: #889fa5; }
+  .appmap--light .edgePath marker {
+    fill: #889fa5; }
+  .appmap--light .nodeLabels {
+    fill: #FFFFFF; }
+    .appmap--light .nodeLabels .dim {
+      opacity: 10%; }
+    .appmap--light .nodeLabels .package {
+      fill: #ffffff; }
