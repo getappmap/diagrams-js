@@ -1,4 +1,4 @@
-import { getLabel } from './util';
+import { getLabel } from '../util';
 
 function mapFunctionLocations(memo, obj) {
   if (obj.type === 'function') {
