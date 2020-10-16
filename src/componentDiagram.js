@@ -121,6 +121,8 @@ function hashify(obj) {
     const val = obj[key];
     if (Array.isArray(val)) {
       clone[key] = new Set(val);
+    } else if (val instanceof Set) {
+      clone[key] = val;
     } else if (val && typeof val === 'object') {
       clone[key] = hashify(val);
     } else {

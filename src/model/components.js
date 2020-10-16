@@ -65,9 +65,16 @@ export default function buildComponents(scenarioData) {
     }
 
     const locationKey = [[event.path || '<path>', event.lineno || '<line>'].join(':'), event.method_id].join('#');
-    const calleeClassDef = locationIndex[locationKey];
-    if ( !calleeClassDef ) {
-      return console.warn(`No class info found for location ${locationKey}`);
+    let calleeClassDef;
+    if ( event.sql_query ) {
+      calleeClassDef = { className: SQL_PACKAGE, packageName: SQL_PACKAGE };
+    } else if ( event.http_server_request ) {
+      calleeClassDef = { className: HTTP_PACKAGE, packageName: HTTP_PACKAGE };
+    } else {
+      calleeClassDef = locationIndex[locationKey];
+      if ( !calleeClassDef ) {
+        return console.warn(`No class info found for location ${locationKey}`);
+      }
     }
 
     if ( callStack.length > 0 ) {
@@ -83,7 +90,7 @@ export default function buildComponents(scenarioData) {
   });
 
   invocationGraph.forEach((call) => {
-    call.forEach(type => {
+    call.forEach((type) => {
       packages.add(type.packageName);
       package_classes[type.packageName] || (package_classes[type.packageName] = new Set());
       package_classes[type.packageName].add(type.className);
@@ -109,6 +116,6 @@ export default function buildComponents(scenarioData) {
     class_callers[callee.className].add(caller.className);
   });
 
-  return { package_calls, class_callers, class_callers, package_classes, class_package,
+  return { package_calls, class_calls, class_callers, package_classes, class_package,
     controller_packages, querying_packages, packages, class_locations, source_control };
-}
+  }
