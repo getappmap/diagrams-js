@@ -35,8 +35,8 @@
 
 <script type="text/javascript">
   function aggregateEvents(events, classMap) {
-    const eventInfo = new appmap.EventInfo(classMap);
-    const callTree = appmap.buildCallTree(events);
+    const eventInfo = new Appmap.EventInfo(classMap);
+    const callTree = Appmap.buildCallTree(events);
 
     callTree.forEach((e) => {
       e.displayName = eventInfo.getName(e.input);
@@ -48,14 +48,14 @@
 
   function onLoad() {
     {
-      var diagram = new appmap.ComponentDiagram('#component-diagram');
+      var diagram = new Appmap.ComponentDiagram('#component-diagram');
       diagram.render(window.componentDiagramModel);
     }
     {
       const callTree = aggregateEvents(window.scenarioData.data.events,
         window.scenarioData.data.classMap);
 
-      var diagram = new appmap.Timeline('#timeline');
+      var diagram = new Appmap.Timeline('#timeline');
       diagram.render(callTree);
     }
   }

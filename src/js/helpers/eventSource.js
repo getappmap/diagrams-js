@@ -1,16 +1,16 @@
 function getListenerArray(eventSource, eventType) {
-  let listeners = eventSource._listeners[eventType];
+  let listeners = eventSource.listeners[eventType];
   if (!listeners) {
     listeners = [];
-    eventSource._listeners[eventType] = listeners;
+    eventSource.listeners[eventType] = listeners;
   }
   return listeners;
 }
 
 export default class EventSource {
   constructor() {
-    this._listeners = {};
-    this._anyListeners = [];
+    this.listeners = {};
+    this.anyListeners = [];
   }
 
   once(eventType, fn) {
@@ -26,14 +26,14 @@ export default class EventSource {
   }
 
   off(eventType, fn) {
-    const handlers = this._listeners[eventType];
+    const handlers = this.listeners[eventType];
 
     if (handlers) {
-      const updatedHandlers = handlers.filter(h => h.fn && h.fn !== fn);
+      const updatedHandlers = handlers.filter((h) => h.fn && h.fn !== fn);
       if (updatedHandlers.length === 0) {
-        delete this._listeners[eventType];
+        delete this.listeners[eventType];
       } else if (updatedHandlers.length !== handlers.length) {
-        this._listeners[eventType] = updatedHandlers;
+        this.listeners[eventType] = updatedHandlers;
       }
     }
 
@@ -41,7 +41,7 @@ export default class EventSource {
   }
 
   emit(eventType, data = undefined) {
-    const handlers = this._listeners[eventType];
+    const handlers = this.listeners[eventType];
 
     if (handlers) {
       let includesOnce = false;
@@ -60,11 +60,11 @@ export default class EventSource {
 
       if (includesOnce) {
         // Only reassign this value if we've encountered a handler that's run once
-        this._listeners[eventType] = this._listeners[eventType].filter(h => !h.once);
+        this.listeners[eventType] = this.listeners[eventType].filter((h) => !h.once);
       }
     }
 
-    this._anyListeners.forEach(eventSource => eventSource.emit(eventType, data));
+    this.anyListeners.forEach((eventSource) => eventSource.emit(eventType, data));
 
     return this;
   }
@@ -73,7 +73,7 @@ export default class EventSource {
   // provided, bind only those types. Otherwise, pipe any event.
   pipe(eventSource, ...eventTypes) {
     if (eventTypes.length) {
-      eventTypes.forEach(type => eventSource.on(type, data => this.emit(data)));
+      eventTypes.forEach((type) => eventSource.on(type, (data) => this.emit(data)));
       return this;
     }
 
@@ -83,7 +83,7 @@ export default class EventSource {
 
   // Bind `eventSource` to recieve any event sent from `this`.
   any(eventSource) {
-    this._anyListeners.push(eventSource);
+    this.anyListeners.push(eventSource);
     return this;
   }
 }

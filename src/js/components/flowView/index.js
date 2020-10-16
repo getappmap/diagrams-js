@@ -4,8 +4,8 @@ import {
   has,
   tokenizeIdentifier,
   capitalizeString,
-} from './util';
-import EventSource from './eventSource';
+} from '../../util';
+import EventSource from '../../helpers/eventSource';
 
 const NodeType = {
   Event: 'event',
@@ -14,8 +14,8 @@ const NodeType = {
   Nonstatic: 'non-static',
 };
 
-const formatParameter = id => formatIdentifier(id.match(/[^.|:]+$/)[0] || id);
-const formatIdentifier = id => tokenizeIdentifier(id).map(t => capitalizeString(t)).join(' ');
+const formatParameter = (id) => formatIdentifier(id.match(/[^.|:]+$/)[0] || id);
+const formatIdentifier = (id) => tokenizeIdentifier(id).map((t) => capitalizeString(t)).join(' ');
 const hasLink = (map, id) => has.call(map, id);
 
 function resolveType(strType) {

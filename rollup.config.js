@@ -5,11 +5,11 @@ import serve from 'rollup-plugin-serve';
 import * as meta from './package.json';
 
 export default {
-  input: 'src/index.js',
+  input: 'src/js/index.js',
   output: [
     {
       file: `dist/${meta.name}.js`,
-      name: 'appmap',
+      name: 'Appmap',
       format: 'umd',
       globals: {
         d3: 'd3',
