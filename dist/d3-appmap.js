@@ -1,7 +1,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3')) :
 	typeof define === 'function' && define.amd ? define(['exports', 'd3'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.appmap = {}, global.d3));
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Appmap = {}, global.d3));
 }(this, (function (exports, d3$1) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -12000,18 +12000,18 @@
 	}
 
 	function getListenerArray(eventSource, eventType) {
-	  let listeners = eventSource._listeners[eventType];
+	  let listeners = eventSource.listeners[eventType];
 	  if (!listeners) {
 	    listeners = [];
-	    eventSource._listeners[eventType] = listeners;
+	    eventSource.listeners[eventType] = listeners;
 	  }
 	  return listeners;
 	}
 
 	class EventSource {
 	  constructor() {
-	    this._listeners = {};
-	    this._anyListeners = [];
+	    this.listeners = {};
+	    this.anyListeners = [];
 	  }
 
 	  once(eventType, fn) {
@@ -12027,14 +12027,14 @@
 	  }
 
 	  off(eventType, fn) {
-	    const handlers = this._listeners[eventType];
+	    const handlers = this.listeners[eventType];
 
 	    if (handlers) {
-	      const updatedHandlers = handlers.filter(h => h.fn && h.fn !== fn);
+	      const updatedHandlers = handlers.filter((h) => h.fn && h.fn !== fn);
 	      if (updatedHandlers.length === 0) {
-	        delete this._listeners[eventType];
+	        delete this.listeners[eventType];
 	      } else if (updatedHandlers.length !== handlers.length) {
-	        this._listeners[eventType] = updatedHandlers;
+	        this.listeners[eventType] = updatedHandlers;
 	      }
 	    }
 
@@ -12042,7 +12042,7 @@
 	  }
 
 	  emit(eventType, data = undefined) {
-	    const handlers = this._listeners[eventType];
+	    const handlers = this.listeners[eventType];
 
 	    if (handlers) {
 	      let includesOnce = false;
@@ -12061,11 +12061,11 @@
 
 	      if (includesOnce) {
 	        // Only reassign this value if we've encountered a handler that's run once
-	        this._listeners[eventType] = this._listeners[eventType].filter(h => !h.once);
+	        this.listeners[eventType] = this.listeners[eventType].filter((h) => !h.once);
 	      }
 	    }
 
-	    this._anyListeners.forEach(eventSource => eventSource.emit(eventType, data));
+	    this.anyListeners.forEach((eventSource) => eventSource.emit(eventType, data));
 
 	    return this;
 	  }
@@ -12074,7 +12074,7 @@
 	  // provided, bind only those types. Otherwise, pipe any event.
 	  pipe(eventSource, ...eventTypes) {
 	    if (eventTypes.length) {
-	      eventTypes.forEach(type => eventSource.on(type, data => this.emit(data)));
+	      eventTypes.forEach((type) => eventSource.on(type, (data) => this.emit(data)));
 	      return this;
 	    }
 
@@ -12084,7 +12084,7 @@
 
 	  // Bind `eventSource` to recieve any event sent from `this`.
 	  any(eventSource) {
-	    this._anyListeners.push(eventSource);
+	    this.anyListeners.push(eventSource);
 	    return this;
 	  }
 	}
@@ -14014,8 +14014,8 @@
 	  Nonstatic: 'non-static',
 	};
 
-	const formatParameter = id => formatIdentifier(id.match(/[^.|:]+$/)[0] || id);
-	const formatIdentifier = id => tokenizeIdentifier(id).map(t => capitalizeString(t)).join(' ');
+	const formatParameter = (id) => formatIdentifier(id.match(/[^.|:]+$/)[0] || id);
+	const formatIdentifier = (id) => tokenizeIdentifier(id).map((t) => capitalizeString(t)).join(' ');
 	const hasLink = (map, id) => has$1.call(map, id);
 
 	function resolveType(strType) {
@@ -22628,7 +22628,7 @@
 
 	  const classTokens = (input.defined_class || '<unknown>')
 	    .split(/_|\/|\$|\(.*\)/)
-	    .filter(x => x);
+	    .filter((x) => x);
 
 	  const event = {
 	    defined_class: classTokens.pop(),
@@ -23358,6 +23358,7 @@
 	const SQL_PACKAGE = 'SQL';
 
 	function buildComponents(scenarioData) {
+	  /* eslint-disable camelcase */
 	  // map of all packages which are invoked from each package
 	  const package_calls = {}; // Hash.new { |h, k| h[k] = Set.new }
 	  // for each class, a set of classes which are called
@@ -23378,6 +23379,7 @@
 	  const class_locations = {};
 	  // Source control related metadata
 	  const source_control = {};
+	  /* eslint-enable camelcase */
 
 	  const locationIndex = {};
 	  const fqPackageName = [];
@@ -23443,12 +23445,16 @@
 	    }
 
 	    callStack.push(calleeClassDef);
+
+	    return null;
 	  });
 
 	  invocationGraph.forEach((call) => {
 	    call.forEach((type) => {
 	      packages.add(type.packageName);
-	      package_classes[type.packageName] || (package_classes[type.packageName] = new Set());
+	      if (!package_classes[type.packageName]) {
+	        package_classes[type.packageName] = new Set();
+	      }
 	      package_classes[type.packageName].add(type.className);
 	      class_package[type.className] = type.packageName;
 	    });
@@ -23462,26 +23468,42 @@
 	      querying_packages.add(caller.packageName);
 	    }
 
-	    package_calls[caller.packageName] || ( package_calls[caller.packageName] = new Set());
+	    if (!package_calls[caller.packageName]) {
+	      package_calls[caller.packageName] = new Set();
+	    }
 	    package_calls[caller.packageName].add(callee.packageName);
 
-	    class_calls[caller.className] || (class_calls[caller.className] = new Set());
+	    if (!class_calls[caller.className]) {
+	      class_calls[caller.className] = new Set();
+	    }
 	    class_calls[caller.className].add(callee.className);
 
-	    class_callers[callee.className] || (class_callers[callee.className] = new Set());
+	    if (!class_callers[callee.className]) {
+	      class_callers[callee.className] = new Set();
+	    }
 	    class_callers[callee.className].add(caller.className);
 	  });
 
-	  return { package_calls, class_calls, class_callers, package_classes, class_package,
-	    controller_packages, querying_packages, packages, class_locations, source_control };
-	  }
+	  return {
+	    package_calls,
+	    class_calls,
+	    class_callers,
+	    package_classes,
+	    class_package,
+	    controller_packages,
+	    querying_packages,
+	    packages,
+	    class_locations,
+	    source_control,
+	  };
+	}
 
-	exports.BuildCallTree = buildCallTree;
-	exports.BuildComponentModel = buildComponents;
 	exports.ComponentDiagram = ComponentDiagram;
 	exports.EventInfo = EventInfo;
 	exports.FlowView = FlowView;
 	exports.Timeline = Timeline;
+	exports.buildCallTree = buildCallTree;
+	exports.buildComponentModel = buildComponents;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 

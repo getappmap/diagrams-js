@@ -1,11 +1,14 @@
 {
   "name": "d3-appmap",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "d3 visualizations of appmap.org data",
+  "main": "dist/d3-appmap.js",
+  "module": "src/index.js",
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "serve": "rollup -c rollup.config.js --watch",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -23,7 +26,6 @@
   "bugs": {
     "url": "https://github.com/appmaporg/d3-appmap/issues"
   },
-  "module": "src/index.js",
   "homepage": "https://github.com/appmaporg/d3-appmap",
   "dependencies": {
     "d3": "^5.16.0",

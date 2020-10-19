@@ -1,8 +1,4 @@
-<<<<<<< HEAD:src/model/eventInfo.js
-import { getLabel } from '../util';
-=======
 import { getLabel } from '../../util';
->>>>>>> Reorganize project file structure:src/js/components/eventInfo/index.js
 
 function mapFunctionLocations(memo, obj) {
   if (obj.type === 'function') {
