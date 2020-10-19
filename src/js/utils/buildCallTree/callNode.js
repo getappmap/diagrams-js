@@ -1,30 +1,3 @@
-
-
-// CallStack provides stack-like behavior to an event array
-class CallStack {
-  constructor(data, functionLabels) {
-    this.index = 0;
-    this.data = [...data];
-    this.maxIndex = this.data.length - 1;
-    this.functionLabels = functionLabels;
-  }
-
-  peek() {
-    if (this.index <= this.maxIndex) {
-      return this.data[this.index];
-    }
-    return null;
-  }
-
-  pop() {
-    const call = this.peek();
-    if (call) {
-      this.index += 1;
-    }
-    return call;
-  }
-}
-
 class CallNode {
   constructor(input = {}, output = {}, caller = null, labels = []) {
     this.input = input;
@@ -365,42 +338,4 @@ class CallNode {
   }
 }
 
-function branch(callStack, parent) {
-  const evt = callStack.pop();
-  if (!evt) {
-    return null;
-  }
-
-  if (evt.event === 'call') {
-    const node = new CallNode(evt, null, parent, callStack.functionLabels(evt));
-    parent.addChild(node);
-
-    let child = null;
-    for (;;) {
-      child = branch(callStack, node);
-      if (!child) {
-        break;
-      }
-    }
-    return node;
-  }
-
-  if (evt.event === 'return') {
-    parent.output = evt;
-  }
-
-  return null;
-}
-
-function noLabels() {
-  return [];
-}
-
-export default function buildCallTree(data, functionLabels = noLabels) {
-  const rootNode = new CallNode();
-  const callStack = new CallStack(data, functionLabels);
-  while (callStack.peek()) {
-    branch(callStack, rootNode);
-  }
-  return rootNode;
-}
+export default CallNode;

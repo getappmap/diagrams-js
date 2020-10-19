@@ -2,6 +2,7 @@ const HTTP_PACKAGE = 'HTTP';
 const SQL_PACKAGE = 'SQL';
 
 export default function buildComponents(scenarioData) {
+  /* eslint-disable camelcase */
   // map of all packages which are invoked from each package
   const package_calls = {}; // Hash.new { |h, k| h[k] = Set.new }
   // for each class, a set of classes which are called
@@ -22,6 +23,7 @@ export default function buildComponents(scenarioData) {
   const class_locations = {};
   // Source control related metadata
   const source_control = {};
+  /* eslint-enable camelcase */
 
   const locationIndex = {};
   const fqPackageName = [];
@@ -87,12 +89,16 @@ export default function buildComponents(scenarioData) {
     }
 
     callStack.push(calleeClassDef);
+
+    return null;
   });
 
   invocationGraph.forEach((call) => {
     call.forEach((type) => {
       packages.add(type.packageName);
-      package_classes[type.packageName] || (package_classes[type.packageName] = new Set());
+      if (!package_classes[type.packageName]) {
+        package_classes[type.packageName] = new Set();
+      }
       package_classes[type.packageName].add(type.className);
       class_package[type.className] = type.packageName;
     });
@@ -100,22 +106,38 @@ export default function buildComponents(scenarioData) {
     const [caller, callee] = call;
 
     if ( caller.packageName === HTTP_PACKAGE ) {
-      controller_packages.add(callee.packageName)
+      controller_packages.add(callee.packageName);
     }
     if ( callee.packageName === SQL_PACKAGE ) {
-      querying_packages.add(caller.packageName)
+      querying_packages.add(caller.packageName);
     }
 
-    package_calls[caller.packageName] || ( package_calls[caller.packageName] = new Set());
+    if (!package_calls[caller.packageName]) {
+      package_calls[caller.packageName] = new Set();
+    }
     package_calls[caller.packageName].add(callee.packageName);
 
-    class_calls[caller.className] || (class_calls[caller.className] = new Set());
+    if (!class_calls[caller.className]) {
+      class_calls[caller.className] = new Set();
+    }
     class_calls[caller.className].add(callee.className);
 
-    class_callers[callee.className] || (class_callers[callee.className] = new Set());
+    if (!class_callers[callee.className]) {
+      class_callers[callee.className] = new Set();
+    }
     class_callers[callee.className].add(caller.className);
   });
 
-  return { package_calls, class_calls, class_callers, package_classes, class_package,
-    controller_packages, querying_packages, packages, class_locations, source_control };
-  }
+  return {
+    package_calls,
+    class_calls,
+    class_callers,
+    package_classes,
+    class_package,
+    controller_packages,
+    querying_packages,
+    packages,
+    class_locations,
+    source_control,
+  };
+}

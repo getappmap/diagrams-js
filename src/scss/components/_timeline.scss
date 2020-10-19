@@ -1,0 +1,500 @@
+$appmap-bg: $gray1;
+$appmap-labels: $white;
+$appland-text: $gray4;
+$form-border: $gray2;
+
+#timeline-group {
+  text-align: center;
+  overflow-y: auto;
+  overflow-x: scroll;
+}
+
+.appmap-column {
+  background-color: $gray2;
+  padding: 1.5rem;
+  scrollbar-color: orange black;
+
+  &.timeline-wrap {
+    padding: 0;
+    scrollbar-color: orange black;
+    &.flow {
+      background-color: $gray1;
+    }
+  }
+
+  /* width */
+  ::-webkit-scrollbar:horizontal {
+    width: 30px;
+    height: 20px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: black;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: orange;
+    border-radius: 10px;
+    border: 5px solid black
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #efb749;
+  }
+
+}
+
+.timeline-nav {
+  justify-content: flex-start;
+}
+
+.appmap-container {
+  flex: 0 0 825px;
+  margin: auto;
+  text-align: center;
+  background-color: $appmap-bg;
+  padding: .5em 1.5em 5em 1.5em;
+  -webkit-box-shadow: 11px 10px 13px -10px rgba(0,0,0,0.41);
+  -moz-box-shadow: 11px 10px 13px -10px rgba(0,0,0,0.41);
+  box-shadow: 11px 10px 13px -10px rgba(0,0,0,0.41);
+}
+
+.d3-flame-graph-label {
+  font-size: 13px;
+  margin-left: 5px;
+  margin-top: 2px;
+  font-family: 'IBM Plex Mono', sans-serif;
+  font-weight: 300;
+  color: $appmap-labels;
+  text-align: left;
+}
+
+.d3-flame-graph rect {
+    stroke: $appmap-bg;
+    fill-opacity: .8;
+}
+
+.d3-flame-graph-tip {
+  font-family: 'IBM Plex Mono', sans-serif;
+}
+
+.no-selection {
+  -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+  -moz-user-select: none; /* mozilla browsers */
+  -khtml-user-select: none; /* webkit (konqueror) browsers */
+  -ms-user-select: none; /* IE10+ */
+  user-select: none;
+}
+
+.footer-nav {
+  div {
+    margin-right: 3em;
+  }
+}
+
+input:focus {
+    outline: none;
+}
+
+.form-control {
+  border-radius: 0;
+}
+
+#edit-link-sharing {
+  width: auto;
+}
+
+.form-control:focus {
+  outline: 0;
+  box-shadow: none;
+  color: $appland-text;
+  border-color: $hotpink;
+}
+
+/* smooth search bar */
+input-group>.custom-select:not(:last-child), .input-group>.form-control:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.bg-appland-green {
+  background-color: #97c366;
+}
+
+.bg-appland-gray {
+  background-color: #b9bdcc;
+}
+
+#scroll-to-element {
+  position: fixed;
+  left: 50%;
+  width: 200px;
+  background-color: black;
+  border: none;
+  text-align: center;
+  z-index: 20;
+  color: $blue;
+  opacity: 1;
+}
+
+#scenario-save-as label {
+  color: $appland-text;
+}
+
+.scenario-filter h4 {
+  font-size: 13pt;
+  margin-top: 1rem;
+}
+
+.scenario-filter section {
+  margin: 1rem;
+}
+
+.scenario-filter [data-filter] {
+  align-items: baseline;
+  display: flex;
+  gap: 1ex;
+}
+
+.scenario-filter .sql-filters :is(section, h5) {
+  display: inline-flex;
+}
+
+.scenario-filter input:not([type=checkbox]) {
+  flex-grow: 1;
+}
+
+#dev-console-sm {
+  background-color: $gray1;
+  padding: 0 1.25rem;
+  border-left: solid 1px $gray2;
+}
+
+.always-on-top {
+  z-index: 2147483647;
+}
+
+.pink-top-border {
+  border-top: solid 1px $hotpink;
+}
+
+.no-top-border {
+  border-top: 0px;
+}
+
+.align-bottom-container {
+  bottom: 0px;
+  width: 100%;
+  max-width: 100%;
+
+  .row {
+    margin-right: 0;
+    margin-left: 0;
+  }
+}
+
+.flow-view-toggle {
+  padding: 0 1.15em;
+  color: $gray5;
+  background-color: $gray2;
+}
+
+
+/* scenario upload */
+select.form-control, select.form-control:focus {
+  border-radius: 0;
+  color: $appland-text;
+  background: none;
+  background-size: 13px 13px;
+  border-color: $form-border;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-position: right 50%;
+  background-repeat: no-repeat;
+  fill: $white;
+  background-image: url(sort-down-solid.svg);
+}
+
+#scenario-controls {
+    li {
+      a {
+        padding: 0;
+      }
+      i {
+        &:hover {
+          color: $blue;
+        }
+      }
+    }
+}
+
+.console {
+  width: 100%;
+  padding: 0px;
+}
+
+.console .nav-tabs {
+  padding: .5rem;
+  margin-bottom: 1rem;
+}
+
+#dev-console-sm .console .nav-tabs .active {
+  color: $white;
+  border-bottom-color: $hotpink;
+}
+
+#dev-console-sm .console .nav-tabs a:hover{
+  color: $white;
+}
+#app-properties, #code-stats, #scenario-properties, #key-data-stats {
+  color: $appland-text;
+}
+
+.table#app-properties, .table#code-stats, .table#key-data-stats {
+  margin: 0;
+  td {
+    border-top: none;
+  }
+}
+
+.console .tab-content {
+  padding: 0px;
+}
+
+#region-border-scenario-tool {
+  text-align: right;
+  padding: 0px;
+}
+
+.active-region-header {
+  color: $white;
+  padding: 1rem;
+}
+
+#tool-trace-nav, #scenario-controls {
+  i {
+    color: $appland-text;
+  }
+}
+
+.nav-tabs {
+  border-bottom: none;
+  background: none;
+
+  .nav-item {
+    margin-bottom: 0;
+  }
+
+  .nav-link {
+    border: 1px solid transparent;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    color: $appland-text;
+
+    &:hover {
+      color: $hotpink;
+      border-color: $gray1;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    &.active {
+      border-bottom-color: $hotpink;
+      background: none;
+      color: $gray5;
+    }
+  }
+}
+
+#tools {
+  width: 100%;
+  background-color: $gray1;
+  margin: auto;
+  z-index: 10;
+  li i {
+    &:hover {
+      color: $blue;
+    }
+  }
+}
+
+
+
+/* Scenario Uploads */
+#scenario-upload-container {
+  //grid-row: 1;
+  // grid-column: col-start / span 12 ;
+  // margin: 0 2rem 2rem 2rem;
+  // height: min-content;
+}
+
+#scenario-upload-container .card-header img {
+  width: 40rem;
+}
+
+#scenario-upload-container select option {
+  color: $appland-text;
+}
+
+
+/* Scenario List */
+.scenario-list {
+  padding: 0;
+  list-style-type: none;
+}
+
+
+/* Scenario Modal */
+.list-scenarios-modal {
+  .modal-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid $gray2;
+    h2 {
+      margin: 0;
+    }
+  }
+  .modal-body {
+    padding: 0 1.25rem 1.25rem 1.25rem;
+  }
+  .scenario-list {
+    li {
+      border-bottom: 1px solid $gray2;
+      padding: .75rem 0;
+      &:last-of-type {
+        border: 0;
+      }
+    }
+  }
+}
+
+/* =================================== */
+/* Responsive Behaviors */
+/* =================================== */
+
+@media (max-width: 767px) {
+  .appland-search {
+    padding: 1rem 0 0 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  div.feature, div.app {
+    margin-bottom: 1em;
+  }
+
+  div.row.feature-group, div.row.app-group {
+    margin-bottom: 0;
+  }
+
+  div#home-wrapper {
+    height: auto;
+  }
+
+  .feature-section-info, .feature-section-appmap {
+    background-color: $gray1;
+    height: auto;
+  }
+
+  div.resizable-hide {
+    height: auto;
+    padding-right: 0px;
+  }
+
+  div.align-bottom-container {
+    position: relative;
+  }
+
+  .properties-table.table-striped tbody tr:nth-of-type(odd) {
+    background-color: lighten($gray1,03);
+  }
+
+  .properties-table.table-striped tbody tr {
+    border-bottom: solid $appmap-bg 1px;
+  }
+
+  div#dev-console-sm, div.align-bottom-container {
+    border-left: 0;
+  }
+ .active-region-header {
+   display: none;
+ }
+}
+
+@media (max-width: 991px) {
+  .grid-full.scenario {
+    grid-template: 'header' 'flow' 1fr / 100%;
+    overflow: hidden;
+
+    .scenario-flow {
+      overflow: visible;
+    }
+
+    .nav,
+    .scenario-console,
+    .scenario-timeline {
+      display: none;
+    }
+  }
+}
+
+#node-value-popper {
+  background: $black;
+  color: $white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  max-width: 24rem;
+  word-break: break-all;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid $white;
+  pointer-events: none;
+  top: 0;
+
+  &[data-show] {
+    opacity: 1;
+  }
+
+  &[data-placement^='left'] > #arrow {
+    top: 50%;
+    transform: translateY(-50%);
+    right: -5px;
+
+    &:before {
+      border-left: 0;
+      border-bottom: 0;
+    }
+  }
+
+  &[data-placement^='right'] > #arrow {
+    top: 50%;
+    transform: translateY(-50%);
+    left: -5px;
+
+    &:before {
+      border-right: 0;
+      border-top: 0;
+    }
+  }
+
+  #arrow,
+  #arrow::before {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    z-index: -1;
+  }
+
+  #arrow::before {
+    content: '';
+    transform: rotate(45deg);
+    background: $black;
+    border: 1px solid $white;
+  }
+}
