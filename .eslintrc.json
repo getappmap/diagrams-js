@@ -22,6 +22,7 @@
         "space-before-function-paren": "off",
         "one-var": "off",
         "no-use-before-define": "off",
-        "no-param-reassign": [2, { "props": false }]
+        "no-param-reassign": [2, { "props": false }],
+        "no-console": "off"
     }
 }

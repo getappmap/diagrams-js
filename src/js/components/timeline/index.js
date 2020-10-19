@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
-import { getLabel, fullyQualifiedFunctionName } from './util';
 import { flamegraph } from 'd3-flame-graph';
-import EventSource from './eventSource';
+import { getLabel, fullyQualifiedFunctionName } from '../../util';
+import EventSource from '../../helpers/eventSource';
 
 // really just a magic number
 const FONT_SIZE = 9;
@@ -26,7 +26,7 @@ function buildName(d) {
 
   const classTokens = (input.defined_class || '<unknown>')
     .split(/_|\/|\$|\(.*\)/)
-    .filter(x => x);
+    .filter((x) => x);
 
   const event = {
     defined_class: classTokens.pop(),
