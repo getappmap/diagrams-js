@@ -1,6 +1,7 @@
 html {
   height: 100%;
-  max-height: 100%; }
+  max-height: 100%;
+  font-size: 16px; }
 
 body {
   margin: 0;
@@ -119,6 +120,167 @@ body {
       opacity: 10%; }
     .appmap--light .nodeLabels .package {
       fill: #ffffff; }
+
+.flow-view-container {
+  font-family: 'IBM Plex Mono', monospace;
+  background-color: #242C41;
+  position: relative;
+  margin: 0;
+  height: 100vh;
+  overflow: auto;
+  font-size: 12px; }
+  .flow-view-container .node-wrapper {
+    will-change: transform; }
+    .flow-view-container .node-wrapper > * {
+      position: absolute;
+      width: max-content; }
+    .flow-view-container .node-wrapper > svg {
+      z-index: -1; }
+    .flow-view-container .node-wrapper li {
+      align-items: start;
+      display: flex; }
+  .flow-view-container svg {
+    overflow: inherit;
+    vertical-align: inherit; }
+  .flow-view-container .sql {
+    white-space: pre;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 1em;
+    margin-top: -1.5em;
+    max-width: 100ex;
+    max-height: 30em; }
+    .flow-view-container .sql::-moz-selection {
+      background-color: #FF07AA;
+      color: #fff; }
+    .flow-view-container .sql::selection {
+      background-color: #FF07AA;
+      color: #fff; }
+  .flow-view-container .highlight .sql {
+    overflow: scroll; }
+  .flow-view-container .modal-content {
+    background-color: #111;
+    color: #a1a1a1; }
+  .flow-view-container .modal-header {
+    border-bottom: 1px solid #222; }
+  .flow-view-container .modal-footer {
+    border-top: 1px solid #222; }
+  .flow-view-container .node {
+    background-color: #010306;
+    display: inline-block;
+    color: #a1a1a1;
+    border-radius: 0;
+    margin: 1em;
+    box-shadow: 0.2em 0.2em 10px 0px rgba(0, 0, 0, 0.6);
+    font-size: .8rem;
+    /*Scrollbars inside of node
+
+    /* width */
+    /* Track */
+    /* Handle */ }
+    .flow-view-container .node.highlight {
+      outline: 4px solid #FF07AA; }
+    .flow-view-container .node .header {
+      text-align: center;
+      font-weight: 800;
+      width: 100%;
+      padding: 0 2em;
+      background-color: rgba(0, 0, 0, 0.25);
+      color: #bababa;
+      border-radius: 0; }
+      .flow-view-container .node .header[data-type='event'] {
+        background-color: #471554; }
+      .flow-view-container .node .header[data-type='sql'] {
+        background-color: #113d80; }
+      .flow-view-container .node .header[data-type='non-static'] {
+        background-color: #525d7b; }
+      .flow-view-container .node .header[data-type='static'] {
+        background-color: #525d7b; }
+      .flow-view-container .node .header p {
+        display: inline;
+        margin: 0 auto;
+        min-width: 100%;
+        max-width: 15em;
+        word-break: break-word; }
+    .flow-view-container .node .io {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      margin: 1em 0; }
+      .flow-view-container .node .io .connector {
+        display: inline-block;
+        cursor: pointer;
+        margin: 0 0.5em;
+        height: 1.5em;
+        width: 1.5em;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 117 90"><path fill="white" d="m 10 0 h 65 a 16 16 0 0 1 10 5 l 30 35 a 8 8 0 0 1 0 10 l -30 35 a 16 16 0 0 1 -10 5 h -65 a 10 10 0 0 1 -10 -10 v -70 a 10 10 0 0 1 10 -10"/></svg>') no-repeat center;
+        opacity: .23; }
+        .flow-view-container .node .io .connector.in-use {
+          opacity: 1; }
+      .flow-view-container .node .io .item {
+        cursor: pointer;
+        transition: color 0.3s cubic-bezier(0.25, 0.5, 0.25, 1); }
+        .flow-view-container .node .io .item:hover {
+          color: #e3e5e8; }
+        .flow-view-container .node .io .item::before, .flow-view-container .node .io .item::after {
+          content: '';
+          margin: 0 .5em;
+          display: inline-block;
+          border-radius: 50%;
+          width: .8em;
+          height: .8em; }
+        .flow-view-container .node .io .item[data-type='int']::before, .flow-view-container .node .io .item[data-type='int']::after {
+          background: #f92672; }
+        .flow-view-container .node .io .item[data-type='string']::before, .flow-view-container .node .io .item[data-type='string']::after {
+          background: #a6e22e; }
+        .flow-view-container .node .io .item[data-type='bool']::before, .flow-view-container .node .io .item[data-type='bool']::after {
+          background: #66d9ef; }
+        .flow-view-container .node .io .item[data-type='float']::before, .flow-view-container .node .io .item[data-type='float']::after {
+          background: #fd971f; }
+        .flow-view-container .node .io .item[data-type='object']::before, .flow-view-container .node .io .item[data-type='object']::after {
+          background: #ae81ff; }
+      .flow-view-container .node .io .column {
+        flex: 1 0 auto; }
+        .flow-view-container .node .io .column.left {
+          text-align: left;
+          margin-right: 1em; }
+          .flow-view-container .node .io .column.left .item::after {
+            display: none; }
+        .flow-view-container .node .io .column.right {
+          text-align: right;
+          margin-left: 1em; }
+          .flow-view-container .node .io .column.right .item::before {
+            display: none; }
+    .flow-view-container .node ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+      background-color: #010306; }
+    .flow-view-container .node ::-webkit-scrollbar-track, .flow-view-container .node ::-webkit-scrollbar-corner {
+      background: #010306; }
+    .flow-view-container .node ::-webkit-scrollbar-thumb {
+      background: #4362b1; }
+  .flow-view-container .exception .header::after {
+    font-family: 'Font Awesome 5 Free';
+    content: '\f071';
+    color: #EBDF90;
+    float: right;
+    margin-right: -1.75em; }
+  .flow-view-container .connection {
+    fill: none;
+    position: absolute;
+    z-index: 0; }
+    .flow-view-container .connection.node-connection {
+      stroke: #808b98;
+      stroke-width: 2px; }
+    .flow-view-container .connection.type-int {
+      stroke: #f92672; }
+    .flow-view-container .connection.type-bool {
+      stroke: #66d9ef; }
+    .flow-view-container .connection.type-float {
+      stroke: #fd971f; }
+    .flow-view-container .connection.type-string {
+      stroke: #a6e22e; }
+    .flow-view-container .connection.type-object {
+      stroke: #ae81ff; }
 
 #timeline-group {
   text-align: center;

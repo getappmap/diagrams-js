@@ -23,12 +23,14 @@
         <h3 class="text-muted">appmap-d3</h3>
       </nav>
     </div>
-    <div id="component-diagram">
+
+    <div id="component-diagram"></div>
+
+    <div class="flow-view-container">
+      <div id="flow-view" class="node-wrapper"></div>
     </div>
-    <div id="flow-view">
-    </div>
-    <div id="timeline">
-    </div>
+
+    <div id="timeline"></div>
   </div>
 </body>
 
@@ -54,6 +56,9 @@
     {
       const callTree = aggregateEvents(window.scenarioData.data.events,
         window.scenarioData.data.classMap);
+
+      var flowView = new Appmap.FlowView('#flow-view');
+      flowView.render(callTree);
 
       var diagram = new Appmap.Timeline('#timeline');
       diagram.render(callTree);
