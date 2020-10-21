@@ -1,0 +1,235 @@
+.flow-view-container {
+  font-family: 'IBM Plex Mono', monospace;
+  background-color: $gray2;
+  position: relative;
+  margin: 0;
+  height: 600px;
+  overflow: auto;
+  font-size: 12px;
+
+  .node-wrapper {
+    will-change: transform;
+
+    > * {
+      position: absolute;
+      width: max-content;
+    }
+
+    > svg {
+      z-index: -1;
+    }
+
+    li {
+      align-items: start;
+      display: flex;
+    }
+  }
+
+  svg {
+    overflow: inherit;
+    vertical-align: inherit;
+  }
+
+  .sql {
+    white-space: pre;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 1em;
+    margin-top: -1.5em;
+    max-width: 100ex;
+    max-height: 30em;
+
+    &::-moz-selection {
+      background-color: $hotpink;
+      color: #fff;
+    };
+    &::selection {
+      background-color: $hotpink;
+      color: #fff;
+    }
+  }
+
+  .highlight .sql {
+    overflow: scroll;
+  }
+
+  .modal-content {
+    background-color: #111;
+    color: #a1a1a1;
+  }
+
+  .modal-header {
+    border-bottom: 1px solid #222;
+  }
+
+  .modal-footer {
+    border-top: 1px solid #222;
+  }
+
+  .node {
+    background-color: $gray1;
+    display: inline-block;
+    color: #a1a1a1;
+    border-radius: 0;
+    margin: 1em;
+    box-shadow: 0.2em 0.2em 10px 0px rgba(0, 0, 0, .6);
+    font-size: .8rem;
+
+    &.highlight {
+      outline: 4px solid $hotpink;
+    }
+
+    .header {
+      text-align: center;
+      font-weight: 800;
+      width: 100%;
+      padding: 0 2em;
+      background-color: rgba(0,0,0,0.25);
+      color: #bababa;
+      border-radius: 0;
+
+      &[data-type='event'] { background-color: darken($royal, 25); }
+      &[data-type='sql'] { background-color: rgba(17, 61, 128, 1); }
+      &[data-type='non-static'] { background-color: #525d7b; }
+      &[data-type='static'] { background-color: #525d7b; }
+
+      p {
+        display: inline;
+        margin: 0 auto;
+        min-width: 100%;
+        max-width: 15em;
+        word-break: break-word;
+      }
+    }
+
+    .io {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      margin: 1em 0;
+
+      .connector {
+        display: inline-block;
+        cursor: pointer;
+        margin: 0 0.5em;
+        height: 1.5em;
+        width: 1.5em;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 117 90"><path fill="white" d="m 10 0 h 65 a 16 16 0 0 1 10 5 l 30 35 a 8 8 0 0 1 0 10 l -30 35 a 16 16 0 0 1 -10 5 h -65 a 10 10 0 0 1 -10 -10 v -70 a 10 10 0 0 1 10 -10"/></svg>') no-repeat center;
+        opacity: .23;
+
+        &.in-use {
+          opacity: 1;
+        }
+      }
+
+      .item {
+        cursor: pointer;
+        transition: color 0.3s cubic-bezier(0.25, 0.5, 0.25, 1);
+
+        &:hover { color: $white; }
+
+        &::before,
+        &::after {
+          content: '';
+          margin: 0 .5em;
+          display: inline-block;
+          border-radius: 50%;
+          width: .8em;
+          height: .8em;
+        }
+
+        &[data-type='int']::before,
+        &[data-type='int']::after {
+          background: $col-int;
+        }
+
+        &[data-type='string']::before,
+        &[data-type='string']::after {
+          background: $col-string;
+        }
+
+        &[data-type='bool']::before,
+        &[data-type='bool']::after {
+          background: $col-bool;
+        }
+
+        &[data-type='float']::before,
+        &[data-type='float']::after {
+          background: $col-float;
+        }
+
+        &[data-type='object']::before,
+        &[data-type='object']::after {
+          background: $col-object;
+        }
+      }
+
+      .column {
+        flex: 1 0 auto;
+
+        &.left {
+          text-align: left;
+          margin-right: 1em;
+
+          .item::after {
+            display: none;
+          }
+        }
+
+        &.right {
+          text-align: right;
+          margin-left: 1em;
+
+          .item::before {
+            display: none;
+          }
+        }
+      }
+    }
+
+    /*Scrollbars inside of node
+
+    /* width */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+      background-color: $gray1;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
+      background: $gray1;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+      background: $blue;
+    }
+  }
+
+  .exception {
+    .header::after {
+      font-family: 'Font Awesome 5 Free';
+      content: '\f071';
+      color: $yellow;
+      float: right;
+      margin-right: -1.75em;
+    }
+  }
+
+  .connection {
+    fill: none;
+    position: absolute;
+    z-index: 0;
+
+    &.node-connection {
+      stroke: $gray4;
+      stroke-width: 2px;
+    }
+
+    &.type-int { stroke: $col-int; }
+    &.type-bool { stroke: $col-bool; }
+    &.type-float { stroke: $col-float; }
+    &.type-string { stroke: $col-string; }
+    &.type-object { stroke: $col-object; }
+  }
+}
