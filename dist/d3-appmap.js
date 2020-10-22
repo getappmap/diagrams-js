@@ -12307,7 +12307,6 @@
 	  });
 
 	  document.body.addEventListener('mouseup', () => {
-	    //document.body.classList.remove('is-grabbing');
 	    document.body.style.cursor = null;
 	    viewportZoom.isDragging = false;
 	  });
