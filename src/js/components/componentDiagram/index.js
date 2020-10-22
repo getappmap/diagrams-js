@@ -3,13 +3,10 @@ import * as d3 from 'd3';
 import { getRepositoryUrl } from '../../util';
 import { bindShapes } from './componentDiagramShapes';
 import EventSource from '../../helpers/eventSource';
+import Container from '../../helpers/container';
 
 export const DEFAULT_TARGET_COUNT = 10;
 const IDEAL_CHILD_COUNT = 3;
-
-const defaultOptions = {
-  theme: 'light',
-};
 
 function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
   if (!graphDefinition
@@ -263,22 +260,20 @@ export default class ComponentDiagram extends EventSource {
   constructor(container, options = {}) {
     super();
 
-    const diagramOptions = { ...defaultOptions, ...options };
+    this.container = new Container(document.querySelector(container), options);
 
-    this.parent = d3.select(container);
     this.targetCount = DEFAULT_TARGET_COUNT;
-    this.element = this.parent
+    this.element = d3.select(this.container)
       .append('svg')
-      .attr('class', `appmap appmap--${diagramOptions.theme}`);
+      .attr('class', 'appmap__component-diagram');
   }
 
-  render(data = null) {
-    let graphDefinition = data;
-    if (!graphDefinition || typeof graphDefinition !== 'object') {
-      graphDefinition = window.componentDiagramModel;
+  render(data) {
+    if (!data || typeof data !== 'object') {
+      return;
     }
 
-    this.currentDiagramModel = hashify(graphDefinition);
+    this.currentDiagramModel = hashify(data);
 
     this.graph = new dagreD3.graphlib.Graph()
       .setGraph({ rankdir: 'LR' })

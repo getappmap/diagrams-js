@@ -12089,12 +12089,367 @@
 	  }
 	}
 
-	const DEFAULT_TARGET_COUNT = 10;
-	const IDEAL_CHILD_COUNT = 3;
+	var isMergeableObject = function isMergeableObject(value) {
+		return isNonNullObject(value)
+			&& !isSpecial(value)
+	};
+
+	function isNonNullObject(value) {
+		return !!value && typeof value === 'object'
+	}
+
+	function isSpecial(value) {
+		var stringValue = Object.prototype.toString.call(value);
+
+		return stringValue === '[object RegExp]'
+			|| stringValue === '[object Date]'
+			|| isReactElement(value)
+	}
+
+	// see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
+	var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
+	var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
+
+	function isReactElement(value) {
+		return value.$$typeof === REACT_ELEMENT_TYPE
+	}
+
+	function emptyTarget(val) {
+		return Array.isArray(val) ? [] : {}
+	}
+
+	function cloneUnlessOtherwiseSpecified(value, options) {
+		return (options.clone !== false && options.isMergeableObject(value))
+			? deepmerge(emptyTarget(value), value, options)
+			: value
+	}
+
+	function defaultArrayMerge(target, source, options) {
+		return target.concat(source).map(function(element) {
+			return cloneUnlessOtherwiseSpecified(element, options)
+		})
+	}
+
+	function getMergeFunction(key, options) {
+		if (!options.customMerge) {
+			return deepmerge
+		}
+		var customMerge = options.customMerge(key);
+		return typeof customMerge === 'function' ? customMerge : deepmerge
+	}
+
+	function getEnumerableOwnPropertySymbols(target) {
+		return Object.getOwnPropertySymbols
+			? Object.getOwnPropertySymbols(target).filter(function(symbol) {
+				return target.propertyIsEnumerable(symbol)
+			})
+			: []
+	}
+
+	function getKeys(target) {
+		return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
+	}
+
+	function propertyIsOnObject(object, property) {
+		try {
+			return property in object
+		} catch(_) {
+			return false
+		}
+	}
+
+	// Protects from prototype poisoning and unexpected merging up the prototype chain.
+	function propertyIsUnsafe(target, key) {
+		return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+			&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+				&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+	}
+
+	function mergeObject(target, source, options) {
+		var destination = {};
+		if (options.isMergeableObject(target)) {
+			getKeys(target).forEach(function(key) {
+				destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
+			});
+		}
+		getKeys(source).forEach(function(key) {
+			if (propertyIsUnsafe(target, key)) {
+				return
+			}
+
+			if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
+				destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
+			} else {
+				destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
+			}
+		});
+		return destination
+	}
+
+	function deepmerge(target, source, options) {
+		options = options || {};
+		options.arrayMerge = options.arrayMerge || defaultArrayMerge;
+		options.isMergeableObject = options.isMergeableObject || isMergeableObject;
+		// cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
+		// implementations can use it. The caller may not replace it.
+		options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
+
+		var sourceIsArray = Array.isArray(source);
+		var targetIsArray = Array.isArray(target);
+		var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
+
+		if (!sourceAndTargetTypesMatch) {
+			return cloneUnlessOtherwiseSpecified(source, options)
+		} else if (sourceIsArray) {
+			return options.arrayMerge(target, source, options)
+		} else {
+			return mergeObject(target, source, options)
+		}
+	}
+
+	deepmerge.all = function deepmergeAll(array, options) {
+		if (!Array.isArray(array)) {
+			throw new Error('first argument should be an array')
+		}
+
+		return array.reduce(function(prev, next) {
+			return deepmerge(prev, next, options)
+		}, {})
+	};
+
+	var deepmerge_1 = deepmerge;
+
+	var cjs = deepmerge_1;
+
+	// updateZoom updates the bar that indicates the current level of zoom.
+	// `zoomScale` is a float, ranging from 0.0 (fully zoomed in) to 1.0 (fully
+	// zoomed out)
+	function updateZoom(viewportZoom, zoomScale) {
+	  const { controls } = viewportZoom;
+	  if (!viewportZoom.maxZoomBarValue) {
+	    const zoomBarHeight = controls.zoomBar.getBoundingClientRect().height;
+	    const zoomGrabHeight = controls.zoomGrab.getBoundingClientRect().height;
+	    viewportZoom.maxZoomBarValue = zoomBarHeight - zoomGrabHeight;
+	  }
+
+	  const { maxZoomBarValue } = viewportZoom;
+	  const topOffset = maxZoomBarValue - maxZoomBarValue * zoomScale;
+	  viewportZoom.zoomScale = zoomScale;
+
+	  controls.zoomGrab.style.top = `${topOffset}px`;
+	}
+
+	function createDOM(viewportZoom) {
+	  const controlsContainer = document.createElement('div');
+	  controlsContainer.className = 'appmap__zoom';
+
+	  const { controls } = viewportZoom;
+	  controls.buttonZoomIn = document.createElement('button');
+	  controls.buttonZoomIn.setAttribute('type', 'button');
+	  controls.buttonZoomIn.className = 'appmap__zoom-button';
+	  controls.buttonZoomIn.innerHTML = '&plus;';
+	  controlsContainer.appendChild(controls.buttonZoomIn);
+
+	  controls.zoomBar = document.createElement('div');
+	  controls.zoomBar.className = 'appmap__zoom-bar';
+	  controls.zoomGrab = document.createElement('div');
+	  controls.zoomGrab.className = 'appmap__zoom-grab';
+	  controls.zoomBar.appendChild(controls.zoomGrab);
+	  controlsContainer.appendChild(controls.zoomBar);
+
+	  controls.buttonZoomOut = document.createElement('button');
+	  controls.buttonZoomOut.setAttribute('type', 'button');
+	  controls.buttonZoomOut.className = 'appmap__zoom-button';
+	  controls.buttonZoomOut.innerHTML = '&minus;';
+	  controlsContainer.appendChild(controls.buttonZoomOut);
+
+	  viewportZoom.container.appendChild(controlsContainer);
+	  viewportZoom.element = controlsContainer;
+
+	  controls.buttonZoomIn.addEventListener('click', () => {
+	    viewportZoom.zoomScale = Math.min(1.0, viewportZoom.zoomScale + viewportZoom.step);
+	    viewportZoom.emit('zoom', viewportZoom.zoomScale);
+	  });
+
+	  controls.buttonZoomOut.addEventListener('click', () => {
+	    viewportZoom.zoomScale = Math.max(0.0, viewportZoom.zoomScale - viewportZoom.step);
+	    viewportZoom.emit('zoom', viewportZoom.zoomScale);
+	  });
+
+	  controls.zoomBar.addEventListener('click', (event) => {
+	    if (event.target !== controls.zoomBar) {
+	      return false;
+	    }
+
+	    const maxOffset = controls.zoomBar.getBoundingClientRect().height;
+	    const offset = event.clientY - Math.round(controls.zoomBar.getBoundingClientRect().top);
+
+	    viewportZoom.emit('zoom', 1.0 - offset / maxOffset);
+
+	    return true;
+	  });
+
+	  controls.zoomBar.addEventListener('mousedown', (event) => {
+	    document.body.style.cursor = 'grabbing';
+	    viewportZoom.zoomGrabPosition = controls.zoomGrab.offsetTop;
+	    viewportZoom.dragStart = event.clientY;
+	    viewportZoom.isDragging = true;
+	    event.stopPropagation();
+	  });
+
+	  document.body.addEventListener('mousemove', (event) => {
+	    if (viewportZoom.isDragging) {
+	      const maxOffset = controls.zoomBar.getBoundingClientRect().height;
+	      const offset = viewportZoom.zoomGrabPosition + (event.clientY - viewportZoom.dragStart);
+	      viewportZoom.emit('zoom', 1.0 - offset / maxOffset);
+	      event.preventDefault();
+	    }
+	  });
+
+	  document.body.addEventListener('mouseup', () => {
+	    //document.body.classList.remove('is-grabbing');
+	    document.body.style.cursor = null;
+	    viewportZoom.isDragging = false;
+	  });
+	}
+
+	class ContainerZoom extends EventSource {
+	  constructor(container, options) {
+	    super();
+
+	    this.container = container.element;
+	    this.step = options.step;
+	    this.controls = {};
+	    this.maxZoomBarValue = null;
+	    this.dragStart = null;
+	    this.zoomGrabPosition = null;
+	    this.isDragging = false;
+	    this.zoomGrabTimeout = null;
+
+	    createDOM(this);
+	    updateZoom(this, container.transform.k);
+	    container.on('move', (transform) => updateZoom(this, (transform.k - options.minRatio) / (options.maxRatio - options.minRatio)));
+	  }
+	}
+
+	const AVAILABLE_THEMES = ['light', 'dark'];
+	const DEFAULT_THEME = 'light';
 
 	const defaultOptions = {
-	  theme: 'light',
+	  pan: {
+	    momentum: true, // if true, enables momentum on panning
+	    boundary: {
+	      contain: null, // selector for contained element
+	      overlap: 300, // px
+	    },
+	    tweenTime: 250, // ms
+	  },
+	  theme: DEFAULT_THEME,
+	  zoom: {
+	    controls: false, // display zoom controls (+ / - buttons)
+	    step: 0.1, // zoom step when clicking a button in the interface
+	    minRatio: 0.1, // minimum zoom scale
+	    maxRatio: 1.0, // maximum zoom scale
+	    requireActive: false, // whether or not the user must interact with the element before zooming
+	  },
 	};
+
+	const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
+
+	class Container extends EventSource {
+	  constructor(parentElement, options = {}) {
+	    super();
+
+	    this.options = cjs(defaultOptions, options);
+
+	    let { theme } = this.options;
+
+	    if (AVAILABLE_THEMES.indexOf(theme) === -1) {
+	      theme = DEFAULT_THEME;
+	    }
+
+	    this.element = document.createElement('div');
+	    this.element.className = `appmap appmap--theme-${theme}`;
+
+	    this.contentElement = document.createElement('div');
+	    this.contentElement.className = 'appmap__content';
+	    this.element.appendChild(this.contentElement);
+	    parentElement.appendChild(this.element);
+
+	    if (this.options.zoom.controls) {
+	      this.zoomController = new ContainerZoom(this, this.options.zoom)
+	        .on('zoom', (k) => {
+	          const { minRatio, maxRatio } = this.options.zoom;
+	          this.scaleTo((maxRatio - minRatio) * k + minRatio);
+	          this.active = true;
+	        });
+	    }
+
+	    this.zoom = d3$1.zoom()
+	      .scaleExtent([this.options.zoom.minRatio, this.options.zoom.maxRatio])
+	      .interpolate(d3$1.interpolate)
+	      .filter(() => {
+	        if (d3$1.event.type === 'wheel') {
+	          return this.active || !this.options.zoom.requireActive;
+	        }
+
+	        // Mutating state in a filter is not so great here. So far I've been
+	        // unsuccessful at binding a 'start' handler to do this. I'm all for
+	        // moving this mutation somewhere more appropriate if someone would
+	        // like to take the time to do so. -DB
+	        this.active = true;
+
+	        return true;
+	      })
+	      .on('zoom', () => {
+	        const { transform } = d3$1.event;
+
+	        const { offsetHeight, offsetWidth } = parentElement;
+
+	        transform.x = clamp(
+	          transform.x,
+	          (this.options.pan.boundary.overlap - this.contentElement.offsetWidth) * transform.k,
+	          offsetWidth - this.options.pan.boundary.overlap * transform.k,
+	        );
+
+	        transform.y = clamp(
+	          transform.y,
+	          (this.options.pan.boundary.overlap - this.contentElement.offsetHeight) * transform.k,
+	          offsetHeight - this.options.pan.boundary.overlap * transform.k,
+	        );
+
+	        this.contentElement.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${transform.k})`;
+	        this.contentElement.style.transformOrigin = '0 0';
+
+	        this.emit('move', transform);
+	      });
+
+	    d3$1.select(this.element)
+	      .call(this.zoom)
+	      .on('dblclick.zoom', null);
+
+	    return this.contentElement;
+	  }
+
+	  scaleTo(k) {
+	    d3$1.select(this.element)
+	      .transition()
+	      .duration(100)
+	      .call(this.zoom.scaleTo, k);
+	  }
+
+	  get transform() {
+	    return d3$1.zoomTransform(this.element);
+	  }
+
+	  set transform(transform) {
+	    d3$1.select(this.element)
+	      .call(this.zoom.transform, transform);
+	  }
+	}
+
+	const DEFAULT_TARGET_COUNT = 10;
+	const IDEAL_CHILD_COUNT = 3;
 
 	function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
 	  if (!graphDefinition
@@ -12348,22 +12703,20 @@
 	  constructor(container, options = {}) {
 	    super();
 
-	    const diagramOptions = { ...defaultOptions, ...options };
+	    this.container = new Container(document.querySelector(container), options);
 
-	    this.parent = d3$1.select(container);
 	    this.targetCount = DEFAULT_TARGET_COUNT;
-	    this.element = this.parent
+	    this.element = d3$1.select(this.container)
 	      .append('svg')
-	      .attr('class', `appmap appmap--${diagramOptions.theme}`);
+	      .attr('class', 'appmap__component-diagram');
 	  }
 
-	  render(data = null) {
-	    let graphDefinition = data;
-	    if (!graphDefinition || typeof graphDefinition !== 'object') {
-	      graphDefinition = window.componentDiagramModel;
+	  render(data) {
+	    if (!data || typeof data !== 'object') {
+	      return;
 	    }
 
-	    this.currentDiagramModel = hashify(graphDefinition);
+	    this.currentDiagramModel = hashify(data);
 
 	    this.graph = new dagreD3.graphlib.Graph()
 	      .setGraph({ rankdir: 'LR' })

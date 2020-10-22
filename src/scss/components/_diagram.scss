@@ -1,6 +1,4 @@
-.appmap {
-  user-select: none;
-
+.appmap__component-diagram {
   .node {
     &.highlight {
       rect, circle, ellipse, path, polygon {
@@ -22,10 +20,9 @@
       &.dim { opacity: 1 }
     }
   }
-}
 
-@each $scheme, $colors in $themes {
-  .appmap--#{$scheme} {
+  @each $scheme, $colors in $themes {
+  .appmap--theme-#{$scheme} & {
     $bg: map-get($colors, 'background');
     $edge: map-get($colors, 'edge');
     $highlight: map-get($colors, 'highlight');
@@ -36,8 +33,6 @@
     $database: map-get($colors, 'color-database');
     $io: map-get($colors, 'color-io');
     $dim-opacity: 10%;
-
-    background-color: $bg;
 
     .node {
       &.dim {
@@ -116,4 +111,5 @@
       }
     }
   }
+}
 }

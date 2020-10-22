@@ -9,3 +9,25 @@ body {
   height: auto;
   width: 100%;
 }
+
+.appmap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+
+  &__content {
+    will-change: transform;
+  }
+
+  @each $scheme, $colors in $themes {
+    &.appmap--theme-#{$scheme} {
+      background-color: map-get($colors, 'background')
+    }
+  }
+
+  &.is-grabbing {
+    cursor: grabbing;
+  }
+}

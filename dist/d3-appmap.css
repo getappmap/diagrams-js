@@ -9,117 +9,201 @@ body {
   width: 100%; }
 
 .appmap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   user-select: none; }
-  .appmap .node.highlight rect, .appmap .node.highlight circle, .appmap .node.highlight ellipse, .appmap .node.highlight path, .appmap .node.highlight polygon {
-    stroke-width: 4px; }
-  .appmap .edgePath path {
-    stroke-width: 2px; }
-  .appmap .nodeLabels {
-    pointer-events: none; }
-    .appmap .nodeLabels .package.dim {
+  .appmap__content {
+    will-change: transform; }
+  .appmap.appmap--theme-dark {
+    background-color: #010306; }
+  .appmap.appmap--theme-light {
+    background-color: #FFFFFF; }
+  .appmap.is-grabbing {
+    cursor: grabbing; }
+
+.appmap__zoom {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center; }
+  .appmap__zoom-button {
+    border: none;
+    border-radius: .5rem;
+    padding: .25rem .5rem;
+    appearance: none;
+    background: #242C41;
+    color: #808b98;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.8; }
+    .appmap__zoom-button:hover {
       opacity: 1; }
+  .appmap__zoom-bar {
+    margin: 3px 6px;
+    position: relative;
+    width: 20px;
+    height: 90px;
+    cursor: pointer; }
+    .appmap__zoom-bar::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: 50%;
+      bottom: -3px;
+      margin-left: -3px;
+      width: 6px;
+      background: #242C41;
+      opacity: 0.8; }
+  .appmap__zoom-grab {
+    position: absolute;
+    border-radius: 3px;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: #808b98;
+    cursor: grab; }
 
-.appmap--dark {
-  background-color: #010306; }
-  .appmap--dark .node.dim .label {
-    fill: #181a1d; }
-  .appmap--dark .node.package {
-    fill: #6FDDD6; }
-    .appmap--dark .node.package .label {
-      fill: #010306; }
-    .appmap--dark .node.package.dim {
-      fill: #0c191b; }
-  .appmap--dark .node.class {
-    fill: #4362b1; }
-    .appmap--dark .node.class.dim {
-      fill: #080d17; }
-  .appmap--dark .node.database {
-    fill: #9C2FBA; }
-    .appmap--dark .node.database path {
-      stroke: #010306; }
-    .appmap--dark .node.database.dim > .shape {
-      fill: #110718; }
-  .appmap--dark .node.http {
-    fill: #FF07AA; }
-    .appmap--dark .node.http.dim {
-      fill: #1a0316; }
-  .appmap--dark .node.io {
-    fill: #f92672; }
-    .appmap--dark .node.io.dim {
-      fill: #1a0711; }
-  .appmap--dark .node .label {
-    fill: #e3e5e8; }
-  .appmap--dark .node.highlight rect, .appmap--dark .node.highlight circle, .appmap--dark .node.highlight ellipse, .appmap--dark .node.highlight path, .appmap--dark .node.highlight polygon {
-    stroke: #FF07AA; }
-  .appmap--dark .edgePath.highlight path {
-    stroke: #FF07AA; }
-  .appmap--dark .edgePath.highlight marker {
-    fill: #FF07AA; }
-  .appmap--dark .edgePath.dim marker {
-    fill: #05070c; }
-  .appmap--dark .edgePath.dim path {
-    stroke: #05070c; }
-  .appmap--dark .edgePath path {
-    stroke: #242C41; }
-  .appmap--dark .edgePath marker {
-    fill: #242C41; }
-  .appmap--dark .nodeLabels {
-    fill: #e3e5e8; }
-    .appmap--dark .nodeLabels .dim {
-      opacity: 10%; }
-    .appmap--dark .nodeLabels .package {
-      fill: #010306; }
+.appmap__component-diagram .node.highlight rect, .appmap__component-diagram .node.highlight circle, .appmap__component-diagram .node.highlight ellipse, .appmap__component-diagram .node.highlight path, .appmap__component-diagram .node.highlight polygon {
+  stroke-width: 4px; }
 
-.appmap--light {
-  background-color: #FFFFFF; }
-  .appmap--light .node.dim .label {
-    fill: white; }
-  .appmap--light .node.package {
-    fill: #008b69; }
-    .appmap--light .node.package .label {
-      fill: #ffffff; }
-    .appmap--light .node.package.dim {
-      fill: #e6f3f0; }
-  .appmap--light .node.class {
-    fill: #919191; }
-    .appmap--light .node.class.dim {
-      fill: #f4f4f4; }
-  .appmap--light .node.database {
-    fill: #474554; }
-    .appmap--light .node.database path {
-      stroke: #ffffff; }
-    .appmap--light .node.database.dim > .shape {
-      fill: #edecee; }
-  .appmap--light .node.http {
-    fill: #474554; }
-    .appmap--light .node.http.dim {
-      fill: #edecee; }
-  .appmap--light .node.io {
-    fill: #8685ef; }
-    .appmap--light .node.io.dim {
-      fill: #f3f3fd; }
-  .appmap--light .node .label {
-    fill: #FFFFFF; }
-  .appmap--light .node.highlight rect, .appmap--light .node.highlight circle, .appmap--light .node.highlight ellipse, .appmap--light .node.highlight path, .appmap--light .node.highlight polygon {
-    stroke: #474554; }
-  .appmap--light .edgePath.highlight path {
-    stroke: #474554; }
-  .appmap--light .edgePath.highlight marker {
-    fill: #474554; }
-  .appmap--light .edgePath.dim marker {
-    fill: #f3f5f6; }
-  .appmap--light .edgePath.dim path {
-    stroke: #f3f5f6; }
-  .appmap--light .edgePath path {
-    stroke: #889fa5; }
-  .appmap--light .edgePath marker {
-    fill: #889fa5; }
-  .appmap--light .nodeLabels {
-    fill: #FFFFFF; }
-    .appmap--light .nodeLabels .dim {
-      opacity: 10%; }
-    .appmap--light .nodeLabels .package {
-      fill: #ffffff; }
+.appmap__component-diagram .edgePath path {
+  stroke-width: 2px; }
+
+.appmap__component-diagram .nodeLabels {
+  pointer-events: none; }
+  .appmap__component-diagram .nodeLabels .package.dim {
+    opacity: 1; }
+
+.appmap--theme-dark .appmap__component-diagram .node.dim .label {
+  fill: #181a1d; }
+
+.appmap--theme-dark .appmap__component-diagram .node.package {
+  fill: #6FDDD6; }
+  .appmap--theme-dark .appmap__component-diagram .node.package .label {
+    fill: #010306; }
+  .appmap--theme-dark .appmap__component-diagram .node.package.dim {
+    fill: #0c191b; }
+
+.appmap--theme-dark .appmap__component-diagram .node.class {
+  fill: #4362b1; }
+  .appmap--theme-dark .appmap__component-diagram .node.class.dim {
+    fill: #080d17; }
+
+.appmap--theme-dark .appmap__component-diagram .node.database {
+  fill: #9C2FBA; }
+  .appmap--theme-dark .appmap__component-diagram .node.database path {
+    stroke: #010306; }
+  .appmap--theme-dark .appmap__component-diagram .node.database.dim > .shape {
+    fill: #110718; }
+
+.appmap--theme-dark .appmap__component-diagram .node.http {
+  fill: #FF07AA; }
+  .appmap--theme-dark .appmap__component-diagram .node.http.dim {
+    fill: #1a0316; }
+
+.appmap--theme-dark .appmap__component-diagram .node.io {
+  fill: #f92672; }
+  .appmap--theme-dark .appmap__component-diagram .node.io.dim {
+    fill: #1a0711; }
+
+.appmap--theme-dark .appmap__component-diagram .node .label {
+  fill: #e3e5e8; }
+
+.appmap--theme-dark .appmap__component-diagram .node.highlight rect, .appmap--theme-dark .appmap__component-diagram .node.highlight circle, .appmap--theme-dark .appmap__component-diagram .node.highlight ellipse, .appmap--theme-dark .appmap__component-diagram .node.highlight path, .appmap--theme-dark .appmap__component-diagram .node.highlight polygon {
+  stroke: #FF07AA; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath.highlight path {
+  stroke: #FF07AA; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath.highlight marker {
+  fill: #FF07AA; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath.dim marker {
+  fill: #05070c; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath.dim path {
+  stroke: #05070c; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath path {
+  stroke: #242C41; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath marker {
+  fill: #242C41; }
+
+.appmap--theme-dark .appmap__component-diagram .nodeLabels {
+  fill: #e3e5e8; }
+  .appmap--theme-dark .appmap__component-diagram .nodeLabels .dim {
+    opacity: 10%; }
+  .appmap--theme-dark .appmap__component-diagram .nodeLabels .package {
+    fill: #010306; }
+
+.appmap--theme-light .appmap__component-diagram .node.dim .label {
+  fill: white; }
+
+.appmap--theme-light .appmap__component-diagram .node.package {
+  fill: #008b69; }
+  .appmap--theme-light .appmap__component-diagram .node.package .label {
+    fill: #ffffff; }
+  .appmap--theme-light .appmap__component-diagram .node.package.dim {
+    fill: #e6f3f0; }
+
+.appmap--theme-light .appmap__component-diagram .node.class {
+  fill: #919191; }
+  .appmap--theme-light .appmap__component-diagram .node.class.dim {
+    fill: #f4f4f4; }
+
+.appmap--theme-light .appmap__component-diagram .node.database {
+  fill: #474554; }
+  .appmap--theme-light .appmap__component-diagram .node.database path {
+    stroke: #ffffff; }
+  .appmap--theme-light .appmap__component-diagram .node.database.dim > .shape {
+    fill: #edecee; }
+
+.appmap--theme-light .appmap__component-diagram .node.http {
+  fill: #474554; }
+  .appmap--theme-light .appmap__component-diagram .node.http.dim {
+    fill: #edecee; }
+
+.appmap--theme-light .appmap__component-diagram .node.io {
+  fill: #8685ef; }
+  .appmap--theme-light .appmap__component-diagram .node.io.dim {
+    fill: #f3f3fd; }
+
+.appmap--theme-light .appmap__component-diagram .node .label {
+  fill: #FFFFFF; }
+
+.appmap--theme-light .appmap__component-diagram .node.highlight rect, .appmap--theme-light .appmap__component-diagram .node.highlight circle, .appmap--theme-light .appmap__component-diagram .node.highlight ellipse, .appmap--theme-light .appmap__component-diagram .node.highlight path, .appmap--theme-light .appmap__component-diagram .node.highlight polygon {
+  stroke: #474554; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath.highlight path {
+  stroke: #474554; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath.highlight marker {
+  fill: #474554; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath.dim marker {
+  fill: #f3f5f6; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath.dim path {
+  stroke: #f3f5f6; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath path {
+  stroke: #889fa5; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath marker {
+  fill: #889fa5; }
+
+.appmap--theme-light .appmap__component-diagram .nodeLabels {
+  fill: #FFFFFF; }
+  .appmap--theme-light .appmap__component-diagram .nodeLabels .dim {
+    opacity: 10%; }
+  .appmap--theme-light .appmap__component-diagram .nodeLabels .package {
+    fill: #ffffff; }
 
 .flow-view-container {
   font-family: 'IBM Plex Mono', monospace;
