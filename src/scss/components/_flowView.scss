@@ -1,33 +1,77 @@
-.flow-view-container {
-  font-family: 'IBM Plex Mono', monospace;
-  background-color: $gray2;
-  position: relative;
-  margin: 0;
-  height: 600px;
-  overflow: auto;
-  font-size: 12px;
+.appmap__flow-view {
+  > * {
+    width: max-content;
+  }
 
-  .node-wrapper {
-    will-change: transform;
+  > svg {
+    z-index: -1;
+  }
 
-    > * {
-      position: absolute;
-      width: max-content;
-    }
-
-    > svg {
-      z-index: -1;
-    }
-
-    li {
-      align-items: start;
-      display: flex;
-    }
+  li {
+    align-items: start;
+    display: flex;
   }
 
   svg {
+    position: absolute;
     overflow: inherit;
     vertical-align: inherit;
+  }
+
+  &-popper {
+    position: absolute;
+    background: $black;
+    color: $white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    max-width: 24rem;
+    word-break: break-all;
+    opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid $white;
+    pointer-events: none;
+    top: 0;
+
+    &[data-show] {
+      opacity: 1;
+    }
+
+    &[data-placement^='left'] > #arrow {
+      top: 50%;
+      transform: translateY(-50%);
+      right: -5px;
+
+      &:before {
+        border-left: 0;
+        border-bottom: 0;
+      }
+    }
+
+    &[data-placement^='right'] > #arrow {
+      top: 50%;
+      transform: translateY(-50%);
+      left: -5px;
+
+      &:before {
+        border-right: 0;
+        border-top: 0;
+      }
+    }
+
+    #arrow,
+    #arrow::before {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      z-index: -1;
+    }
+
+    #arrow::before {
+      content: '';
+      transform: rotate(45deg);
+      background: $black;
+      border: 1px solid $white;
+    }
   }
 
   .sql {
@@ -66,7 +110,7 @@
   }
 
   .node {
-    background-color: $gray1;
+    background-color: $gray2;
     display: inline-block;
     color: #a1a1a1;
     border-radius: 0;
