@@ -6,6 +6,7 @@ import {
   capitalizeString,
 } from '../../util';
 import EventSource from '../../helpers/eventSource';
+import Container from '../../helpers/container';
 
 const NodeType = {
   Event: 'event',
@@ -334,16 +335,21 @@ function displayValue(flowView, port, data, placement) {
 }
 
 export default class FlowView extends EventSource {
-  constructor(container) {
+  constructor(container, options = {}) {
     super();
 
-    this.parent = d3.select(container);
-    this.svg = this.parent
+    this.container = new Container(document.querySelector(container), options);
+
+    this.element = document.createElement('div');
+    this.element.className = 'appmap__flow-view';
+    this.container.appendChild(this.element);
+
+    this.svg = d3.select(this.element)
       .append('svg')
       .attr('width', window.innerWidth)
       .attr('height', window.innerHeight);
 
-    this.nodeGroup = this.parent
+    this.nodeGroup = d3.select(this.element)
       .append('ul')
       .attr('id', 'nodes');
 
@@ -351,9 +357,9 @@ export default class FlowView extends EventSource {
       .append('g')
       .attr('id', 'links');
 
-    this.valuePopper = this.parent
+    this.valuePopper = d3.select(this.element)
       .append('div')
-      .attr('id', 'node-value-popper');
+      .attr('class', 'appmap__flow-view-popper');
 
     document.addEventListener('click', () => this.hidePopper());
   }

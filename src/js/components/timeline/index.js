@@ -1,7 +1,10 @@
 import * as d3 from 'd3';
 import { flamegraph } from 'd3-flame-graph';
+import deepmerge from 'deepmerge';
+
 import { getLabel, fullyQualifiedFunctionName } from '../../util';
 import EventSource from '../../helpers/eventSource';
+import Container from '../../helpers/container';
 
 // really just a magic number
 const FONT_SIZE = 9;
@@ -76,12 +79,19 @@ function getPoints(viewSelector, node) {
   };
 }
 
+const COMPONENT_OPTIONS = {
+  zoom: false,
+};
+
 export default class Timeline extends EventSource {
-  constructor(container) {
+  constructor(container, options = {}) {
     super();
 
-    this.parent = d3.select(container);
-    this.timelineGroup = this.parent
+    const timelineOptions = deepmerge(COMPONENT_OPTIONS, options);
+
+    this.container = new Container(document.querySelector(container), timelineOptions);
+
+    this.timelineGroup = d3.select(this.container)
       .append('div')
       .attr('id', 'timeline-group');
 

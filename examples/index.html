@@ -26,9 +26,7 @@
 
     <div id="component-diagram"></div>
 
-    <div class="flow-view-container">
-      <div id="flow-view" class="node-wrapper"></div>
-    </div>
+    <div id="flow-view" style="height:800px"></div>
 
     <div id="timeline"></div>
   </div>
@@ -50,14 +48,24 @@
 
   function onLoad() {
     {
-      var diagram = new Appmap.ComponentDiagram('#component-diagram');
+      var diagram = new Appmap.ComponentDiagram('#component-diagram', {
+        theme: 'dark',
+        zoom: {
+          controls: true
+        }
+      });
       diagram.render(window.componentDiagramModel);
     }
     {
       const callTree = aggregateEvents(window.scenarioData.data.events,
         window.scenarioData.data.classMap);
 
-      var flowView = new Appmap.FlowView('#flow-view');
+      var flowView = new Appmap.FlowView('#flow-view', {
+        theme: 'light',
+        zoom: {
+          controls: true
+        }
+      });
       flowView.render(callTree);
 
       var diagram = new Appmap.Timeline('#timeline');
