@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import deepmerge from 'deepmerge';
 
+import momentum from '../momentum';
 import EventSource from '../eventSource';
 import ContainerZoom from './zoom';
 
@@ -98,12 +99,30 @@ export default class Container extends EventSource {
           this.emit('move', transform);
         });
 
+      if (this.options.pan.momentum) {
+        momentum(this.zoom, d3.select(this.element));
+      }
+
       d3.select(this.element)
         .call(this.zoom)
         .on('dblclick.zoom', null);
     }
 
     return this.contentElement;
+  }
+
+  translateTo(x, y, target = null) {
+    d3.select(this.element)
+      .transition()
+      .duration(this.options.pan.tweenTime)
+      .call(this.zoom.translateTo, x, y, target);
+  }
+
+  translateBy(x, y) {
+    d3.select(this.element)
+      .transition()
+      .duration(this.options.pan.tweenTime)
+      .call(this.zoom.translateBy, x, y);
   }
 
   scaleTo(k) {
