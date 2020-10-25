@@ -11943,9 +11943,9 @@
 	  if (!element) {
 	    return;
 	  }
-	console.log(viewport);
+
 	  let { x, y } = Geometry.delta(
-	    viewport.parent.getBoundingClientRect(),
+	    viewport.element.getBoundingClientRect(),
 	    element.getBoundingClientRect(),
 	  );
 
@@ -11955,7 +11955,7 @@
 
 	  // Scale the offset using the current transform. This is necessary to put the
 	  // element in view at different scales.
-	  const { k } = viewport.parent.transform;
+	  const { k } = viewport.transform;
 	  x /= k;
 	  y /= k;
 
@@ -12654,8 +12654,8 @@
 
 	    this.contentElement = document.createElement('div');
 	    this.contentElement.className = 'appmap__content';
+	    this.contentElement.containerController = this;
 	    this.element.appendChild(this.contentElement);
-	    this.contentElement.parent = this.element;
 	    parentElement.appendChild(this.element);
 
 	    if (this.options.zoom) {
@@ -15017,7 +15017,7 @@
 
 	    document.addEventListener('click', () => this.hidePopper());
 
-	    this.on('popper', (element) => lazyPanToElement(this.container, element, 10));
+	    this.on('popper', (element) => lazyPanToElement(this.container.containerController, element, 10));
 	  }
 
 	  render(rootEvent) {

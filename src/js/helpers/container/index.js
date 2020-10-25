@@ -46,6 +46,7 @@ export default class Container extends EventSource {
 
     this.contentElement = document.createElement('div');
     this.contentElement.className = 'appmap__content';
+    this.contentElement.containerController = this;
     this.element.appendChild(this.contentElement);
     parentElement.appendChild(this.element);
 

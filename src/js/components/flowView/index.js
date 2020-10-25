@@ -4,6 +4,7 @@ import {
   has,
   tokenizeIdentifier,
   capitalizeString,
+  lazyPanToElement,
 } from '../../util';
 import EventSource from '../../helpers/eventSource';
 import Container from '../../helpers/container';
@@ -250,7 +251,7 @@ function getScopedObjects(behaviorNode) {
   }
 
   const ancestors = parent.ancestors();
-  ancestors.forEach(ancestor => recordScopedObjects(objectsInScope, ancestor));
+  ancestors.forEach((ancestor) => recordScopedObjects(objectsInScope, ancestor));
 
   return objectsInScope;
 }
@@ -362,6 +363,8 @@ export default class FlowView extends EventSource {
       .attr('class', 'appmap__flow-view-popper');
 
     document.addEventListener('click', () => this.hidePopper());
+
+    this.on('popper', (element) => lazyPanToElement(this.container.containerController, element, 10));
   }
 
   render(rootEvent) {
