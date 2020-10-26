@@ -1,5 +1,7 @@
 import * as d3 from 'd3';
 
+import Geometry from './helpers/geometry';
+
 // loadFont loads a font into the current document and returns a promise
 function loadFont(fontName, fontUrl) {
   const fontFace = new FontFace(fontName, `url(${fontUrl})`);
@@ -239,7 +241,7 @@ const getSqlLabel = (event) => {
     if (depth === 0) {
       arr.push(c);
     }
-    
+
     if (c === ')') {
       --depth;
     }
@@ -434,6 +436,30 @@ export function selector(value) {
   }
 
   return element;
+}
+
+// Move the minimum amount to put the element into view
+export function lazyPanToElement(viewport, element, padding = 0) {
+  if (!element) {
+    return;
+  }
+
+  let { x, y } = Geometry.delta(
+    viewport.element.getBoundingClientRect(),
+    element.getBoundingClientRect(),
+  );
+
+  // Apply padding
+  x += Math.sign(x) * padding;
+  y += Math.sign(y) * padding;
+
+  // Scale the offset using the current transform. This is necessary to put the
+  // element in view at different scales.
+  const { k } = viewport.transform;
+  x /= k;
+  y /= k;
+
+  viewport.translateBy(x, y);
 }
 
 export {

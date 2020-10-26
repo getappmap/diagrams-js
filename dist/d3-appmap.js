@@ -11635,6 +11635,60 @@
 	  version: version$2
 	};
 
+	class Transform {
+	  constructor(x = 0, y = 0, k = 1) {
+	    this.x = x;
+	    this.y = y;
+	    this.k = k;
+	  }
+
+	  toString() {
+	    return [
+	      this.x !== 0 ? `translateX(${this.x}px)` : null,
+	      this.y !== 0 ? `translateY(${this.y}px)` : null,
+	      this.k !== 1 ? `scale(${this.k}` : null,
+	    ].join(' ');
+	  }
+	}
+
+	var Geometry = {
+	  // Checks if a rect (such as a DOMRect) fully contains another.
+	  contains(outer, inner) {
+	    return outer.top <= inner.top
+	      && outer.bottom >= inner.bottom
+	      && outer.left <= inner.left
+	      && outer.right >= inner.right;
+	  },
+
+	  // delta returns the shortest relative translation to place inner within
+	  // outer
+	  delta(outer, inner) {
+	    let x = 0;
+	    let y = 0;
+
+	    if (outer.left >= inner.left) {
+	      x = outer.left - inner.left;
+	    } else if (outer.right <= inner.right) {
+	      x = outer.right - inner.right;
+	    }
+
+	    if (outer.top >= inner.top) {
+	      y = outer.top - inner.top;
+	    } else if (outer.bottom <= inner.bottom) {
+	      y = outer.bottom - inner.bottom;
+	    }
+
+	    return { x, y };
+	  },
+
+	  // calculates a transform that shifts from one position to another
+	  shift(from, to) {
+	    return new Transform(from.x - to.x, from.y - to.y);
+	  },
+
+	  Transform,
+	};
+
 	const tint = d3$1.scaleOrdinal()
 	  .range(d3$1.schemeCategory10
 	    .map((c) => {
@@ -11812,7 +11866,7 @@
 	    if (depth === 0) {
 	      arr.push(c);
 	    }
-	    
+
 	    if (c === ')') {
 	      --depth;
 	    }
@@ -11882,6 +11936,30 @@
 	      return url;
 	    }
 	  }
+	}
+
+	// Move the minimum amount to put the element into view
+	function lazyPanToElement(viewport, element, padding = 0) {
+	  if (!element) {
+	    return;
+	  }
+
+	  let { x, y } = Geometry.delta(
+	    viewport.element.getBoundingClientRect(),
+	    element.getBoundingClientRect(),
+	  );
+
+	  // Apply padding
+	  x += Math.sign(x) * padding;
+	  y += Math.sign(y) * padding;
+
+	  // Scale the offset using the current transform. This is necessary to put the
+	  // element in view at different scales.
+	  const { k } = viewport.transform;
+	  x /= k;
+	  y /= k;
+
+	  viewport.translateBy(x, y);
 	}
 
 	// These shapes are from
@@ -12221,6 +12299,210 @@
 
 	var cjs = deepmerge_1;
 
+	const STALE_TIME = 0.33; // seconds
+
+	function removeStaleSamples(accumulator) {
+	  let lastTime = Date.now();
+	  for (let i = accumulator.values.length - 1; i >= 0; --i) {
+	    const sample = accumulator.values[i];
+	    const dt = (lastTime - sample.time) / 60.0;
+
+	    // If enough time has passed between the new sample and the last sample,
+	    // all the existing data is considered stale and removed.
+	    if (dt > accumulator.staleTime) {
+	      accumulator.values.splice(0, accumulator.values.length);
+	      break;
+	    }
+
+	    lastTime = sample.time;
+	  }
+	}
+
+	// Accumulator keeps a running average of values up to a max number of samples
+	// samples decay and are removed after the staleTime
+	class Accumulator {
+	  constructor(maxSamples, staleTime = STALE_TIME) {
+	    this.maxSamples = maxSamples;
+	    this.staleTime = staleTime;
+	    this.reset();
+	  }
+
+	  add(value) {
+	    removeStaleSamples(this);
+
+	    if (this.values.length >= this.maxSamples) {
+	      this.values.splice(0, this.values.length - this.maxSamples + 1);
+	    }
+
+	    this.values.push({ value, time: Date.now() });
+	  }
+
+	  reset() {
+	    this.values = [];
+	  }
+
+	  get length() {
+	    return this.values.length;
+	  }
+
+	  get value() {
+	    removeStaleSamples(this);
+	    return this.values.reduce((acc, sample) => acc += sample.value, 0) / (this.values.length - 1);
+	  }
+	}
+
+	const FRICTION_COEFFICIENT = 2.5;
+	const IMPULSE_THRESHOLD = 1;
+	const EPSILON = 0.2;
+	const SAMPLES = 8;
+
+	class Momentum {
+	  constructor(zoom, selection) {
+	    this.vX = new Accumulator(SAMPLES);
+	    this.vY = new Accumulator(SAMPLES);
+	    this.transform = { x: 0.0, y: 0.0, k: 0.0 };
+	    this.velocity = { x: 0, y: 0 };
+	    this.selection = selection;
+	    this.node = selection.node();
+	    this.zoom = zoom;
+	    this.active = false;
+	    this.ticking = false;
+	  }
+
+	  cancel() {
+	    if (this.lastTick) {
+	      delete this.lastTick;
+	    }
+
+	    this.active = false;
+	    this.ticking = false;
+	  }
+
+	  hold() {
+	    this.active = false;
+	    this.holding = true;
+	    this.vX.reset();
+	    this.vY.reset();
+	  }
+
+	  release() {
+	    if (!this.holding) {
+	      return;
+	    }
+
+	    this.holding = false;
+	    this.impulse(this.vX.value, this.vY.value);
+	  }
+
+	  impulse(x, y, threshold = IMPULSE_THRESHOLD) {
+	    if (Math.abs(x) + Math.abs(y) < threshold) {
+	      return;
+	    }
+
+	    this.velocity.x = x / this.transform.k;
+	    this.velocity.y = y / this.transform.k;
+
+	    if (this.ticking) {
+	      return;
+	    }
+
+	    this.active = true;
+	    this.tick();
+	  }
+
+	  tick() {
+	    if (!this.moving || !this.active) {
+	      this.cancel();
+	      return;
+	    }
+
+	    this.ticking = true;
+
+	    requestAnimationFrame((t) => {
+	      if (!this.active) {
+	        this.cancel();
+	        return;
+	      }
+
+	      if (!this.lastTick) {
+	        this.lastTick = t - 1;
+	      }
+
+	      const dt = (t - this.lastTick) / 1000.0;
+
+	      this.zoom.translateBy(this.selection, this.velocity.x, this.velocity.y);
+
+	      this.velocity.x -= this.velocity.x * FRICTION_COEFFICIENT * dt;
+	      this.velocity.y -= this.velocity.y * FRICTION_COEFFICIENT * dt;
+
+	      this.lastTick = t;
+	      this.tick();
+	    });
+	  }
+
+	  updateTransform(transform) {
+	    // check if translation has changed by checking if scale hasn't
+	    if (!this.active && transform.k === this.transform.k) {
+	      this.vX.add(transform.x - this.transform.x);
+	      this.vY.add(transform.y - this.transform.y);
+	    }
+
+	    this.transform.x = transform.x;
+	    this.transform.y = transform.y;
+	    this.transform.k = transform.k;
+	  }
+
+	  get moving() {
+	    return Math.abs(this.velocity.x) + Math.abs(this.velocity.y) > EPSILON;
+	  }
+	}
+
+	function momentum(zoom, selection) {
+	  const m = new Momentum(zoom, selection);
+	  const onZoom = zoom.on('zoom');
+	  const onBlur = window.onblur;
+
+	  selection
+	    .on('mousedown', () => m.hold())
+	    .on('mouseup', () => m.release())
+	    .on('pointerdown', () => m.hold())
+	    .on('pointerup', () => m.release())
+	    .on('touchstart', () => m.hold())
+	    .on('touchend', () => m.release())
+	    .on('touchcancel', () => m.release());
+
+	  window.addEventListener('mouseup', () => m.release());
+	  window.addEventListener('pointerup', () => m.release());
+	  window.onblur = () => {
+	    if (onBlur) {
+	      onBlur();
+	    }
+
+	    m.cancel();
+	  };
+
+	  zoom.on('zoom', () => {
+	    m.updateTransform(d3$1.event.transform);
+	    if (onZoom) {
+	      onZoom();
+	    }
+	  });
+
+	  const translateTo = zoom.translateTo;
+	  zoom.translateTo = (...args) => {
+	    m.cancel();
+	    return translateTo(...args);
+	  };
+
+	  const translate = zoom.translate;
+	  zoom.translate = (...args) => {
+	    m.cancel();
+	    return translate(...args);
+	  };
+
+	  return zoom;
+	}
+
 	// updateZoom updates the bar that indicates the current level of zoom.
 	// `zoomScale` is a float, ranging from 0.0 (fully zoomed in) to 1.0 (fully
 	// zoomed out)
@@ -12372,6 +12654,7 @@
 
 	    this.contentElement = document.createElement('div');
 	    this.contentElement.className = 'appmap__content';
+	    this.contentElement.containerController = this;
 	    this.element.appendChild(this.contentElement);
 	    parentElement.appendChild(this.element);
 
@@ -12424,12 +12707,30 @@
 	          this.emit('move', transform);
 	        });
 
+	      if (this.options.pan.momentum) {
+	        momentum(this.zoom, d3$1.select(this.element));
+	      }
+
 	      d3$1.select(this.element)
 	        .call(this.zoom)
 	        .on('dblclick.zoom', null);
 	    }
 
 	    return this.contentElement;
+	  }
+
+	  translateTo(x, y, target = null) {
+	    d3$1.select(this.element)
+	      .transition()
+	      .duration(this.options.pan.tweenTime)
+	      .call(this.zoom.translateTo, x, y, target);
+	  }
+
+	  translateBy(x, y) {
+	    d3$1.select(this.element)
+	      .transition()
+	      .duration(this.options.pan.tweenTime)
+	      .call(this.zoom.translateBy, x, y);
 	  }
 
 	  scaleTo(k) {
@@ -14603,7 +14904,7 @@
 	  }
 
 	  const ancestors = parent.ancestors();
-	  ancestors.forEach(ancestor => recordScopedObjects(objectsInScope, ancestor));
+	  ancestors.forEach((ancestor) => recordScopedObjects(objectsInScope, ancestor));
 
 	  return objectsInScope;
 	}
@@ -14715,6 +15016,8 @@
 	      .attr('class', 'appmap__flow-view-popper');
 
 	    document.addEventListener('click', () => this.hidePopper());
+
+	    this.on('popper', (element) => lazyPanToElement(this.container.containerController, element, 10));
 	  }
 
 	  render(rootEvent) {
