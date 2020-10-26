@@ -101,7 +101,21 @@ export default class Timeline extends EventSource {
       .classed('no-selection', true);
   }
 
-  render(rootEvent) {
+  setCallTree(callTree) {
+    this.callTree = callTree;
+
+    this.callTree.on('selectedEvent', (event) => {
+      this.highlight(event, this.callTree.rootEvent);
+    });
+
+    this.callTree.on('rootEvent', () => {
+      this.render();
+    });
+  }
+
+  render() {
+    const rootEvent = this.callTree.rootEvent;
+
     rootEvent.postOrderForEach((d) => {
       d.label = buildName(d);
       d.value = d.label.length;
@@ -155,7 +169,7 @@ export default class Timeline extends EventSource {
 
     this.timelineSelection
       .selectAll('.frame')
-      .on('click', d => this.emit('click', d.data));
+      .on('click', d => this.callTree.selectedEvent = d.data);
 
     return this;
   }

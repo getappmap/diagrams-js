@@ -35,10 +35,10 @@
 
 <script type="text/javascript">
   function aggregateEvents(events, classMap) {
-    const eventInfo = new Appmap.EventInfo(classMap);
-    const callTree = Appmap.buildCallTree(events);
+    const eventInfo = new Appmap.Models.EventInfo(classMap);
+    const callTree = new Appmap.Models.CallTree(events);
 
-    callTree.forEach((e) => {
+    callTree.rootNode.forEach((e) => {
       e.displayName = eventInfo.getName(e.input);
       e.labels = eventInfo.getLabels(e.input);
     });
@@ -66,10 +66,12 @@
           controls: true
         }
       });
-      flowView.render(callTree);
+      flowView.setCallTree(callTree);
+      flowView.render();
 
-      var diagram = new Appmap.Timeline('#timeline');
-      diagram.render(callTree);
+      var timeline = new Appmap.Timeline('#timeline');
+      timeline.setCallTree(callTree);
+      timeline.render();
     }
   }
 

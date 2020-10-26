@@ -1,8 +1,21 @@
 import '../scss/style.scss';
 
-export { default as ComponentDiagram } from './components/componentDiagram';
-export { default as FlowView } from './components/flowView';
-export { default as Timeline } from './components/timeline';
-export { default as EventInfo } from './models/eventInfo';
-export { default as buildCallTree } from './models/buildCallTree';
-export { default as buildComponentModel } from './models/buildComponentModel';
+import ComponentDiagram from './components/componentDiagram';
+import FlowView from './components/flowView';
+import Timeline from './components/timeline';
+import EventInfo from './models/eventInfo';
+import CallTree from './models/callTree';
+import Components from './models/components';
+
+const Models = {
+  EventInfo,
+  CallTree,
+  Components,
+};
+
+export {
+  ComponentDiagram,
+  FlowView,
+  Timeline,
+  Models,
+};

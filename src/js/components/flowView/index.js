@@ -5,6 +5,7 @@ import {
   tokenizeIdentifier,
   capitalizeString,
   lazyPanToElement,
+  panToNode,
 } from '../../util';
 import EventSource from '../../helpers/eventSource';
 import Container from '../../helpers/container';
@@ -239,7 +240,7 @@ function getScopedObjects(behaviorNode) {
     return objectsInScope;
   }
 
-  const parentIndex = grandParent.children.findIndex(e => e === parent);
+  const parentIndex = grandParent.children.findIndex((e) => e === parent);
   if (parentIndex > 0) {
     // iterate in reverse order (right to left) in order to guarantee the most recent output
     // is used in case of an object id collision. i.e., if two methods return the same object,
@@ -367,7 +368,21 @@ export default class FlowView extends EventSource {
     this.on('popper', (element) => lazyPanToElement(this.container.containerController, element, 10));
   }
 
-  render(rootEvent) {
+  setCallTree(callTree) {
+    this.callTree = callTree;
+
+    this.callTree.on('selectedEvent', (event) => {
+      panToNode(this.container.containerController, event.element);
+      this.highlight(event ? event.id : null);
+    });
+
+    this.callTree.on('rootEvent', () => {
+      this.render();
+    });
+  }
+
+  render() {
+    const { rootEvent } = this.callTree;
     const [nodeConnections, portConnections] = transformEvents(rootEvent);
 
     // Maps for forward and reverse lookups of node links
@@ -383,26 +398,26 @@ export default class FlowView extends EventSource {
 
     const mapNode = (layer) => {
       const node = layer
-        .filter(d => d.data.behavior)
+        .filter((d) => d.data.behavior)
         .append('div')
-        .datum(d => d.data.behavior)
+        .datum((d) => d.data.behavior)
         .classed('node', true)
-        .classed('exception', d => d.exceptions.length > 0)
-        .attr('data-node-id', d => d.id)
-        .attr('data-event-id', d => d.event_id)
-        .on('click', d => this.emit('click', d.data))
-        .on('dblclick', d => this.emit('dblclick', d.data))
-        .on('contextmenu', d => this.emit('click', d.data));
+        .classed('exception', (d) => d.exceptions.length > 0)
+        .attr('data-node-id', (d) => d.id)
+        .attr('data-event-id', (d) => d.event_id)
+        .on('click', (d) => this.callTree.selectedEvent = d.data)
+        .on('dblclick', (d) => this.emit('dblclick', d.data))
+        .on('contextmenu', (d) => this.callTree.selectedEvent = d.data);
 
       const header = node
         .append('div')
-        .attr('data-type', d => d.type)
+        .attr('data-type', (d) => d.type)
         .classed('header', true)
         .attr('draggable', true);
 
       header
         .append('p')
-        .html(e => e.name)
+        .html((e) => e.name)
         .attr('draggable', true);
 
       const ioTable = node
@@ -417,21 +432,21 @@ export default class FlowView extends EventSource {
         .append('div')
         .attr('data-connection-type', 'input')
         .classed('connector', true)
-        .classed('in-use', d => hasLink(inboundConnections, d.id));
+        .classed('in-use', (d) => hasLink(inboundConnections, d.id));
 
       inputs
         .selectAll(null)
-        .data(d => d.in.map(x => ({ ...x, id: d.id })))
+        .data((d) => d.in.map((x) => ({ ...x, id: d.id })))
         .enter()
         .append('div')
         .classed('item', true)
-        .classed('has-data', d => d && d.value && d.value.value)
-        .attr('data-type', d => d.type)
+        .classed('has-data', (d) => d && d.value && d.value.value)
+        .attr('data-type', (d) => d.type)
         .attr('data-port-type', 'input')
-        .attr('data-port-id', d => d && d.value && d.value.object_id)
-        .text(d => d.name)
+        .attr('data-port-id', (d) => d && d.value && d.value.object_id)
+        .text((d) => d.name)
         .on('click', (d, i, elements) => {
-          this.emit('click', rootEvent.find(e => e.id === d.id));
+          this.callTree.selectedEvent = rootEvent.find((e) => e.id === d.id);
           displayValue(this, elements[i], d.value, 'left');
           d3.event.stopPropagation();
         });
@@ -444,30 +459,30 @@ export default class FlowView extends EventSource {
         .append('div')
         .attr('data-connection-type', 'output')
         .classed('connector', true)
-        .classed('in-use', d => hasLink(outboundConnections, d.id));
+        .classed('in-use', (d) => hasLink(outboundConnections, d.id));
 
       outputs
         .selectAll(null)
-        .data(d => d.out.map(x => ({ ...x, id: d.id })))
+        .data((d) => d.out.map((x) => ({ ...x, id: d.id })))
         .enter()
         .append('div')
         .classed('item', true)
-        .classed('has-data', d => d && d.value && d.value.value)
-        .attr('data-type', d => d.type)
+        .classed('has-data', (d) => d && d.value && d.value.value)
+        .attr('data-type', (d) => d.type)
         .attr('data-port-type', 'output')
-        .attr('data-port-id', d => d && d.value && d.value.object_id)
-        .text(d => d.name)
+        .attr('data-port-id', (d) => d && d.value && d.value.object_id)
+        .text((d) => d.name)
         .on('click', (d, i, elements) => {
-          this.emit('click', rootEvent.find(e => e.id === d.id));
+          this.callTree.selectedEvent = rootEvent.find((e) => e.id === d.id);
           displayValue(this, elements[i], d.value, 'right');
           d3.event.stopPropagation();
         });
 
       node
-        .filter(d => d.type === 'sql')
+        .filter((d) => d.type === 'sql')
         .append('div')
         .classed('sql', true)
-        .text(d => d.value);
+        .text((d) => d.value);
     };
 
     function bind(nodes) {
@@ -478,7 +493,7 @@ export default class FlowView extends EventSource {
         .call(mapNode)
         .append('ul')
         .selectAll(':scope > li')
-        .data(d => d.children || [], d => d.data.behavior.id)
+        .data((d) => d.children || [], (d) => d.data.behavior.id)
         .join(bind);
     }
 
@@ -514,7 +529,7 @@ export default class FlowView extends EventSource {
       .data(portConnections)
       .enter()
       .append('path')
-      .attr('class', d => `type-${d.type}`)
+      .attr('class', (d) => `type-${d.type}`)
       .classed('connection', true)
       .classed('port-connection', true)
       .attr('d', (d) => {
@@ -532,7 +547,7 @@ export default class FlowView extends EventSource {
     this.nodeGroup
       .selectAll('.node')
       .classed('highlight', false)
-      .filter(d => d.id === eventId)
+      .filter((d) => d.id === eventId)
       .classed('highlight', true);
   }
 

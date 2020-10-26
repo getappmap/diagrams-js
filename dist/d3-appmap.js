@@ -11962,6 +11962,39 @@
 	  viewport.translateBy(x, y);
 	}
 
+	function nodeFullyVisible(viewport, node) {
+	  if (!node) return false;
+	  return Geometry.contains(
+	    viewport.element.getBoundingClientRect(),
+	    node.getBoundingClientRect(),
+	  );
+	}
+
+	// Pan the scenario view to given HTMLElement node.
+	function panToNode(viewport, node) {
+	  // To minimize panning do not move the view if the node is already fully visible.
+	  if (!node || nodeFullyVisible(viewport, node)) {
+	    return;
+	  }
+
+	  let target;
+	  // If a node is already selected and visible, pan so that
+	  // the new selection will be in the same place.
+	  const highlightedNode = viewport.element.querySelector('.node.highlight');
+	  if (nodeFullyVisible(viewport, highlightedNode)) {
+	    const xform = d3$1.zoomTransform(highlightedNode);
+
+	    // we'll have to offset for the border
+	    const style = getComputedStyle(highlightedNode);
+	    target = xform.apply([
+	      highlightedNode.offsetLeft + Number.parseInt(style.borderLeftWidth, 10),
+	      highlightedNode.offsetTop + Number.parseInt(style.borderTopWidth, 10),
+	    ]);
+	  }
+
+	  viewport.translateTo(node.offsetLeft, node.offsetTop, target);
+	}
+
 	// These shapes are from
 	// https://github.com/mermaid-js/mermaid/blob/develop/src/diagrams/flowchart/flowChartShapes.js
 
@@ -14892,7 +14925,7 @@
 	    return objectsInScope;
 	  }
 
-	  const parentIndex = grandParent.children.findIndex(e => e === parent);
+	  const parentIndex = grandParent.children.findIndex((e) => e === parent);
 	  if (parentIndex > 0) {
 	    // iterate in reverse order (right to left) in order to guarantee the most recent output
 	    // is used in case of an object id collision. i.e., if two methods return the same object,
@@ -15020,7 +15053,21 @@
 	    this.on('popper', (element) => lazyPanToElement(this.container.containerController, element, 10));
 	  }
 
-	  render(rootEvent) {
+	  setCallTree(callTree) {
+	    this.callTree = callTree;
+
+	    this.callTree.on('selectedEvent', (event) => {
+	      panToNode(this.container.containerController, event.element);
+	      this.highlight(event ? event.id : null);
+	    });
+
+	    this.callTree.on('rootEvent', () => {
+	      this.render();
+	    });
+	  }
+
+	  render() {
+	    const { rootEvent } = this.callTree;
 	    const [nodeConnections, portConnections] = transformEvents(rootEvent);
 
 	    // Maps for forward and reverse lookups of node links
@@ -15036,26 +15083,26 @@
 
 	    const mapNode = (layer) => {
 	      const node = layer
-	        .filter(d => d.data.behavior)
+	        .filter((d) => d.data.behavior)
 	        .append('div')
-	        .datum(d => d.data.behavior)
+	        .datum((d) => d.data.behavior)
 	        .classed('node', true)
-	        .classed('exception', d => d.exceptions.length > 0)
-	        .attr('data-node-id', d => d.id)
-	        .attr('data-event-id', d => d.event_id)
-	        .on('click', d => this.emit('click', d.data))
-	        .on('dblclick', d => this.emit('dblclick', d.data))
-	        .on('contextmenu', d => this.emit('click', d.data));
+	        .classed('exception', (d) => d.exceptions.length > 0)
+	        .attr('data-node-id', (d) => d.id)
+	        .attr('data-event-id', (d) => d.event_id)
+	        .on('click', (d) => this.callTree.selectedEvent = d.data)
+	        .on('dblclick', (d) => this.emit('dblclick', d.data))
+	        .on('contextmenu', (d) => this.callTree.selectedEvent = d.data);
 
 	      const header = node
 	        .append('div')
-	        .attr('data-type', d => d.type)
+	        .attr('data-type', (d) => d.type)
 	        .classed('header', true)
 	        .attr('draggable', true);
 
 	      header
 	        .append('p')
-	        .html(e => e.name)
+	        .html((e) => e.name)
 	        .attr('draggable', true);
 
 	      const ioTable = node
@@ -15070,21 +15117,21 @@
 	        .append('div')
 	        .attr('data-connection-type', 'input')
 	        .classed('connector', true)
-	        .classed('in-use', d => hasLink(inboundConnections, d.id));
+	        .classed('in-use', (d) => hasLink(inboundConnections, d.id));
 
 	      inputs
 	        .selectAll(null)
-	        .data(d => d.in.map(x => ({ ...x, id: d.id })))
+	        .data((d) => d.in.map((x) => ({ ...x, id: d.id })))
 	        .enter()
 	        .append('div')
 	        .classed('item', true)
-	        .classed('has-data', d => d && d.value && d.value.value)
-	        .attr('data-type', d => d.type)
+	        .classed('has-data', (d) => d && d.value && d.value.value)
+	        .attr('data-type', (d) => d.type)
 	        .attr('data-port-type', 'input')
-	        .attr('data-port-id', d => d && d.value && d.value.object_id)
-	        .text(d => d.name)
+	        .attr('data-port-id', (d) => d && d.value && d.value.object_id)
+	        .text((d) => d.name)
 	        .on('click', (d, i, elements) => {
-	          this.emit('click', rootEvent.find(e => e.id === d.id));
+	          this.callTree.selectedEvent = rootEvent.find((e) => e.id === d.id);
 	          displayValue(this, elements[i], d.value, 'left');
 	          d3$1.event.stopPropagation();
 	        });
@@ -15097,30 +15144,30 @@
 	        .append('div')
 	        .attr('data-connection-type', 'output')
 	        .classed('connector', true)
-	        .classed('in-use', d => hasLink(outboundConnections, d.id));
+	        .classed('in-use', (d) => hasLink(outboundConnections, d.id));
 
 	      outputs
 	        .selectAll(null)
-	        .data(d => d.out.map(x => ({ ...x, id: d.id })))
+	        .data((d) => d.out.map((x) => ({ ...x, id: d.id })))
 	        .enter()
 	        .append('div')
 	        .classed('item', true)
-	        .classed('has-data', d => d && d.value && d.value.value)
-	        .attr('data-type', d => d.type)
+	        .classed('has-data', (d) => d && d.value && d.value.value)
+	        .attr('data-type', (d) => d.type)
 	        .attr('data-port-type', 'output')
-	        .attr('data-port-id', d => d && d.value && d.value.object_id)
-	        .text(d => d.name)
+	        .attr('data-port-id', (d) => d && d.value && d.value.object_id)
+	        .text((d) => d.name)
 	        .on('click', (d, i, elements) => {
-	          this.emit('click', rootEvent.find(e => e.id === d.id));
+	          this.callTree.selectedEvent = rootEvent.find((e) => e.id === d.id);
 	          displayValue(this, elements[i], d.value, 'right');
 	          d3$1.event.stopPropagation();
 	        });
 
 	      node
-	        .filter(d => d.type === 'sql')
+	        .filter((d) => d.type === 'sql')
 	        .append('div')
 	        .classed('sql', true)
-	        .text(d => d.value);
+	        .text((d) => d.value);
 	    };
 
 	    function bind(nodes) {
@@ -15131,7 +15178,7 @@
 	        .call(mapNode)
 	        .append('ul')
 	        .selectAll(':scope > li')
-	        .data(d => d.children || [], d => d.data.behavior.id)
+	        .data((d) => d.children || [], (d) => d.data.behavior.id)
 	        .join(bind);
 	    }
 
@@ -15167,7 +15214,7 @@
 	      .data(portConnections)
 	      .enter()
 	      .append('path')
-	      .attr('class', d => `type-${d.type}`)
+	      .attr('class', (d) => `type-${d.type}`)
 	      .classed('connection', true)
 	      .classed('port-connection', true)
 	      .attr('d', (d) => {
@@ -15185,7 +15232,7 @@
 	    this.nodeGroup
 	      .selectAll('.node')
 	      .classed('highlight', false)
-	      .filter(d => d.id === eventId)
+	      .filter((d) => d.id === eventId)
 	      .classed('highlight', true);
 	  }
 
@@ -23362,7 +23409,21 @@
 	      .classed('no-selection', true);
 	  }
 
-	  render(rootEvent) {
+	  setCallTree(callTree) {
+	    this.callTree = callTree;
+
+	    this.callTree.on('selectedEvent', (event) => {
+	      this.highlight(event, this.callTree.rootEvent);
+	    });
+
+	    this.callTree.on('rootEvent', () => {
+	      this.render();
+	    });
+	  }
+
+	  render() {
+	    const rootEvent = this.callTree.rootEvent;
+
 	    rootEvent.postOrderForEach((d) => {
 	      d.label = buildName(d);
 	      d.value = d.label.length;
@@ -23416,7 +23477,7 @@
 
 	    this.timelineSelection
 	      .selectAll('.frame')
-	      .on('click', d => this.emit('click', d.data));
+	      .on('click', d => this.callTree.selectedEvent = d.data);
 
 	    return this;
 	  }
@@ -24014,165 +24075,198 @@
 	  return [];
 	}
 
-	function buildCallTree(data, functionLabels = noLabels) {
-	  const rootNode = new CallNode();
-	  const callStack = new CallStack(data, functionLabels);
-	  while (callStack.peek()) {
-	    branch(callStack, rootNode);
+	class CallTree extends EventSource {
+	  constructor (data, functionLabels = noLabels) {
+	    super();
+
+	    this.rootNode = new CallNode();
+	    const callStack = new CallStack(data, functionLabels);
+
+	    while (callStack.peek()) {
+	      branch(callStack, this.rootNode);
+	    }
+
+	    this.dataStore = {
+	      rootEvent: this.rootNode,
+	      selectedEvent: this.rootNode,
+	    };
+
+	    return this;
 	  }
-	  return rootNode;
+
+	  get rootEvent() {
+	    return this.dataStore.rootEvent;
+	  }
+
+	  set rootEvent(event) {
+	    this.dataStore.rootEvent = event;
+	    this.emit('rootEvent', event);
+	  }
+
+	  get selectedEvent() {
+	    return this.dataStore.selectedEvent;
+	  }
+
+	  set selectedEvent(event) {
+	    this.dataStore.selectedEvent = event;
+	    this.emit('selectedEvent', event);
+	  }
 	}
 
 	const HTTP_PACKAGE = 'HTTP';
 	const SQL_PACKAGE = 'SQL';
 
-	function buildComponents(scenarioData) {
-	  /* eslint-disable camelcase */
-	  // map of all packages which are invoked from each package
-	  const package_calls = {}; // Hash.new { |h, k| h[k] = Set.new }
-	  // for each class, a set of classes which are called
-	  const class_calls = {}; // Hash.new { |h, k| h[k] = Set.new }
-	  // for each class, a set of classes which are its callers
-	  const class_callers = {}; // Hash.new { |h, k| h[k] = Set.new }
-	  // map of all classes in each package
-	  const package_classes = {}; // Hash.new { |h, k| h[k] = Set.new }
-	  // the package of each class
-	  const class_package = {};
-	  // Packages which are invoked from HTTP_PACKAGE
-	  const controller_packages = new Set();
-	  // Packages which invoke a SQL query
-	  const querying_packages = new Set();
-	  // All packages
-	  const packages = new Set();
-	  // Path and line numbers of classes
-	  const class_locations = {};
-	  // Source control related metadata
-	  const source_control = {};
-	  /* eslint-enable camelcase */
+	class Components {
+	  constructor(scenarioData) {
+	    /* eslint-disable camelcase */
+	    // map of all packages which are invoked from each package
+	    const package_calls = {}; // Hash.new { |h, k| h[k] = Set.new }
+	    // for each class, a set of classes which are called
+	    const class_calls = {}; // Hash.new { |h, k| h[k] = Set.new }
+	    // for each class, a set of classes which are its callers
+	    const class_callers = {}; // Hash.new { |h, k| h[k] = Set.new }
+	    // map of all classes in each package
+	    const package_classes = {}; // Hash.new { |h, k| h[k] = Set.new }
+	    // the package of each class
+	    const class_package = {};
+	    // Packages which are invoked from HTTP_PACKAGE
+	    const controller_packages = new Set();
+	    // Packages which invoke a SQL query
+	    const querying_packages = new Set();
+	    // All packages
+	    const packages = new Set();
+	    // Path and line numbers of classes
+	    const class_locations = {};
+	    // Source control related metadata
+	    const source_control = {};
+	    /* eslint-enable camelcase */
 
-	  const locationIndex = {};
-	  const fqPackageName = [];
-	  const fqClassName = [];
+	    const locationIndex = {};
+	    const fqPackageName = [];
+	    const fqClassName = [];
 
-	  function buildLocationIndex(cls) {
-	    if ( cls.type === 'class' ) {
-	      fqClassName.push(cls.name);
-	    }
-	    if ( cls.type === 'package' ) {
-	      fqPackageName.push(cls.name);
-	    }
+	    function buildLocationIndex(cls) {
+	      if ( cls.type === 'class' ) {
+	        fqClassName.push(cls.name);
+	      }
+	      if ( cls.type === 'package' ) {
+	        fqPackageName.push(cls.name);
+	      }
 
-	    if ( cls.type === 'function' ) {
-	      const locationKey = [cls.location || '<path>:<line>', cls.name].join('#');
-	      const className = fqClassName.join('::');
-	      const packageName = fqPackageName.join('/');
-	      locationIndex[locationKey] = { className, packageName };
-	    }
+	      if ( cls.type === 'function' ) {
+	        const locationKey = [cls.location || '<path>:<line>', cls.name].join('#');
+	        const className = fqClassName.join('::');
+	        const packageName = fqPackageName.join('/');
+	        locationIndex[locationKey] = { className, packageName };
+	      }
 
-	    (cls.children || []).forEach(buildLocationIndex);
+	      (cls.children || []).forEach(buildLocationIndex);
 
-	    if ( cls.type === 'class' ) {
-	      fqClassName.pop();
-	    }
-	    if ( cls.type === 'package' ) {
-	      fqPackageName.pop();
-	    }
-	  }
-
-	  scenarioData.classMap.forEach(buildLocationIndex);
-
-	  console.log(locationIndex);
-
-	  const callStack = [];
-	  const uniqueInvocations = new Set();
-	  const invocationGraph = [];
-	  scenarioData.events.forEach((event) => {
-	    if ( event.event === 'return' ) {
-	      return callStack.pop();
-	    }
-
-	    const locationKey = [[event.path || '<path>', event.lineno || '<line>'].join(':'), event.method_id].join('#');
-	    let calleeClassDef;
-	    if ( event.sql_query ) {
-	      calleeClassDef = { className: SQL_PACKAGE, packageName: SQL_PACKAGE };
-	    } else if ( event.http_server_request ) {
-	      calleeClassDef = { className: HTTP_PACKAGE, packageName: HTTP_PACKAGE };
-	    } else {
-	      calleeClassDef = locationIndex[locationKey];
-	      if ( !calleeClassDef ) {
-	        return console.warn(`No class info found for location ${locationKey}`);
+	      if ( cls.type === 'class' ) {
+	        fqClassName.pop();
+	      }
+	      if ( cls.type === 'package' ) {
+	        fqPackageName.pop();
 	      }
 	    }
 
-	    if ( callStack.length > 0 ) {
-	      const callerClassDef = callStack[callStack.length - 1];
-	      const call = [callerClassDef, calleeClassDef];
-	      const callKey = JSON.stringify(call);
-	      if ( uniqueInvocations.add(callKey) ) {
-	        invocationGraph.push(call);
+	    scenarioData.classMap.forEach(buildLocationIndex);
+
+	    const callStack = [];
+	    const uniqueInvocations = new Set();
+	    const invocationGraph = [];
+	    scenarioData.events.forEach((event) => {
+	      if ( event.event === 'return' ) {
+	        return callStack.pop();
 	      }
-	    }
 
-	    callStack.push(calleeClassDef);
-
-	    return null;
-	  });
-
-	  invocationGraph.forEach((call) => {
-	    call.forEach((type) => {
-	      packages.add(type.packageName);
-	      if (!package_classes[type.packageName]) {
-	        package_classes[type.packageName] = new Set();
+	      const locationKey = [[event.path || '<path>', event.lineno || '<line>'].join(':'), event.method_id].join('#');
+	      let calleeClassDef;
+	      if ( event.sql_query ) {
+	        calleeClassDef = { className: SQL_PACKAGE, packageName: SQL_PACKAGE };
+	      } else if ( event.http_server_request ) {
+	        calleeClassDef = { className: HTTP_PACKAGE, packageName: HTTP_PACKAGE };
+	      } else {
+	        calleeClassDef = locationIndex[locationKey];
+	        if ( !calleeClassDef ) {
+	          return console.warn(`No class info found for location ${locationKey}`);
+	        }
 	      }
-	      package_classes[type.packageName].add(type.className);
-	      class_package[type.className] = type.packageName;
+
+	      if ( callStack.length > 0 ) {
+	        const callerClassDef = callStack[callStack.length - 1];
+	        const call = [callerClassDef, calleeClassDef];
+	        const callKey = JSON.stringify(call);
+	        if ( uniqueInvocations.add(callKey) ) {
+	          invocationGraph.push(call);
+	        }
+	      }
+
+	      callStack.push(calleeClassDef);
+
+	      return null;
 	    });
 
-	    const [caller, callee] = call;
+	    invocationGraph.forEach((call) => {
+	      call.forEach((type) => {
+	        packages.add(type.packageName);
+	        if (!package_classes[type.packageName]) {
+	          package_classes[type.packageName] = new Set();
+	        }
+	        package_classes[type.packageName].add(type.className);
+	        class_package[type.className] = type.packageName;
+	      });
 
-	    if ( caller.packageName === HTTP_PACKAGE ) {
-	      controller_packages.add(callee.packageName);
-	    }
-	    if ( callee.packageName === SQL_PACKAGE ) {
-	      querying_packages.add(caller.packageName);
-	    }
+	      const [caller, callee] = call;
 
-	    if (!package_calls[caller.packageName]) {
-	      package_calls[caller.packageName] = new Set();
-	    }
-	    package_calls[caller.packageName].add(callee.packageName);
+	      if ( caller.packageName === HTTP_PACKAGE ) {
+	        controller_packages.add(callee.packageName);
+	      }
+	      if ( callee.packageName === SQL_PACKAGE ) {
+	        querying_packages.add(caller.packageName);
+	      }
 
-	    if (!class_calls[caller.className]) {
-	      class_calls[caller.className] = new Set();
-	    }
-	    class_calls[caller.className].add(callee.className);
+	      if (!package_calls[caller.packageName]) {
+	        package_calls[caller.packageName] = new Set();
+	      }
+	      package_calls[caller.packageName].add(callee.packageName);
 
-	    if (!class_callers[callee.className]) {
-	      class_callers[callee.className] = new Set();
-	    }
-	    class_callers[callee.className].add(caller.className);
-	  });
+	      if (!class_calls[caller.className]) {
+	        class_calls[caller.className] = new Set();
+	      }
+	      class_calls[caller.className].add(callee.className);
 
-	  return {
-	    package_calls,
-	    class_calls,
-	    class_callers,
-	    package_classes,
-	    class_package,
-	    controller_packages,
-	    querying_packages,
-	    packages,
-	    class_locations,
-	    source_control,
-	  };
+	      if (!class_callers[callee.className]) {
+	        class_callers[callee.className] = new Set();
+	      }
+	      class_callers[callee.className].add(caller.className);
+	    });
+
+	    return {
+	      package_calls,
+	      class_calls,
+	      class_callers,
+	      package_classes,
+	      class_package,
+	      controller_packages,
+	      querying_packages,
+	      packages,
+	      class_locations,
+	      source_control,
+	    };
+	  }
 	}
 
+	const Models = {
+	  EventInfo,
+	  CallTree,
+	  Components,
+	};
+
 	exports.ComponentDiagram = ComponentDiagram;
-	exports.EventInfo = EventInfo;
 	exports.FlowView = FlowView;
+	exports.Models = Models;
 	exports.Timeline = Timeline;
-	exports.buildCallTree = buildCallTree;
-	exports.buildComponentModel = buildComponents;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
