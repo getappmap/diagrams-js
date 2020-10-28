@@ -1,4 +1,10 @@
-import {CallTree,Components,EventInfo,EventSource,getLabel} from '@applandinc/appmap-models';
+import {
+  CallTree,
+  Components,
+  EventInfo,
+  EventSource,
+  getLabel,
+} from '@applandinc/appmap-models';
 
 const Models = {
   CallTree,
@@ -7,4 +13,5 @@ const Models = {
   EventSource,
   getLabel,
 };
+
 export default Models;

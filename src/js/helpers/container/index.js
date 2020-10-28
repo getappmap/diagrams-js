@@ -30,8 +30,10 @@ const defaultOptions = {
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
 export default class Container extends Models.EventSource {
-  constructor(parentElement, options = {}) {
+  constructor(parent, options = {}) {
     super();
+
+    const parentElement = d3.select(parent).node();
 
     this.options = deepmerge(defaultOptions, options);
 
