@@ -1,4 +1,4 @@
-import EventSource from '../eventSource';
+import Models from '../../models';
 
 // updateZoom updates the bar that indicates the current level of zoom.
 // `zoomScale` is a float, ranging from 0.0 (fully zoomed in) to 1.0 (fully
@@ -91,7 +91,7 @@ function createDOM(viewportZoom) {
   });
 }
 
-export default class ContainerZoom extends EventSource {
+export default class ContainerZoom extends Models.EventSource {
   constructor(container, options) {
     super();
 

@@ -278,7 +278,7 @@ body {
     color: #fff; }
 
 .appmap__flow-view .highlight .sql {
-  overflow: scroll; }
+  overflow: auto; }
 
 .appmap__flow-view .modal-content {
   background-color: #111;
