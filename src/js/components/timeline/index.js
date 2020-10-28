@@ -2,8 +2,8 @@ import * as d3 from 'd3';
 import { flamegraph } from 'd3-flame-graph';
 import deepmerge from 'deepmerge';
 
-import { getLabel, fullyQualifiedFunctionName } from '../../util';
-import EventSource from '../../helpers/eventSource';
+import { fullyQualifiedFunctionName } from '../../util';
+import Models from '../../models';
 import Container from '../../helpers/container';
 
 // really just a magic number
@@ -18,7 +18,7 @@ function positionFromTransform(e) {
 function buildName(d) {
   const { input } = d;
 
-  const label = getLabel(input);
+  const label = Models.getLabel(input);
   if (label) {
     return label;
   }
@@ -83,7 +83,7 @@ const COMPONENT_OPTIONS = {
   zoom: false,
 };
 
-export default class Timeline extends EventSource {
+export default class Timeline extends Models.EventSource {
   constructor(container, options = {}) {
     super();
 

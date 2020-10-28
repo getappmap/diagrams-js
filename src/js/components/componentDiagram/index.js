@@ -2,7 +2,7 @@ import * as dagreD3 from 'dagre-d3';
 import * as d3 from 'd3';
 import { getRepositoryUrl } from '../../util';
 import { bindShapes } from './componentDiagramShapes';
-import EventSource from '../../helpers/eventSource';
+import Models from '../../models';
 import Container from '../../helpers/container';
 
 export const DEFAULT_TARGET_COUNT = 10;
@@ -256,7 +256,7 @@ function renderGraph(componentDiagram) {
   componentDiagram.emit('postrender');
 }
 
-export default class ComponentDiagram extends EventSource {
+export default class ComponentDiagram extends Models.EventSource {
   constructor(container, options = {}) {
     super();
 
