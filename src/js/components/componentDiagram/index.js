@@ -260,7 +260,7 @@ export default class ComponentDiagram extends Models.EventSource {
   constructor(container, options = {}) {
     super();
 
-    this.container = new Container(document.querySelector(container), options);
+    this.container = new Container(container, options);
 
     this.targetCount = DEFAULT_TARGET_COUNT;
     this.element = d3.select(this.container)

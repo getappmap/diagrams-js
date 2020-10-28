@@ -89,7 +89,7 @@ export default class Timeline extends Models.EventSource {
 
     const timelineOptions = deepmerge(COMPONENT_OPTIONS, options);
 
-    this.container = new Container(document.querySelector(container), timelineOptions);
+    this.container = new Container(container, timelineOptions);
 
     this.timelineGroup = d3.select(this.container)
       .append('div')
@@ -114,7 +114,7 @@ export default class Timeline extends Models.EventSource {
   }
 
   render() {
-    const rootEvent = this.callTree.rootEvent;
+    const { rootEvent } = this.callTree;
 
     rootEvent.postOrderForEach((d) => {
       d.label = buildName(d);
@@ -143,7 +143,7 @@ export default class Timeline extends Models.EventSource {
       .cellHeight(22)
       .minFrameSize(3)
       .tooltip(false)
-      .getName(d => d.data.label)
+      .getName((d) => d.data.label)
       .setColorMapper((d) => {
         if (d.highlight) {
           return '#4175ea';
@@ -169,7 +169,7 @@ export default class Timeline extends Models.EventSource {
 
     this.timelineSelection
       .selectAll('.frame')
-      .on('click', d => this.callTree.selectedEvent = d.data);
+      .on('click', (d) => this.callTree.selectedEvent = d.data);
 
     return this;
   }
@@ -186,12 +186,12 @@ export default class Timeline extends Models.EventSource {
       .style('color', '#404040');
 
     const selectedIds = events
-      .filter(d => d.data === event)
+      .filter((d) => d.data === event)
       .datum()
       .descendants()
-      .map(child => child.data.id);
+      .map((child) => child.data.id);
 
-    const selectedEvents = events.filter(d => selectedIds.includes(d.data.id));
+    const selectedEvents = events.filter((d) => selectedIds.includes(d.data.id));
 
     selectedEvents
       .selectAll('rect')
@@ -234,7 +234,7 @@ export default class Timeline extends Models.EventSource {
     callStack.forEach((e) => {
       const element = this.timelineSelection
         .selectAll('g.frame')
-        .filter(d => d && d.data === e);
+        .filter((d) => d && d.data === e);
       const { x, y } = positionFromTransform(element);
       const width = Number(element.attr('width'));
       const height = Number(element.attr('height'));
@@ -258,7 +258,7 @@ export default class Timeline extends Models.EventSource {
 
     const currentElement = this.timelineSelection
       .selectAll('g')
-      .filter(d => d && d.data === event);
+      .filter((d) => d && d.data === event);
 
     // put a colored highlight on the selected event
     this.highlighted = currentElement
@@ -293,12 +293,12 @@ export default class Timeline extends Models.EventSource {
   nearestNeighbor(event, direction) {
     const node = this.timelineSelection
       .selectAll('g')
-      .filter(d => d && d.data && d.data.id === event.id)
+      .filter((d) => d && d.data && d.data.id === event.id)
       .datum();
 
     const neighbors = this.timelineSelection
       .selectAll('g')
-      .filter(d => d
+      .filter((d) => d
         && d.data
         && d.depth === node.depth
         && (direction < 0 ? node.x0 > d.x0 : node.x0 < d.x0))

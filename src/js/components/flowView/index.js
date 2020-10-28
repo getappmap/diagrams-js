@@ -341,7 +341,7 @@ export default class FlowView extends Models.EventSource {
   constructor(container, options = {}) {
     super();
 
-    this.container = new Container(document.querySelector(container), options);
+    this.container = new Container(container, options);
 
     this.element = document.createElement('div');
     this.element.className = 'appmap__flow-view';
