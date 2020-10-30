@@ -81,6 +81,7 @@
     margin-top: -1.5em;
     max-width: 100ex;
     max-height: 30em;
+    overflow: auto;
 
     &::-moz-selection {
       background-color: $hotpink;
@@ -90,10 +91,6 @@
       background-color: $hotpink;
       color: #fff;
     }
-  }
-
-  .highlight .sql {
-    overflow: auto;
   }
 
   .modal-content {
