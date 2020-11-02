@@ -12628,7 +12628,6 @@
 	      [current] = children;
 	    }
 
-<<<<<<< HEAD
 	  fitViewport(targetElement) {
 	    const targetHeight = targetElement.offsetHeight;
 	    const targetWidth = targetElement.offsetWidth;
@@ -12651,9 +12650,6 @@
 	      .transition()
 	      .duration(this.options.pan.tweenTime)
 	      .call(this.zoom.translateTo, x, y, target);
-=======
-	    return current;
->>>>>>> master
 	  }
 
 	  isRoot() {
@@ -12882,7 +12878,6 @@
 
 	      (cls.children || []).forEach(buildLocationIndex);
 
-<<<<<<< HEAD
 	      data.labelElem = e;
 	    });
 
@@ -12914,16 +12909,7 @@
 	  render(data) {
 	    if (!data || typeof data !== 'object') {
 	      return;
-=======
-	      if ( cls.type === 'class' ) {
-	        fqClassName.pop();
-	      }
-	      if ( cls.type === 'package' ) {
-	        fqPackageName.pop();
-	      }
->>>>>>> master
 	    }
-
 	    scenarioData.classMap.forEach(buildLocationIndex);
 
 	    const callStack = [];
