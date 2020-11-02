@@ -268,7 +268,7 @@ export default class ComponentDiagram extends EventSource {
       .attr('class', 'appmap__component-diagram');
 
     this.on('postrender', () => {
-      this.container.containerController.fitViewport(this.element.node());
+      this.container.containerController.fitViewport(this.container);
     });
   }
 
