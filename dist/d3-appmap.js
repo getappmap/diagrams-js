@@ -12752,6 +12752,23 @@
 	    return this.contentElement;
 	  }
 
+	  fitViewport(targetElement) {
+	    const targetHeight = targetElement.offsetHeight;
+	    const targetWidth = targetElement.offsetWidth;
+	    const { clientWidth, clientHeight } = this.element.parentNode;
+	    const { minRatio, maxRatio } = this.options.zoom;
+	    const desiredRatio = Math.min(clientHeight / targetHeight, clientWidth / targetWidth);
+	    const initialScale = Math.min(Math.max(desiredRatio, minRatio), maxRatio);
+	    const transformMatrix = d3$1.zoomIdentity
+	      .translate(
+	        (clientWidth - targetWidth * initialScale) * 0.5,
+	        (clientHeight - targetHeight * initialScale) * 0.5,
+	      )
+	      .scale(initialScale);
+
+	    this.transform = transformMatrix;
+	  }
+
 	  translateTo(x, y, target = null) {
 	    d3$1.select(this.element)
 	      .transition()
@@ -13044,6 +13061,10 @@
 	    this.element = d3$1.select(this.container)
 	      .append('svg')
 	      .attr('class', 'appmap__component-diagram');
+
+	    this.on('postrender', () => {
+	      this.container.fitViewport(this.element.node());
+	    });
 	  }
 
 	  render(data) {

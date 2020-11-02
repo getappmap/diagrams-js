@@ -20,6 +20,7 @@ body {
   user-select: none;
 
   &__content {
+    display: inline-block;
     will-change: transform;
   }
 

@@ -17,6 +17,7 @@ body {
   overflow: hidden;
   user-select: none; }
   .appmap__content {
+    display: inline-block;
     will-change: transform; }
   .appmap.appmap--theme-dark {
     background-color: #010306; }
@@ -269,16 +270,14 @@ body {
   padding: 1em;
   margin-top: -1.5em;
   max-width: 100ex;
-  max-height: 30em; }
+  max-height: 30em;
+  overflow: auto; }
   .appmap__flow-view .sql::-moz-selection {
     background-color: #FF07AA;
     color: #fff; }
   .appmap__flow-view .sql::selection {
     background-color: #FF07AA;
     color: #fff; }
-
-.appmap__flow-view .highlight .sql {
-  overflow: scroll; }
 
 .appmap__flow-view .modal-content {
   background-color: #111;

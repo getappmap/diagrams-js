@@ -266,6 +266,10 @@ export default class ComponentDiagram extends EventSource {
     this.element = d3.select(this.container)
       .append('svg')
       .attr('class', 'appmap__component-diagram');
+
+    this.on('postrender', () => {
+      this.container.fitViewport(this.element.node());
+    });
   }
 
   render(data) {
