@@ -7,7 +7,8 @@ import {
   lazyPanToElement,
   panToNode,
 } from '../../util';
-import EventSource from '../../helpers/eventSource';
+
+import Models from '../../models';
 import Container from '../../helpers/container';
 
 const NodeType = {
@@ -336,11 +337,11 @@ function displayValue(flowView, port, data, placement) {
   flowView.emit('popper', popperElement);
 }
 
-export default class FlowView extends EventSource {
+export default class FlowView extends Models.EventSource {
   constructor(container, options = {}) {
     super();
 
-    this.container = new Container(document.querySelector(container), options);
+    this.container = new Container(container, options);
 
     this.element = document.createElement('div');
     this.element.className = 'appmap__flow-view';

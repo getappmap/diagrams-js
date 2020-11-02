@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import deepmerge from 'deepmerge';
 
 import momentum from '../momentum';
-import EventSource from '../eventSource';
+import Models from '../../models';
 import ContainerZoom from './zoom';
 
 const AVAILABLE_THEMES = ['light', 'dark'];
@@ -29,9 +29,11 @@ const defaultOptions = {
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
-export default class Container extends EventSource {
-  constructor(parentElement, options = {}) {
+export default class Container extends Models.EventSource {
+  constructor(parent, options = {}) {
     super();
+
+    const parentElement = d3.select(parent).node();
 
     this.options = deepmerge(defaultOptions, options);
 

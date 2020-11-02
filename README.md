@@ -3,6 +3,7 @@
 Build and serve the code:
 
 ```
+$  npm install
 $  npm run serve
 ...
 http://localhost:10001 -> $HOME/source/appmaporg/d3-appmap/dist
