@@ -12628,28 +12628,7 @@
 	      [current] = children;
 	    }
 
-	  fitViewport(targetElement) {
-	    const targetHeight = targetElement.offsetHeight;
-	    const targetWidth = targetElement.offsetWidth;
-	    const { clientWidth, clientHeight } = this.element.parentNode;
-	    const { minRatio, maxRatio } = this.options.zoom;
-	    const desiredRatio = Math.min(clientHeight / targetHeight, clientWidth / targetWidth);
-	    const initialScale = Math.min(Math.max(desiredRatio, minRatio), maxRatio);
-	    const transformMatrix = d3$1.zoomIdentity
-	      .translate(
-	        (clientWidth - targetWidth * initialScale) * 0.5,
-	        (clientHeight - targetHeight * initialScale) * 0.5,
-	      )
-	      .scale(initialScale);
-
-	    this.transform = transformMatrix;
-	  }
-
-	  translateTo(x, y, target = null) {
-	    d3$1.select(this.element)
-	      .transition()
-	      .duration(this.options.pan.tweenTime)
-	      .call(this.zoom.translateTo, x, y, target);
+	    return current;
 	  }
 
 	  isRoot() {
@@ -12878,38 +12857,14 @@
 
 	      (cls.children || []).forEach(buildLocationIndex);
 
-	      data.labelElem = e;
-	    });
-
-	  const bbox = componentDiagram.graphGroup.node().getBBox();
-	  componentDiagram.element
-	    .attr('width', `${bbox.width}px`)
-	    .attr('height', `${bbox.height}px`)
-	    .attr('viewBox', `${bbox.x}, ${bbox.y}, ${bbox.width}, ${bbox.height}`);
-
-	  componentDiagram.emit('postrender');
-	}
-
-	class ComponentDiagram extends EventSource {
-	  constructor(container, options = {}) {
-	    super();
-
-	    this.container = new Container(document.querySelector(container), options);
-
-	    this.targetCount = DEFAULT_TARGET_COUNT;
-	    this.element = d3$1.select(this.container)
-	      .append('svg')
-	      .attr('class', 'appmap__component-diagram');
-
-	    this.on('postrender', () => {
-	      this.container.containerController.fitViewport(this.container);
-	    });
-	  }
-
-	  render(data) {
-	    if (!data || typeof data !== 'object') {
-	      return;
+	      if ( cls.type === 'class' ) {
+	        fqClassName.pop();
+	      }
+	      if ( cls.type === 'package' ) {
+	        fqPackageName.pop();
+	      }
 	    }
+
 	    scenarioData.classMap.forEach(buildLocationIndex);
 
 	    const callStack = [];
@@ -13559,6 +13514,23 @@
 	    return this.contentElement;
 	  }
 
+	  fitViewport(targetElement) {
+	    const targetHeight = targetElement.offsetHeight;
+	    const targetWidth = targetElement.offsetWidth;
+	    const { clientWidth, clientHeight } = this.element.parentNode;
+	    const { minRatio, maxRatio } = this.options.zoom;
+	    const desiredRatio = Math.min(clientHeight / targetHeight, clientWidth / targetWidth);
+	    const initialScale = Math.min(Math.max(desiredRatio, minRatio), maxRatio);
+	    const transformMatrix = d3$1.zoomIdentity
+	      .translate(
+	        (clientWidth - targetWidth * initialScale) * 0.5,
+	        (clientHeight - targetHeight * initialScale) * 0.5,
+	      )
+	      .scale(initialScale);
+
+	    this.transform = transformMatrix;
+	  }
+
 	  translateTo(x, y, target = null) {
 	    d3$1.select(this.element)
 	      .transition()
@@ -13851,6 +13823,10 @@
 	    this.element = d3$1.select(this.container)
 	      .append('svg')
 	      .attr('class', 'appmap__component-diagram');
+
+	    this.on('postrender', () => {
+	      this.container.containerController.fitViewport(this.container);
+	    });
 	  }
 
 	  render(data) {
@@ -24205,6 +24181,8 @@
 	    const timelineOptions = cjs(COMPONENT_OPTIONS, options);
 
 	    this.container = new Container(container, timelineOptions);
+
+	    this.container.style.display = 'block';
 
 	    this.timelineGroup = d3$1.select(this.container)
 	      .append('div')

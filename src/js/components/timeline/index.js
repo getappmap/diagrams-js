@@ -91,6 +91,8 @@ export default class Timeline extends Models.EventSource {
 
     this.container = new Container(container, timelineOptions);
 
+    this.container.style.display = 'block';
+
     this.timelineGroup = d3.select(this.container)
       .append('div')
       .attr('id', 'timeline-group');
