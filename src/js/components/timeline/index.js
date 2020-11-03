@@ -95,12 +95,11 @@ export default class Timeline extends Models.EventSource {
 
     this.timelineGroup = d3.select(this.container)
       .append('div')
-      .attr('id', 'timeline-group');
+      .classed('appmap__timeline', true);
 
     this.timelineSelection = this.timelineGroup
       .append('svg')
-      .attr('id', 'timeline')
-      .classed('no-selection', true);
+      .classed('appmap__timiline-graph', true);
   }
 
   setCallTree(callTree) {
@@ -221,12 +220,7 @@ export default class Timeline extends Models.EventSource {
 
     const line = this.timelineSelection
       .append('polyline')
-      .style('stroke', '#FF07AA')
-      .style('stroke-width', '4')
-      .style('stroke-opacity', '1')
-      .style('fill', '#fff')
-      .style('fill-opacity', '0.1')
-      .style('pointer-events', 'none');
+      .classed('highlight', true);
 
     // Aggregate vertices by separating lines on the left and right of a particular event.
     // The first vertex is the bottom left of the root node and winds clockwise to the
@@ -265,14 +259,13 @@ export default class Timeline extends Models.EventSource {
     // put a colored highlight on the selected event
     this.highlighted = currentElement
       .insert('rect', ':last-child')
-      .attr('id', 'highlight')
+      .attr('class', 'highlight')
       .attr('width', function() {
         return d3.select(this.parentElement).attr('width');
       })
       .attr('height', function() {
         return d3.select(this.parentElement).attr('height');
-      })
-      .style('fill', '#FF07AA');
+      });
 
     if (currentElement.node()) {
       const { node, label } = getPoints(this.timelineGroup, currentElement);
