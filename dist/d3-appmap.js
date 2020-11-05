@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'd3'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Appmap = {}, global.d3));
-}(this, (function (exports, d3$1) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3'), require('@applandinc/appmap-models')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'd3', '@applandinc/appmap-models'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Appmap = {}, global.d3, global.appmapModels));
+}(this, (function (exports, d3$1, appmapModels) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -13413,7 +13413,7 @@
 	  return element;
 	}
 
-	class ContextMenuItem extends EventSource {
+	class ContextMenuItem extends appmapModels.EventSource {
 	  constructor() {
 	    super();
 	    this._text = 'Untitled item';
@@ -13550,7 +13550,7 @@
 	  return element;
 	}
 
-	class ContextMenu extends EventSource {
+	class ContextMenu extends appmapModels.EventSource {
 	  constructor(container, activeArea = null) {
 	    super();
 

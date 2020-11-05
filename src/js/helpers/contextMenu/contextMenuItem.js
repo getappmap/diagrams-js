@@ -1,4 +1,4 @@
-import { EventSource } from '@mingyu8981/appmap-models';
+import { EventSource } from '@applandinc/appmap-models';
 
 function transformElement(item, element) {
   if (typeof item._transform === 'function') {
