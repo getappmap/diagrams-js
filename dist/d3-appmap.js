@@ -14149,7 +14149,12 @@
 
 	  highlight(id) {
 	    this.clearHighlights();
-	    this.graph.node(id).elem.classList.add('highlight');
+
+	    const highligthedNode = this.graph.node(id);
+	    if (!highligthedNode) {
+	      return false;
+	    }
+	    highligthedNode.elem.classList.add('highlight');
 
 	    this.graph.nodeEdges(id).forEach((e) => {
 	      const element = this.graph.edge(e).elem;
@@ -14158,6 +14163,8 @@
 
 	    // Render highlighted connections above non-highlighted connections
 	    d3$1.selectAll('.edgePath.highlight').raise();
+
+	    return true;
 	  }
 
 	  focus(id) {
