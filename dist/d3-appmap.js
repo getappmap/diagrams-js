@@ -11635,6 +11635,138 @@
 	  version: version$2
 	};
 
+	var isMergeableObject = function isMergeableObject(value) {
+		return isNonNullObject(value)
+			&& !isSpecial(value)
+	};
+
+	function isNonNullObject(value) {
+		return !!value && typeof value === 'object'
+	}
+
+	function isSpecial(value) {
+		var stringValue = Object.prototype.toString.call(value);
+
+		return stringValue === '[object RegExp]'
+			|| stringValue === '[object Date]'
+			|| isReactElement(value)
+	}
+
+	// see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
+	var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
+	var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
+
+	function isReactElement(value) {
+		return value.$$typeof === REACT_ELEMENT_TYPE
+	}
+
+	function emptyTarget(val) {
+		return Array.isArray(val) ? [] : {}
+	}
+
+	function cloneUnlessOtherwiseSpecified(value, options) {
+		return (options.clone !== false && options.isMergeableObject(value))
+			? deepmerge(emptyTarget(value), value, options)
+			: value
+	}
+
+	function defaultArrayMerge(target, source, options) {
+		return target.concat(source).map(function(element) {
+			return cloneUnlessOtherwiseSpecified(element, options)
+		})
+	}
+
+	function getMergeFunction(key, options) {
+		if (!options.customMerge) {
+			return deepmerge
+		}
+		var customMerge = options.customMerge(key);
+		return typeof customMerge === 'function' ? customMerge : deepmerge
+	}
+
+	function getEnumerableOwnPropertySymbols(target) {
+		return Object.getOwnPropertySymbols
+			? Object.getOwnPropertySymbols(target).filter(function(symbol) {
+				return target.propertyIsEnumerable(symbol)
+			})
+			: []
+	}
+
+	function getKeys(target) {
+		return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
+	}
+
+	function propertyIsOnObject(object, property) {
+		try {
+			return property in object
+		} catch(_) {
+			return false
+		}
+	}
+
+	// Protects from prototype poisoning and unexpected merging up the prototype chain.
+	function propertyIsUnsafe(target, key) {
+		return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
+			&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
+				&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
+	}
+
+	function mergeObject(target, source, options) {
+		var destination = {};
+		if (options.isMergeableObject(target)) {
+			getKeys(target).forEach(function(key) {
+				destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
+			});
+		}
+		getKeys(source).forEach(function(key) {
+			if (propertyIsUnsafe(target, key)) {
+				return
+			}
+
+			if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
+				destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
+			} else {
+				destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
+			}
+		});
+		return destination
+	}
+
+	function deepmerge(target, source, options) {
+		options = options || {};
+		options.arrayMerge = options.arrayMerge || defaultArrayMerge;
+		options.isMergeableObject = options.isMergeableObject || isMergeableObject;
+		// cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
+		// implementations can use it. The caller may not replace it.
+		options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
+
+		var sourceIsArray = Array.isArray(source);
+		var targetIsArray = Array.isArray(target);
+		var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
+
+		if (!sourceAndTargetTypesMatch) {
+			return cloneUnlessOtherwiseSpecified(source, options)
+		} else if (sourceIsArray) {
+			return options.arrayMerge(target, source, options)
+		} else {
+			return mergeObject(target, source, options)
+		}
+	}
+
+	deepmerge.all = function deepmergeAll(array, options) {
+		if (!Array.isArray(array)) {
+			throw new Error('first argument should be an array')
+		}
+
+		return array.reduce(function(prev, next) {
+			return deepmerge(prev, next, options)
+		}, {})
+	};
+
+	var deepmerge_1 = deepmerge;
+
+	var cjs = deepmerge_1;
+
 	class Transform {
 	  constructor(x = 0, y = 0, k = 1) {
 	    this.x = x;
@@ -12960,138 +13092,6 @@
 	  getLabel: getLabel$1,
 	};
 
-	var isMergeableObject = function isMergeableObject(value) {
-		return isNonNullObject(value)
-			&& !isSpecial(value)
-	};
-
-	function isNonNullObject(value) {
-		return !!value && typeof value === 'object'
-	}
-
-	function isSpecial(value) {
-		var stringValue = Object.prototype.toString.call(value);
-
-		return stringValue === '[object RegExp]'
-			|| stringValue === '[object Date]'
-			|| isReactElement(value)
-	}
-
-	// see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
-	var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
-	var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
-
-	function isReactElement(value) {
-		return value.$$typeof === REACT_ELEMENT_TYPE
-	}
-
-	function emptyTarget(val) {
-		return Array.isArray(val) ? [] : {}
-	}
-
-	function cloneUnlessOtherwiseSpecified(value, options) {
-		return (options.clone !== false && options.isMergeableObject(value))
-			? deepmerge(emptyTarget(value), value, options)
-			: value
-	}
-
-	function defaultArrayMerge(target, source, options) {
-		return target.concat(source).map(function(element) {
-			return cloneUnlessOtherwiseSpecified(element, options)
-		})
-	}
-
-	function getMergeFunction(key, options) {
-		if (!options.customMerge) {
-			return deepmerge
-		}
-		var customMerge = options.customMerge(key);
-		return typeof customMerge === 'function' ? customMerge : deepmerge
-	}
-
-	function getEnumerableOwnPropertySymbols(target) {
-		return Object.getOwnPropertySymbols
-			? Object.getOwnPropertySymbols(target).filter(function(symbol) {
-				return target.propertyIsEnumerable(symbol)
-			})
-			: []
-	}
-
-	function getKeys(target) {
-		return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target))
-	}
-
-	function propertyIsOnObject(object, property) {
-		try {
-			return property in object
-		} catch(_) {
-			return false
-		}
-	}
-
-	// Protects from prototype poisoning and unexpected merging up the prototype chain.
-	function propertyIsUnsafe(target, key) {
-		return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-			&& !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-				&& Object.propertyIsEnumerable.call(target, key)) // and also unsafe if they're nonenumerable.
-	}
-
-	function mergeObject(target, source, options) {
-		var destination = {};
-		if (options.isMergeableObject(target)) {
-			getKeys(target).forEach(function(key) {
-				destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
-			});
-		}
-		getKeys(source).forEach(function(key) {
-			if (propertyIsUnsafe(target, key)) {
-				return
-			}
-
-			if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
-				destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
-			} else {
-				destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
-			}
-		});
-		return destination
-	}
-
-	function deepmerge(target, source, options) {
-		options = options || {};
-		options.arrayMerge = options.arrayMerge || defaultArrayMerge;
-		options.isMergeableObject = options.isMergeableObject || isMergeableObject;
-		// cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
-		// implementations can use it. The caller may not replace it.
-		options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
-
-		var sourceIsArray = Array.isArray(source);
-		var targetIsArray = Array.isArray(target);
-		var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
-
-		if (!sourceAndTargetTypesMatch) {
-			return cloneUnlessOtherwiseSpecified(source, options)
-		} else if (sourceIsArray) {
-			return options.arrayMerge(target, source, options)
-		} else {
-			return mergeObject(target, source, options)
-		}
-	}
-
-	deepmerge.all = function deepmergeAll(array, options) {
-		if (!Array.isArray(array)) {
-			throw new Error('first argument should be an array')
-		}
-
-		return array.reduce(function(prev, next) {
-			return deepmerge(prev, next, options)
-		}, {})
-	};
-
-	var deepmerge_1 = deepmerge;
-
-	var cjs = deepmerge_1;
-
 	const STALE_TIME = 0.33; // seconds
 
 	function removeStaleSamples(accumulator) {
@@ -13406,10 +13406,220 @@
 	  }
 	}
 
+	function transformElement(item, element) {
+	  if (typeof item._transform === 'function') {
+	    return item._transform(element);
+	  }
+	  return element;
+	}
+
+	class ContextMenuItem extends EventSource {
+	  constructor() {
+	    super();
+	    this._text = 'Untitled item';
+	  }
+
+	  text(value) {
+	    this._text = value;
+	    return this;
+	  }
+
+	  selector(value) {
+	    this._selector = value;
+	    return this;
+	  }
+
+	  condition(fn) {
+	    this._condition = fn;
+	    return this;
+	  }
+
+	  transform(fn) {
+	    this._transform = fn;
+	    return this;
+	  }
+
+	  match(e) {
+	    const matchSelector = !this._selector || e.matches(this._selector);
+	    if (!matchSelector) {
+	      return false;
+	    }
+
+	    const subject = transformElement(this, e);
+	    if (!subject) {
+	      // we have a transform and it failed to resolve
+	      return false;
+	    }
+
+	    const matchCondition = !this._condition || this._condition(subject);
+	    return matchCondition;
+	  }
+	}
+
+	function initializeDomElements(parent) {
+	  const dropdown = document.createElement('div');
+	  dropdown.classList.add('appmap__context-menu');
+	  dropdown.style.display = 'none';
+
+	  const dropdownMenu = document.createElement('div');
+	  dropdownMenu.classList.add('dropdown-menu');
+	  dropdown.appendChild(dropdownMenu);
+
+	  // Don't propagate mousedown events to elements we're above. For example, we
+	  // don't want the user being able to pan a viewport through this element.
+	  // OTOH, maybe this shouldn't be a class behavior and should be handled by the
+	  // context menu owner. If this causes issues in the future we can move this
+	  // out.
+	  dropdown.addEventListener('mousedown', (e) => e.stopPropagation());
+	  dropdown.addEventListener('pointerdown', (e) => e.stopPropagation());
+	  dropdown.addEventListener('touchstart', (e) => e.stopPropagation());
+
+	  const emptyMessage = document.createElement('p');
+	  emptyMessage.innerText = 'No actions available';
+	  emptyMessage.style.display = 'none';
+	  dropdownMenu.appendChild(emptyMessage);
+
+	  parent.appendChild(dropdown);
+
+	  return {
+	    dropdown,
+	    menu: dropdownMenu,
+	    emptyMessage,
+	  };
+	}
+
+	function addItem(contextMenu, item) {
+	  const itemElement = document.createElement('a');
+	  itemElement.classList.add('dropdown-item');
+	  itemElement.innerText = item._text;
+	  contextMenu.elements.menu.appendChild(itemElement);
+	  item.element = itemElement;
+
+	  return itemElement;
+	}
+
+	function addDivider(contextMenu) {
+	  const divider = document.createElement('div');
+	  divider.classList.add('dropdown-divider');
+	  contextMenu.elements.menu.appendChild(divider);
+	}
+
+	function show(contextMenu, clickEvent) {
+	  let itemsDisplayed = 0;
+
+	  // Remove ancestors of the container element, we don't need to iterate any
+	  // further than that.
+	  const path = clickEvent
+	    .composedPath()
+	    .slice(0, clickEvent
+	      .composedPath()
+	      .findIndex((e) => e === contextMenu.activeArea));
+
+	  contextMenu.items.forEach((item) => {
+	    const match = path.find((e) => item.match(e));
+	    if (!match) {
+	      item.element.style.display = 'none';
+	      return;
+	    }
+
+	    if (item.element.listener) {
+	      // make sure there's no old state
+	      item.element.removeEventListener('click', item.element.listener);
+	    }
+
+	    item.element.listener = () => item.emit('execute', transformElement$1(item, match));
+	    item.element.addEventListener('click', item.element.listener);
+	    item.element.style.display = '';
+	    item.emit('show');
+	    itemsDisplayed += 1;
+	  });
+
+	  contextMenu.elements.emptyMessage.style.display = itemsDisplayed > 0
+	    ? 'none'
+	    : '';
+
+	  const { x, y } = contextMenu.parent.getBoundingClientRect();
+	  contextMenu.elements.menu.style.transform = `translate(${clickEvent.x - x}px, ${clickEvent.y - y}px)`;
+	  contextMenu.elements.dropdown.style.display = 'block';
+	}
+
+	function transformElement$1(item, element) {
+	  if (typeof item._transform === 'function') {
+	    return item._transform(element);
+	  }
+	  return element;
+	}
+
+	class ContextMenu extends EventSource {
+	  constructor(container, activeArea = null) {
+	    super();
+
+	    this.parent = container;
+	    this.activeArea = activeArea || container;
+	    this.elements = initializeDomElements(container);
+	    this.activeArea.addEventListener('contextmenu', (e) => {
+	      show(this, e);
+	      e.preventDefault();
+	      this.emit('show');
+	    });
+	    this.selectors = {};
+	    this.items = [];
+	  }
+
+	  divider() {
+	    addDivider(this);
+	    return this;
+	  }
+
+	  add(itemBuilder) {
+	    const item = itemBuilder(new ContextMenuItem());
+	    console.log(item);
+	    if (!item) {
+	      return this;
+	    }
+
+	    addItem(this, item);
+	    this.items.push(item);
+
+	    return this;
+	  }
+
+	  get visible() {
+	    if (!this.elements || !this.elements.menu) {
+	      return false;
+	    }
+
+	    return this.elements.menu.offsetWidth > 0;
+	  }
+
+	  close() {
+	    const isVisible = this.visible;
+	    if (isVisible) {
+	      this.elements.dropdown.style.display = 'none';
+	    }
+	    return isVisible;
+	  }
+
+	  // Determines whether or not an event could have originated from the context
+	  // menu.
+	  isEventSource(e) {
+	    if (!e) return false;
+
+	    const path = e.composedPath();
+
+	    if (!path || !this.elements) {
+	      return false;
+	    }
+
+	    return path.includes(this.elements.menu);
+	  }
+	}
+
 	const AVAILABLE_THEMES = ['light', 'dark'];
 	const DEFAULT_THEME = 'light';
 
 	const defaultOptions = {
+	  contextMenu: false,
 	  pan: {
 	    momentum: true, // if true, enables momentum on panning
 	    boundary: {
@@ -13512,6 +13722,18 @@
 	    }
 
 	    return this.contentElement;
+	  }
+
+	  setContextMenu(componentController) {
+	    if (this.options.contextMenu === false || typeof this.options.contextMenu !== 'function') {
+	      return;
+	    }
+
+	    this.contextMenu = new ContextMenu(this.element);
+
+	    const contextMenuItems = this.options.contextMenu(componentController);
+
+	    contextMenuItems.forEach((item) => this.contextMenu.add(item));
 	  }
 
 	  fitViewport(targetElement) {
@@ -13813,11 +14035,48 @@
 	  componentDiagram.emit('postrender');
 	}
 
+	const COMPONENT_OPTIONS = {
+	  contextMenu(componentDiagram) {
+	    return [
+	      (item) => item
+	        .text('Set as root')
+	        .selector('.nodes .node')
+	        .transform((e) => e.getAttribute('id'))
+	        .on('execute', (id) => componentDiagram.makeRoot(id)),
+	      (item) => item
+	        .text('Expand')
+	        .selector('g.node')
+	        .transform((e) => e.getAttribute('id'))
+	        .condition((id) => componentDiagram.hasPackage(id))
+	        .on('execute', (id) => componentDiagram.expand(id)),
+	      (item) => item
+	        .text('Collapse')
+	        .selector('g.node')
+	        .transform((e) => e.getAttribute('id'))
+	        .condition((id) => !componentDiagram.hasPackage(id))
+	        .on('execute', (id) => componentDiagram.collapse(id)),
+	      (item) => item
+	        .text('View source')
+	        .selector('g.node.class')
+	        .transform((e) => componentDiagram.sourceLocation(e.getAttribute('id')))
+	        .on('execute', (repoUrl) => window.open(repoUrl)),
+	      (item) => item
+	        .text('Reset view')
+	        .on('execute', () => {
+	          componentDiagram.render(componentDiagram.initialModel);
+	        }),
+	    ];
+	  },
+	};
+
 	class ComponentDiagram extends Models.EventSource {
 	  constructor(container, options = {}) {
 	    super();
 
-	    this.container = new Container(container, options);
+	    const componentDiagramOptions = cjs(COMPONENT_OPTIONS, options);
+
+	    this.container = new Container(container, componentDiagramOptions);
+	    this.container.containerController.setContextMenu(this);
 
 	    this.targetCount = DEFAULT_TARGET_COUNT;
 	    this.element = d3$1.select(this.container)
@@ -13827,11 +14086,29 @@
 	    this.on('postrender', () => {
 	      this.container.containerController.fitViewport(this.container);
 	    });
+
+	    this.container.containerController.element.addEventListener('click', () => {
+	      this.clearHighlights();
+
+	      if (this.container.containerController.contextMenu) {
+	        this.container.containerController.contextMenu.close();
+	      }
+	    });
+
+	    this.container.containerController.element.addEventListener('move', () => {
+	      if (this.container.containerController.contextMenu) {
+	        this.container.containerController.contextMenu.close();
+	      }
+	    });
 	  }
 
 	  render(data) {
 	    if (!data || typeof data !== 'object') {
 	      return;
+	    }
+
+	    if (!this.initialModel) {
+	      this.initialModel = { ...data };
 	    }
 
 	    this.currentDiagramModel = hashify(data);
@@ -24170,7 +24447,7 @@
 	  };
 	}
 
-	const COMPONENT_OPTIONS = {
+	const COMPONENT_OPTIONS$1 = {
 	  zoom: false,
 	};
 
@@ -24178,7 +24455,7 @@
 	  constructor(container, options = {}) {
 	    super();
 
-	    const timelineOptions = cjs(COMPONENT_OPTIONS, options);
+	    const timelineOptions = cjs(COMPONENT_OPTIONS$1, options);
 
 	    this.container = new Container(container, timelineOptions);
 

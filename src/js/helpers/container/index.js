@@ -4,11 +4,13 @@ import deepmerge from 'deepmerge';
 import momentum from '../momentum';
 import Models from '../../models';
 import ContainerZoom from './zoom';
+import ContextMenu from '../contextMenu';
 
 const AVAILABLE_THEMES = ['light', 'dark'];
 const DEFAULT_THEME = 'light';
 
 const defaultOptions = {
+  contextMenu: false,
   pan: {
     momentum: true, // if true, enables momentum on panning
     boundary: {
@@ -112,6 +114,18 @@ export default class Container extends Models.EventSource {
     }
 
     return this.contentElement;
+  }
+
+  setContextMenu(componentController) {
+    if (this.options.contextMenu === false || typeof this.options.contextMenu !== 'function') {
+      return;
+    }
+
+    this.contextMenu = new ContextMenu(this.element);
+
+    const contextMenuItems = this.options.contextMenu(componentController);
+
+    contextMenuItems.forEach((item) => this.contextMenu.add(item));
   }
 
   fitViewport(targetElement) {

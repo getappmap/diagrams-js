@@ -1,5 +1,7 @@
 import * as dagreD3 from 'dagre-d3';
 import * as d3 from 'd3';
+import deepmerge from 'deepmerge';
+
 import { getRepositoryUrl } from '../../util';
 import { bindShapes } from './componentDiagramShapes';
 import Models from '../../models';
@@ -256,11 +258,48 @@ function renderGraph(componentDiagram) {
   componentDiagram.emit('postrender');
 }
 
+const COMPONENT_OPTIONS = {
+  contextMenu(componentDiagram) {
+    return [
+      (item) => item
+        .text('Set as root')
+        .selector('.nodes .node')
+        .transform((e) => e.getAttribute('id'))
+        .on('execute', (id) => componentDiagram.makeRoot(id)),
+      (item) => item
+        .text('Expand')
+        .selector('g.node')
+        .transform((e) => e.getAttribute('id'))
+        .condition((id) => componentDiagram.hasPackage(id))
+        .on('execute', (id) => componentDiagram.expand(id)),
+      (item) => item
+        .text('Collapse')
+        .selector('g.node')
+        .transform((e) => e.getAttribute('id'))
+        .condition((id) => !componentDiagram.hasPackage(id))
+        .on('execute', (id) => componentDiagram.collapse(id)),
+      (item) => item
+        .text('View source')
+        .selector('g.node.class')
+        .transform((e) => componentDiagram.sourceLocation(e.getAttribute('id')))
+        .on('execute', (repoUrl) => window.open(repoUrl)),
+      (item) => item
+        .text('Reset view')
+        .on('execute', () => {
+          componentDiagram.render(componentDiagram.initialModel);
+        }),
+    ];
+  },
+};
+
 export default class ComponentDiagram extends Models.EventSource {
   constructor(container, options = {}) {
     super();
 
-    this.container = new Container(container, options);
+    const componentDiagramOptions = deepmerge(COMPONENT_OPTIONS, options);
+
+    this.container = new Container(container, componentDiagramOptions);
+    this.container.containerController.setContextMenu(this);
 
     this.targetCount = DEFAULT_TARGET_COUNT;
     this.element = d3.select(this.container)
@@ -270,11 +309,29 @@ export default class ComponentDiagram extends Models.EventSource {
     this.on('postrender', () => {
       this.container.containerController.fitViewport(this.container);
     });
+
+    this.container.containerController.element.addEventListener('click', () => {
+      this.clearHighlights();
+
+      if (this.container.containerController.contextMenu) {
+        this.container.containerController.contextMenu.close();
+      }
+    });
+
+    this.container.containerController.element.addEventListener('move', () => {
+      if (this.container.containerController.contextMenu) {
+        this.container.containerController.contextMenu.close();
+      }
+    });
   }
 
   render(data) {
     if (!data || typeof data !== 'object') {
       return;
+    }
+
+    if (!this.initialModel) {
+      this.initialModel = { ...data };
     }
 
     this.currentDiagramModel = hashify(data);
