@@ -14169,8 +14169,10 @@
 	      }
 
 	      const data = this.graph.node(nodeId);
-	      data.elem.classList.add('dim');
-	      data.labelElem.classList.add('dim');
+	      if (data.type !== 'cluster') {
+	        data.elem.classList.add('dim');
+	        data.labelElem.classList.add('dim');
+	      }
 	    });
 
 	    this.graph.edges().forEach((edgeId) => {
@@ -14227,6 +14229,8 @@
 	    if (!pkgClasses) {
 	      return;
 	    }
+
+	    this.graph.removeNode(`${pkg}-cluster`);
 
 	    setNode(this.graph, { id: pkg, type: 'package' });
 	    pkgClasses.forEach((id) => {
