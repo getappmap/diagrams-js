@@ -4,16 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1]
+Fixed
+- Potential null reference when highlighting a node
+
 ## [0.2.0]
-### Added
+Added
 - Context menu component
 - The component diagram now displays a frame around classes in an expanded package
 - Light and dark themes for flow view and timeline
-### Fixed
+
+Fixed
 - Component diagram sizing when viewing a small number of nodes
 - Fixed visible overflow for large SQL queries in the flow view
-### Changed
+
+Changed
 - The default positioning of a component diagram now fills the viewport
+
 
 ## [0.1.6]
 ### Changed
