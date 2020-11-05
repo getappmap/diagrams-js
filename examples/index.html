@@ -55,6 +55,8 @@
         }
       });
       diagram.render(window.componentDiagramModel);
+      // for easy access and debug from console
+      window.diagram = diagram;
     }
     {
       const callTree = aggregateEvents(window.scenarioData.data.events,

@@ -153,6 +153,11 @@ body {
   .appmap--theme-dark .appmap__component-diagram .node.http.dim {
     fill: #1a0316; }
 
+.appmap--theme-dark .appmap__component-diagram .node.class[data-parent-type='http'] {
+  fill: #FF07AA; }
+  .appmap--theme-dark .appmap__component-diagram .node.class[data-parent-type='http'].dim {
+    fill: #1a0316; }
+
 .appmap--theme-dark .appmap__component-diagram .node.io {
   fill: #f92672; }
   .appmap--theme-dark .appmap__component-diagram .node.io.dim {
@@ -225,6 +230,11 @@ body {
 .appmap--theme-light .appmap__component-diagram .node.http {
   fill: #474554; }
   .appmap--theme-light .appmap__component-diagram .node.http.dim {
+    fill: #edecee; }
+
+.appmap--theme-light .appmap__component-diagram .node.class[data-parent-type='http'] {
+  fill: #474554; }
+  .appmap--theme-light .appmap__component-diagram .node.class[data-parent-type='http'].dim {
     fill: #edecee; }
 
 .appmap--theme-light .appmap__component-diagram .node.io {
