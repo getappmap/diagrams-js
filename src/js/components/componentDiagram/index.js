@@ -148,7 +148,7 @@ function activeNodes(componentDiagram, key, list, fn) {
   }
 }
 
-function setNode(graph, node) {
+function setNode(graph, node, parent = null) {
   node.label = node.label || node.id;
   node.class = node.class || node.type;
 
@@ -161,8 +161,17 @@ function setNode(graph, node) {
     node.shape = 'database';
     node.class = 'database';
   }
+  if (node.type === 'cluster') {
+    node.label = '';
+  }
 
-  return graph.setNode(node.id, node);
+  graph.setNode(node.id, node);
+
+  if ( parent ) {
+    graph.setParent(node.id, parent.id);
+  }
+
+  return graph;
 }
 
 function setEdge(graph, v, w) {
@@ -336,7 +345,7 @@ export default class ComponentDiagram extends Models.EventSource {
 
     this.currentDiagramModel = hashify(data);
 
-    this.graph = new dagreD3.graphlib.Graph()
+    this.graph = new dagreD3.graphlib.Graph({ compound: true })
       .setGraph({ rankdir: 'LR' })
       .setDefaultEdgeLabel(function() { return {}; });
 
@@ -407,8 +416,13 @@ export default class ComponentDiagram extends Models.EventSource {
     }
 
     this.graph.removeNode(nodeId);
+
+    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster' };
+
+    setNode(this.graph, clusterNode);
+
     subclasses.forEach((cls) => {
-      setNode(this.graph, { id: cls, type: 'class' });
+      setNode(this.graph, { id: cls, type: 'class' }, clusterNode);
 
       activeNodes(this, cls, this.currentDiagramModel.class_calls, (id) => {
         if (cls !== id) {

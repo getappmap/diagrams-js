@@ -119,7 +119,7 @@ export default class ContextMenu extends EventSource {
 
   add(itemBuilder) {
     const item = itemBuilder(new ContextMenuItem());
-    console.log(item);
+
     if (!item) {
       return this;
     }

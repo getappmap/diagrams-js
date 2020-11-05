@@ -160,6 +160,17 @@ body {
 .appmap--theme-dark .appmap__component-diagram .node.highlight rect, .appmap--theme-dark .appmap__component-diagram .node.highlight circle, .appmap--theme-dark .appmap__component-diagram .node.highlight ellipse, .appmap--theme-dark .appmap__component-diagram .node.highlight path, .appmap--theme-dark .appmap__component-diagram .node.highlight polygon {
   stroke: #FF07AA; }
 
+.appmap--theme-dark .appmap__component-diagram .cluster rect {
+  opacity: 0;
+  transition: opacity .6s ease-in-out;
+  fill: transparent;
+  stroke: #FF07AA;
+  stroke-width: 2; }
+
+.appmap--theme-dark .appmap__component-diagram .cluster:hover rect {
+  opacity: 1;
+  stroke: #FF07AA; }
+
 .appmap--theme-dark .appmap__component-diagram .edgePath.highlight path {
   stroke: #FF07AA; }
 
@@ -221,6 +232,17 @@ body {
   fill: #FFFFFF; }
 
 .appmap--theme-light .appmap__component-diagram .node.highlight rect, .appmap--theme-light .appmap__component-diagram .node.highlight circle, .appmap--theme-light .appmap__component-diagram .node.highlight ellipse, .appmap--theme-light .appmap__component-diagram .node.highlight path, .appmap--theme-light .appmap__component-diagram .node.highlight polygon {
+  stroke: #474554; }
+
+.appmap--theme-light .appmap__component-diagram .cluster rect {
+  opacity: 0;
+  transition: opacity .6s ease-in-out;
+  fill: transparent;
+  stroke: #474554;
+  stroke-width: 2; }
+
+.appmap--theme-light .appmap__component-diagram .cluster:hover rect {
+  opacity: 1;
   stroke: #474554; }
 
 .appmap--theme-light .appmap__component-diagram .edgePath.highlight path {

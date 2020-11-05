@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3'), require('@applandinc/appmap-models')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'd3', '@applandinc/appmap-models'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Appmap = {}, global.d3, global.appmapModels));
-}(this, (function (exports, d3$1, appmapModels) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'd3'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Appmap = {}, global.d3));
+}(this, (function (exports, d3$1) { 'use strict';
 
 	function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -13413,7 +13413,7 @@
 	  return element;
 	}
 
-	class ContextMenuItem extends appmapModels.EventSource {
+	class ContextMenuItem extends EventSource {
 	  constructor() {
 	    super();
 	    this._text = 'Untitled item';
@@ -13550,7 +13550,7 @@
 	  return element;
 	}
 
-	class ContextMenu extends appmapModels.EventSource {
+	class ContextMenu extends EventSource {
 	  constructor(container, activeArea = null) {
 	    super();
 
@@ -13573,7 +13573,7 @@
 
 	  add(itemBuilder) {
 	    const item = itemBuilder(new ContextMenuItem());
-	    console.log(item);
+
 	    if (!item) {
 	      return this;
 	    }
@@ -13925,7 +13925,7 @@
 	  }
 	}
 
-	function setNode(graph, node) {
+	function setNode(graph, node, parent = null) {
 	  node.label = node.label || node.id;
 	  node.class = node.class || node.type;
 
@@ -13938,8 +13938,17 @@
 	    node.shape = 'database';
 	    node.class = 'database';
 	  }
+	  if (node.type === 'cluster') {
+	    node.label = '';
+	  }
 
-	  return graph.setNode(node.id, node);
+	  graph.setNode(node.id, node);
+
+	  if ( parent ) {
+	    graph.setParent(node.id, parent.id);
+	  }
+
+	  return graph;
 	}
 
 	function setEdge(graph, v, w) {
@@ -14113,7 +14122,7 @@
 
 	    this.currentDiagramModel = hashify(data);
 
-	    this.graph = new dagreD3.graphlib.Graph()
+	    this.graph = new dagreD3.graphlib.Graph({ compound: true })
 	      .setGraph({ rankdir: 'LR' })
 	      .setDefaultEdgeLabel(function() { return {}; });
 
@@ -14184,8 +14193,13 @@
 	    }
 
 	    this.graph.removeNode(nodeId);
+
+	    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster' };
+
+	    setNode(this.graph, clusterNode);
+
 	    subclasses.forEach((cls) => {
-	      setNode(this.graph, { id: cls, type: 'class' });
+	      setNode(this.graph, { id: cls, type: 'class' }, clusterNode);
 
 	      activeNodes(this, cls, this.currentDiagramModel.class_calls, (id) => {
 	        if (cls !== id) {
