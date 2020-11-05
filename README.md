@@ -30,6 +30,45 @@ const diagram = new Appmap.ComponentDiagram('#component-diagram', {
 diagram.render(componentDiagramModel);
 ```
 
+If you want to create your custom context menu for diagram nodes, pass `contextMenu` option with builder function:
+
+<pre>
+const diagram = new Appmap.ComponentDiagram('#component-diagram', {
+  <b>contextMenu: function(componentDiagram){
+    return [
+      (item) => item
+        .text('Set as root')
+        .selector('.nodes .node')
+        .transform((e) => e.getAttribute('id'))
+        .on('execute', (id) => componentDiagram.makeRoot(id)),
+      (item) => item
+        .text('Expand')
+        .selector('g.node')
+        .transform((e) => e.getAttribute('id'))
+        .condition((id) => componentDiagram.hasPackage(id))
+        .on('execute', (id) => componentDiagram.expand(id)),
+      (item) => item
+        .text('Collapse')
+        .selector('g.node')
+        .transform((e) => e.getAttribute('id'))
+        .condition((id) => !componentDiagram.hasPackage(id))
+        .on('execute', (id) => componentDiagram.collapse(id)),
+      (item) => item
+        .text('Reset view')
+        .on('execute', () => {
+          componentDiagram.render(componentDiagram.initialModel);
+        }),
+    ];
+  },</b>
+  theme: 'light',
+  zoom: {
+    controls: true
+  }
+});
+</pre>
+
+Builder function must accepts one argument with `ComponentDiagram` instance and must return an array of menu item's builder functions.
+
 ## Flow view
 
 Use this function to aggregate events from `scenarioData` object to `callTree` variable:
@@ -59,6 +98,7 @@ const flowView = new Appmap.FlowView('#flow-view', {
     controls: true
   }
 });
+
 flowView.setCallTree(callTree);
 flowView.render();
 ```
@@ -70,6 +110,7 @@ flowView.render();
 const timeline = new Appmap.Timeline('#timeline', {
   theme: 'light',
 });
+
 timeline.setCallTree(callTree);
 timeline.render();
 ```
@@ -99,10 +140,11 @@ Available options are:
 Clone this repo, install dependencies and serve the code:
 
 ```
-$  git clone https://github.com/mingyu8981/d3-appmap.git && cd d3-appmap
+$  git clone https://github.com/applandinc/d3-appmap.git && cd d3-appmap
 $  npm install
 $  npm run serve
 ...
+
 http://localhost:10001 -> $HOME/source/appmaporg/d3-appmap/dist
 http://localhost:10001 -> $HOME/source/appmaporg/d3-appmap/examples
 ```
