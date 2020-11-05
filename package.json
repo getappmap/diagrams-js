@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/appmaporg/d3-appmap.git"
+    "url": "git+https://github.com/applandinc/d3-appmap.git"
   },
   "directories": {
     "example": "examples"
@@ -24,9 +24,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/appmaporg/d3-appmap/issues"
+    "url": "https://github.com/applandinc/d3-appmap/issues"
   },
-  "homepage": "https://github.com/appmaporg/d3-appmap",
+  "homepage": "https://github.com/applandinc/d3-appmap",
   "dependencies": {
     "@applandinc/appmap-models": "github:applandinc/appmap-models",
     "d3": "^5.16.0",

@@ -75,6 +75,46 @@ body {
     background: #808b98;
     cursor: grab; }
 
+.appmap__context-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  user-select: none; }
+  .appmap__context-menu .dropdown-menu {
+    background-color: #242C41;
+    box-shadow: 4px 4px 1px #010306;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none; }
+    .appmap__context-menu .dropdown-menu p {
+      display: block;
+      margin: 0;
+      padding: 0.25rem 1.5rem;
+      color: #808b98;
+      white-space: nowrap;
+      font-style: italic; }
+    .appmap__context-menu .dropdown-menu .dropdown-item {
+      display: block;
+      border: 0;
+      width: 100%;
+      padding: .25rem 1.5rem;
+      color: #EAEAEA;
+      cursor: pointer;
+      white-space: nowrap;
+      background-color: transparent; }
+      .appmap__context-menu .dropdown-menu .dropdown-item:hover {
+        color: #e3e5e8;
+        background-color: #364262;
+        text-decoration: none; }
+
 .appmap__component-diagram .node.highlight rect, .appmap__component-diagram .node.highlight circle, .appmap__component-diagram .node.highlight ellipse, .appmap__component-diagram .node.highlight path, .appmap__component-diagram .node.highlight polygon {
   stroke-width: 4px; }
 
@@ -122,6 +162,17 @@ body {
   fill: #e3e5e8; }
 
 .appmap--theme-dark .appmap__component-diagram .node.highlight rect, .appmap--theme-dark .appmap__component-diagram .node.highlight circle, .appmap--theme-dark .appmap__component-diagram .node.highlight ellipse, .appmap--theme-dark .appmap__component-diagram .node.highlight path, .appmap--theme-dark .appmap__component-diagram .node.highlight polygon {
+  stroke: #FF07AA; }
+
+.appmap--theme-dark .appmap__component-diagram .cluster rect {
+  opacity: 0;
+  transition: opacity .6s ease-in-out;
+  fill: transparent;
+  stroke: #FF07AA;
+  stroke-width: 2; }
+
+.appmap--theme-dark .appmap__component-diagram .cluster:hover rect {
+  opacity: 1;
   stroke: #FF07AA; }
 
 .appmap--theme-dark .appmap__component-diagram .edgePath.highlight path {
@@ -185,6 +236,17 @@ body {
   fill: #FFFFFF; }
 
 .appmap--theme-light .appmap__component-diagram .node.highlight rect, .appmap--theme-light .appmap__component-diagram .node.highlight circle, .appmap--theme-light .appmap__component-diagram .node.highlight ellipse, .appmap--theme-light .appmap__component-diagram .node.highlight path, .appmap--theme-light .appmap__component-diagram .node.highlight polygon {
+  stroke: #474554; }
+
+.appmap--theme-light .appmap__component-diagram .cluster rect {
+  opacity: 0;
+  transition: opacity .6s ease-in-out;
+  fill: transparent;
+  stroke: #474554;
+  stroke-width: 2; }
+
+.appmap--theme-light .appmap__component-diagram .cluster:hover rect {
+  opacity: 1;
   stroke: #474554; }
 
 .appmap--theme-light .appmap__component-diagram .edgePath.highlight path {

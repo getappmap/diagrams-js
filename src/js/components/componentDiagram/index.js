@@ -1,5 +1,7 @@
 import * as dagreD3 from 'dagre-d3';
 import * as d3 from 'd3';
+import deepmerge from 'deepmerge';
+
 import { getRepositoryUrl } from '../../util';
 import { bindShapes } from './componentDiagramShapes';
 import Models from '../../models';
@@ -146,7 +148,7 @@ function activeNodes(componentDiagram, key, list, fn) {
   }
 }
 
-function setNode(graph, node) {
+function setNode(graph, node, parent = null) {
   node.label = node.label || node.id;
   node.class = node.class || node.type;
 
@@ -159,8 +161,17 @@ function setNode(graph, node) {
     node.shape = 'database';
     node.class = 'database';
   }
+  if (node.type === 'cluster') {
+    node.label = '';
+  }
 
-  return graph.setNode(node.id, node);
+  graph.setNode(node.id, node);
+
+  if ( parent ) {
+    graph.setParent(node.id, parent.id);
+  }
+
+  return graph;
 }
 
 function setEdge(graph, v, w) {
@@ -256,11 +267,48 @@ function renderGraph(componentDiagram) {
   componentDiagram.emit('postrender');
 }
 
+const COMPONENT_OPTIONS = {
+  contextMenu(componentDiagram) {
+    return [
+      (item) => item
+        .text('Set as root')
+        .selector('.nodes .node')
+        .transform((e) => e.getAttribute('id'))
+        .on('execute', (id) => componentDiagram.makeRoot(id)),
+      (item) => item
+        .text('Expand')
+        .selector('g.node')
+        .transform((e) => e.getAttribute('id'))
+        .condition((id) => componentDiagram.hasPackage(id))
+        .on('execute', (id) => componentDiagram.expand(id)),
+      (item) => item
+        .text('Collapse')
+        .selector('g.node')
+        .transform((e) => e.getAttribute('id'))
+        .condition((id) => !componentDiagram.hasPackage(id))
+        .on('execute', (id) => componentDiagram.collapse(id)),
+      (item) => item
+        .text('View source')
+        .selector('g.node.class')
+        .transform((e) => componentDiagram.sourceLocation(e.getAttribute('id')))
+        .on('execute', (repoUrl) => window.open(repoUrl)),
+      (item) => item
+        .text('Reset view')
+        .on('execute', () => {
+          componentDiagram.render(componentDiagram.initialModel);
+        }),
+    ];
+  },
+};
+
 export default class ComponentDiagram extends Models.EventSource {
   constructor(container, options = {}) {
     super();
 
-    this.container = new Container(container, options);
+    const componentDiagramOptions = deepmerge(COMPONENT_OPTIONS, options);
+
+    this.container = new Container(container, componentDiagramOptions);
+    this.container.containerController.setContextMenu(this);
 
     this.targetCount = DEFAULT_TARGET_COUNT;
     this.element = d3.select(this.container)
@@ -270,6 +318,20 @@ export default class ComponentDiagram extends Models.EventSource {
     this.on('postrender', () => {
       this.container.containerController.fitViewport(this.container);
     });
+
+    this.container.containerController.element.addEventListener('click', () => {
+      this.clearHighlights();
+
+      if (this.container.containerController.contextMenu) {
+        this.container.containerController.contextMenu.close();
+      }
+    });
+
+    this.container.containerController.element.addEventListener('move', () => {
+      if (this.container.containerController.contextMenu) {
+        this.container.containerController.contextMenu.close();
+      }
+    });
   }
 
   render(data) {
@@ -277,9 +339,13 @@ export default class ComponentDiagram extends Models.EventSource {
       return;
     }
 
+    if (!this.initialModel) {
+      this.initialModel = { ...data };
+    }
+
     this.currentDiagramModel = hashify(data);
 
-    this.graph = new dagreD3.graphlib.Graph()
+    this.graph = new dagreD3.graphlib.Graph({ compound: true })
       .setGraph({ rankdir: 'LR' })
       .setDefaultEdgeLabel(function() { return {}; });
 
@@ -326,8 +392,10 @@ export default class ComponentDiagram extends Models.EventSource {
       }
 
       const data = this.graph.node(nodeId);
-      data.elem.classList.add('dim');
-      data.labelElem.classList.add('dim');
+      if (data.type !== 'cluster') {
+        data.elem.classList.add('dim');
+        data.labelElem.classList.add('dim');
+      }
     });
 
     this.graph.edges().forEach((edgeId) => {
@@ -350,8 +418,13 @@ export default class ComponentDiagram extends Models.EventSource {
     }
 
     this.graph.removeNode(nodeId);
+
+    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster' };
+
+    setNode(this.graph, clusterNode);
+
     subclasses.forEach((cls) => {
-      setNode(this.graph, { id: cls, type: 'class' });
+      setNode(this.graph, { id: cls, type: 'class' }, clusterNode);
 
       activeNodes(this, cls, this.currentDiagramModel.class_calls, (id) => {
         if (cls !== id) {
@@ -379,6 +452,8 @@ export default class ComponentDiagram extends Models.EventSource {
     if (!pkgClasses) {
       return;
     }
+
+    this.graph.removeNode(`${pkg}-cluster`);
 
     setNode(this.graph, { id: pkg, type: 'package' });
     pkgClasses.forEach((id) => {
