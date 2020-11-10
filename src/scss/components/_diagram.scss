@@ -26,6 +26,7 @@
     $bg: map-get($colors, 'background');
     $edge: map-get($colors, 'edge');
     $highlight: map-get($colors, 'highlight');
+    $highlight-inbound: map-get($colors, 'highlight-inbound');
     $labelLight: map-get($colors, 'label-light');
     $labelDark: map-get($colors, 'label-dark');
     $package: map-get($colors, 'color-package');
@@ -99,6 +100,11 @@
       &.highlight {
         path { stroke: $highlight; }
         marker { fill: $highlight; }
+      }
+
+      &.highlight--inbound {
+        path { stroke: $highlight-inbound; }
+        marker { fill: $highlight-inbound; }
       }
 
       &.dim {
