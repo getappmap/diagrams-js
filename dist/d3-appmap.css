@@ -181,6 +181,12 @@ body {
 .appmap--theme-dark .appmap__component-diagram .edgePath.highlight marker {
   fill: #FF07AA; }
 
+.appmap--theme-dark .appmap__component-diagram .edgePath.highlight--inbound path {
+  stroke: #6FDDD6; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath.highlight--inbound marker {
+  fill: #6FDDD6; }
+
 .appmap--theme-dark .appmap__component-diagram .edgePath.dim marker {
   fill: #05070c; }
 
@@ -254,6 +260,12 @@ body {
 
 .appmap--theme-light .appmap__component-diagram .edgePath.highlight marker {
   fill: #474554; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath.highlight--inbound path {
+  stroke: #008b69; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath.highlight--inbound marker {
+  fill: #008b69; }
 
 .appmap--theme-light .appmap__component-diagram .edgePath.dim marker {
   fill: #f3f5f6; }

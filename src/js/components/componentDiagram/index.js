@@ -366,8 +366,8 @@ export default class ComponentDiagram extends Models.EventSource {
     }
 
     this.graphGroup
-      .selectAll('.dim, .highlight')
-      .classed('dim highlight', false);
+      .selectAll('.dim, .highlight, .highlight--inbound')
+      .classed('dim highlight highlight--inbound', false);
   }
 
   highlight(id) {
@@ -382,6 +382,10 @@ export default class ComponentDiagram extends Models.EventSource {
     this.graph.nodeEdges(id).forEach((e) => {
       const element = this.graph.edge(e).elem;
       element.classList.add('highlight');
+
+      if (id === e.w) {
+        element.classList.add('highlight--inbound');
+      }
     });
 
     // Render highlighted connections above non-highlighted connections
