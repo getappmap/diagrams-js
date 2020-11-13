@@ -1,6 +1,6 @@
 {
   "name": "d3-appmap",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "d3 visualizations of appmap.org data",
   "main": "dist/d3-appmap.js",
   "module": "src/index.js",
