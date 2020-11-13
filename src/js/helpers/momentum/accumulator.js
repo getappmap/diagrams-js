@@ -46,6 +46,7 @@ export default class Accumulator {
 
   get value() {
     removeStaleSamples(this);
-    return this.values.reduce((acc, sample) => acc += sample.value, 0) / (this.values.length - 1);
+    const length = this.values.length - 1;
+    return length !== 0 ? this.values.reduce((acc, sample) => acc += sample.value, 0) / length : 0;
   }
 }
