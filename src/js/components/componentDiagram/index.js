@@ -114,6 +114,21 @@ function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
   return { edges, nodes };
 }
 
+/// helper function to get value for data-parent-type attr
+function getParentType(id, classPackage) {
+  let parent = classPackage[id];
+  if (parent) {
+    parent = parent.toLowerCase();
+    switch (parent) {
+      case 'http':
+      case 'sql':
+        return parent;
+      default:
+        return 'package';
+    }
+  } else return 'none';
+}
+
 function hashify(obj) {
   const clone = { ...obj };
   Object.keys(obj).forEach((key) => {
@@ -248,6 +263,12 @@ function renderGraph(componentDiagram) {
       const transform = e.parentElement.getAttribute('transform');
       const data = componentDiagram.graph.node(id);
 
+      // TODO:
+      // find a better and more consistent way to pass attributes
+      // to rendered element from corresponding node
+
+      // set parent-type data attribute
+      e.parentElement.setAttribute('data-parent-type', getParentType(id, componentDiagram.currentDiagramModel.class_package));
       e.parentElement.removeChild(e);
       componentDiagram.labelGroup.node().appendChild(e);
 

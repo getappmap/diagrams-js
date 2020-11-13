@@ -49,7 +49,6 @@
       }
       &.class {
         fill: $class;
-
         &.dim { fill: mix($class, $bg, $weight: $dim-opacity); }
       }
       &.database {
@@ -60,7 +59,10 @@
       }
       &.http {
         fill: $highlight;
-
+        &.dim { fill: mix($highlight, $bg, $weight: $dim-opacity); }
+      }
+      &.class[data-parent-type='http']{
+        fill: $highlight;
         &.dim { fill: mix($highlight, $bg, $weight: $dim-opacity); }
       }
       &.io {
