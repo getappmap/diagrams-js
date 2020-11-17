@@ -1,6 +1,6 @@
-import * as d3 from 'd3';
+import d3 from 'd3';
 
-import Geometry from './helpers/geometry';
+import Geometry from './helpers/geometry.js';
 
 // loadFont loads a font into the current document and returns a promise
 function loadFont(fontName, fontUrl) {

@@ -1,4 +1,4 @@
-import * as dagreD3 from 'dagre-d3';
+import dagreD3 from 'dagre-d3';
 
 // These shapes are from
 // https://github.com/mermaid-js/mermaid/blob/develop/src/diagrams/flowchart/flowChartShapes.js

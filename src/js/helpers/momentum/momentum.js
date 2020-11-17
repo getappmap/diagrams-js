@@ -1,4 +1,4 @@
-import Accumulator from './accumulator';
+import Accumulator from './accumulator.js';
 
 const FRICTION_COEFFICIENT = 2.5;
 const IMPULSE_THRESHOLD = 1;

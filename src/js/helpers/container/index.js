@@ -1,10 +1,10 @@
-import * as d3 from 'd3';
+import d3 from 'd3';
 import deepmerge from 'deepmerge';
 
-import momentum from '../momentum';
-import Models from '../../models';
-import ContainerZoom from './zoom';
-import ContextMenu from '../contextMenu';
+import momentum from '../momentum/index.js';
+import Models from '../../models.js';
+import ContainerZoom from './zoom.js';
+import ContextMenu from '../contextMenu/index.js';
 
 const AVAILABLE_THEMES = ['light', 'dark'];
 const DEFAULT_THEME = 'light';

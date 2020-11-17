@@ -1,11 +1,11 @@
-import * as dagreD3 from 'dagre-d3';
-import * as d3 from 'd3';
+import dagreD3 from 'dagre-d3';
+import d3 from 'd3';
 import deepmerge from 'deepmerge';
 
-import { getRepositoryUrl } from '../../util';
-import { bindShapes } from './componentDiagramShapes';
-import Models from '../../models';
-import Container from '../../helpers/container';
+import { getRepositoryUrl } from '../../util.js';
+import { bindShapes } from './componentDiagramShapes.js';
+import Models from '../../models.js';
+import Container from '../../helpers/container/index.js';
 
 export const DEFAULT_TARGET_COUNT = 10;
 const IDEAL_CHILD_COUNT = 3;

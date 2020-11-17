@@ -1,4 +1,4 @@
-import Models from '../../models';
+import Models from '../../models.js';
 
 // updateZoom updates the bar that indicates the current level of zoom.
 // `zoomScale` is a float, ranging from 0.0 (fully zoomed in) to 1.0 (fully
