@@ -8,7 +8,8 @@
     "build": "rollup -c rollup.config.js",
     "serve": "rollup -c rollup.config.js --watch",
     "lint": "eslint src",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "node ./test/**-test.js"
   },
   "repository": {
     "type": "git",
@@ -41,8 +42,13 @@
     "eslint": "^7.11.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.1",
+    "geometry-interfaces": "^1.1.4",
+    "jsdom": "^16.4.0",
+    "mathjs": "^8.0.1",
     "rollup": "^2.31.0",
     "rollup-plugin-scss": "^2.6.1",
-    "rollup-plugin-serve": "^1.0.4"
-  }
+    "rollup-plugin-serve": "^1.0.4",
+    "tape": "^5.0.1"
+  },
+  "type": "module"
 }

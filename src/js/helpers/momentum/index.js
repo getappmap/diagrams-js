@@ -1,6 +1,6 @@
-import * as d3 from 'd3';
+import d3 from 'd3';
 
-import Momentum from './momentum';
+import Momentum from './momentum.js';
 
 export default function momentum(zoom, selection) {
   const m = new Momentum(zoom, selection);

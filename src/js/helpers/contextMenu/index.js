@@ -1,6 +1,6 @@
 import { EventSource } from '@applandinc/appmap-models';
 
-import ContextMenuItem from './contextMenuItem';
+import ContextMenuItem from './contextMenuItem.js';
 
 function initializeDomElements(parent) {
   const dropdown = document.createElement('div');
