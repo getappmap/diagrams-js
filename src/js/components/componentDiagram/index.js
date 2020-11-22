@@ -389,6 +389,8 @@ export default class ComponentDiagram extends Models.EventSource {
     this.graphGroup
       .selectAll('.dim, .highlight, .highlight--inbound')
       .classed('dim highlight highlight--inbound', false);
+
+    this.emit('highlight', null);
   }
 
   highlight(id) {
@@ -411,6 +413,8 @@ export default class ComponentDiagram extends Models.EventSource {
 
     // Render highlighted connections above non-highlighted connections
     d3.selectAll('.edgePath.highlight').raise();
+
+    this.emit('highlight', id);
 
     return true;
   }
