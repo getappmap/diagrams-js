@@ -11821,18 +11821,18 @@
 	  Transform,
 	};
 
-	const tint = d3$1.scaleOrdinal()
-	  .range(d3$1.schemeCategory10
+	const tint = d3__default['default'].scaleOrdinal()
+	  .range(d3__default['default'].schemeCategory10
 	    .map((c) => {
-	      const rgba = d3$1.rgb(c);
+	      const rgba = d3__default['default'].rgb(c);
 	      rgba.opacity = 0.05;
 	      return rgba;
 	    }));
 
-	const color = d3$1.scaleOrdinal()
-	  .range(d3$1.schemeCategory10
+	const color = d3__default['default'].scaleOrdinal()
+	  .range(d3__default['default'].schemeCategory10
 	    .map((c) => {
-	      const rgba = d3$1.rgb(c);
+	      const rgba = d3__default['default'].rgb(c);
 	      rgba.opacity = 0.8;
 	      return rgba;
 	    }));
@@ -12114,7 +12114,7 @@
 	  // the new selection will be in the same place.
 	  const highlightedNode = viewport.element.querySelector('.node.highlight');
 	  if (nodeFullyVisible(viewport, highlightedNode)) {
-	    const xform = d3$1.zoomTransform(highlightedNode);
+	    const xform = d3__default['default'].zoomTransform(highlightedNode);
 
 	    // we'll have to offset for the border
 	    const style = getComputedStyle(highlightedNode);
@@ -13276,7 +13276,7 @@
 	  };
 
 	  zoom.on('zoom', () => {
-	    m.updateTransform(d3$1.event.transform);
+	    m.updateTransform(d3__default['default'].event.transform);
 	    if (onZoom) {
 	      onZoom();
 	    }
@@ -13645,7 +13645,7 @@
 	  constructor(parent, options = {}) {
 	    super();
 
-	    const parentElement = d3$1.select(parent).node();
+	    const parentElement = d3__default['default'].select(parent).node();
 
 	    this.options = cjs(defaultOptions, options);
 
@@ -13674,11 +13674,12 @@
 	          });
 	      }
 
-	      this.zoom = d3$1.zoom()
+	      this.zoom = d3__default['default']
+	        .zoom()
 	        .scaleExtent([this.options.zoom.minRatio, this.options.zoom.maxRatio])
-	        .interpolate(d3$1.interpolate)
+	        .interpolate(d3__default['default'].interpolate)
 	        .filter(() => {
-	          if (d3$1.event.type === 'wheel') {
+	          if (d3__default['default'].event.type === 'wheel') {
 	            return this.active || !this.options.zoom.requireActive;
 	          }
 
@@ -13691,7 +13692,7 @@
 	          return true;
 	        })
 	        .on('zoom', () => {
-	          const { transform } = d3$1.event;
+	          const { transform } = d3__default['default'].event;
 
 	          const { offsetHeight, offsetWidth } = parentElement;
 
@@ -13714,10 +13715,10 @@
 	        });
 
 	      if (this.options.pan.momentum) {
-	        momentum(this.zoom, d3$1.select(this.element));
+	        momentum(this.zoom, d3__default['default'].select(this.element));
 	      }
 
-	      d3$1.select(this.element)
+	      d3__default['default'].select(this.element)
 	        .call(this.zoom)
 	        .on('dblclick.zoom', null);
 	    }
@@ -13744,7 +13745,7 @@
 	    const { minRatio, maxRatio } = this.options.zoom;
 	    const desiredRatio = Math.min(clientHeight / targetHeight, clientWidth / targetWidth);
 	    const initialScale = Math.min(Math.max(desiredRatio, minRatio), maxRatio);
-	    const transformMatrix = d3$1.zoomIdentity
+	    const transformMatrix = d3__default['default'].zoomIdentity
 	      .translate(
 	        (clientWidth - targetWidth * initialScale) * 0.5,
 	        (clientHeight - targetHeight * initialScale) * 0.5,
@@ -13755,32 +13756,32 @@
 	  }
 
 	  translateTo(x, y, target = null) {
-	    d3$1.select(this.element)
+	    d3__default['default'].select(this.element)
 	      .transition()
 	      .duration(this.options.pan.tweenTime)
 	      .call(this.zoom.translateTo, x, y, target);
 	  }
 
 	  translateBy(x, y) {
-	    d3$1.select(this.element)
+	    d3__default['default'].select(this.element)
 	      .transition()
 	      .duration(this.options.pan.tweenTime)
 	      .call(this.zoom.translateBy, x, y);
 	  }
 
 	  scaleTo(k) {
-	    d3$1.select(this.element)
+	    d3__default['default'].select(this.element)
 	      .transition()
 	      .duration(100)
 	      .call(this.zoom.scaleTo, k);
 	  }
 
 	  get transform() {
-	    return d3$1.zoomTransform(this.element);
+	    return d3__default['default'].zoomTransform(this.element);
 	  }
 
 	  set transform(transform) {
-	    d3$1.select(this.element)
+	    d3__default['default'].select(this.element)
 	      .call(this.zoom.transform, transform);
 	  }
 	}
@@ -13968,7 +13969,7 @@
 	}
 
 	function setEdge(graph, v, w) {
-	  return graph.setEdge(v, w, { curve: d3$1.curveBasis });
+	  return graph.setEdge(v, w, { curve: d3__default['default'].curveBasis });
 	}
 
 	const render$1 = new dagreD3.render(); // eslint-disable-line new-cap
@@ -14110,7 +14111,7 @@
 	    this.container.containerController.setContextMenu(this);
 
 	    this.targetCount = DEFAULT_TARGET_COUNT;
-	    this.element = d3$1.select(this.container)
+	    this.element = d3__default['default'].select(this.container)
 	      .append('svg')
 	      .attr('class', 'appmap__component-diagram');
 
@@ -14157,16 +14158,28 @@
 	    });
 
 	    renderGraph(this);
+
+	    // set arrow url with hash (without page url and query params)
+	    this.element.selectAll('.edgePath > path').nodes().forEach((edge) => {
+	      const markerEnd = edge.getAttribute('marker-end');
+	      const matchedURL = markerEnd.match(/^url\((.*)\)$/);
+	      if (markerEnd && matchedURL.length > 1) {
+	        const url = new URL(matchedURL[1]);
+	        edge.setAttribute('marker-end', `url(${url.hash})`);
+	      }
+	    });
 	  }
 
 	  clearHighlights() {
-	    if (d3$1.event) {
-	      d3$1.event.stopPropagation();
+	    if (d3__default['default'].event) {
+	      d3__default['default'].event.stopPropagation();
 	    }
 
 	    this.graphGroup
 	      .selectAll('.dim, .highlight, .highlight--inbound')
 	      .classed('dim highlight highlight--inbound', false);
+
+	    this.emit('highlight', null);
 	  }
 
 	  highlight(id) {
@@ -14188,7 +14201,9 @@
 	    });
 
 	    // Render highlighted connections above non-highlighted connections
-	    d3$1.selectAll('.edgePath.highlight').raise();
+	    d3__default['default'].selectAll('.edgePath.highlight').raise();
+
+	    this.emit('highlight', id);
 
 	    return true;
 	  }
@@ -14218,7 +14233,7 @@
 
 	    // Push the dimmed edges down below the rest so they don't cross over at any
 	    // point
-	    d3$1.selectAll('.edgePath.dim').lower();
+	    d3__default['default'].selectAll('.edgePath.dim').lower();
 	  }
 
 	  expand(nodeId) {
