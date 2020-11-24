@@ -13877,6 +13877,26 @@
 	    });
 	  }
 
+	  // expand nodes with 1 child
+	  Object.entries(diagramCalls).forEach(([key, value]) => {
+	    const subclasses = Array.from(graphDefinition.package_classes[key]);
+	    if (subclasses.length !== 1) {
+	      return;
+	    }
+
+	    const newId = subclasses[0];
+	    diagramCalls[newId] = value;
+	    delete diagramCalls[key];
+
+	    Object.entries(diagramCalls).forEach(([k, v]) => {
+	      if (v.has(key)) {
+	        v.delete(key);
+	        v.add(newId);
+	      }
+	      diagramCalls[k] = v;
+	    });
+	  });
+
 	  const entries = Object.entries(diagramCalls).map(([k, vs]) => [k, [...vs]]);
 	  const edges = entries
 	    .map(([k, vs]) => vs.map((v) => [k, v]))
