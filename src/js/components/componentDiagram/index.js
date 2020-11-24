@@ -379,6 +379,16 @@ export default class ComponentDiagram extends Models.EventSource {
     });
 
     renderGraph(this);
+
+    // set arrow url with hash (without page url and query params)
+    this.element.selectAll('.edgePath > path').nodes().forEach((edge) => {
+      const markerEnd = edge.getAttribute('marker-end');
+      const matchedURL = markerEnd.match(/^url\((.*)\)$/);
+      if (markerEnd && matchedURL.length > 1) {
+        const url = new URL(matchedURL[1]);
+        edge.setAttribute('marker-end', `url(${url.hash})`);
+      }
+    });
   }
 
   clearHighlights() {
