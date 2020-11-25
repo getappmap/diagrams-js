@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.9]
+Fixed
+- Don't clear node highlight when diagram expands/collapses
+- Fix arrows `marker-end` location after expanding/collapsing
+
 ## [0.2.8]
 Added
 - Emit 'focus', 'expand' and 'collapse' events of Component Diagram
