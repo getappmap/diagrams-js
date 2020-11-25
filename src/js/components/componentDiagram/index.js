@@ -479,6 +479,8 @@ export default class ComponentDiagram extends Models.EventSource {
     // Push the dimmed edges down below the rest so they don't cross over at any
     // point
     d3.selectAll('.edgePath.dim').lower();
+
+    this.emit('focus', id);
   }
 
   expand(nodeId) {
@@ -510,6 +512,8 @@ export default class ComponentDiagram extends Models.EventSource {
     });
 
     renderGraph(this);
+
+    this.emit('expand', nodeId);
   }
 
   collapse(nodeId) {
@@ -543,6 +547,8 @@ export default class ComponentDiagram extends Models.EventSource {
     });
 
     renderGraph(this);
+
+    this.emit('collapse', pkg);
   }
 
   makeRoot(nodeId) {
