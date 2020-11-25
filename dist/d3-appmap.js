@@ -13879,6 +13879,10 @@
 
 	  // expand nodes with 1 child
 	  Object.entries(diagramCalls).forEach(([key, value]) => {
+	    if (!graphDefinition.package_classes[key]) {
+	      return;
+	    }
+
 	    const subclasses = Array.from(graphDefinition.package_classes[key]);
 	    if (subclasses.length !== 1) {
 	      return;
