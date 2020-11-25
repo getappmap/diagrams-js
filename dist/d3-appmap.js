@@ -14088,6 +14088,16 @@
 	    .attr('height', `${bbox.height}px`)
 	    .attr('viewBox', `${bbox.x}, ${bbox.y}, ${bbox.width}, ${bbox.height}`);
 
+	  // set arrow url with hash (without page url and query params)
+	  componentDiagram.element.selectAll('.edgePath > path').nodes().forEach((edge) => {
+	    const markerEnd = edge.getAttribute('marker-end');
+	    const matchedURL = markerEnd.match(/^url\((.*)\)$/);
+	    if (markerEnd && matchedURL.length > 1) {
+	      const url = new URL(matchedURL[1]);
+	      edge.setAttribute('marker-end', `url(${url.hash})`);
+	    }
+	  });
+
 	  componentDiagram.emit('postrender');
 	}
 
@@ -14143,8 +14153,10 @@
 	      this.container.containerController.fitViewport(this.container);
 	    });
 
-	    this.container.containerController.element.addEventListener('click', () => {
-	      this.clearHighlights();
+	    this.container.containerController.element.addEventListener('click', (event) => {
+	      if (!event.target.classList.contains('dropdown-item')) {
+	        this.clearHighlights();
+	      }
 
 	      if (this.container.containerController.contextMenu) {
 	        this.container.containerController.contextMenu.close();
@@ -14182,16 +14194,6 @@
 	    });
 
 	    renderGraph(this);
-
-	    // set arrow url with hash (without page url and query params)
-	    this.element.selectAll('.edgePath > path').nodes().forEach((edge) => {
-	      const markerEnd = edge.getAttribute('marker-end');
-	      const matchedURL = markerEnd.match(/^url\((.*)\)$/);
-	      if (markerEnd && matchedURL.length > 1) {
-	        const url = new URL(matchedURL[1]);
-	        edge.setAttribute('marker-end', `url(${url.hash})`);
-	      }
-	    });
 	  }
 
 	  clearHighlights() {
@@ -14291,6 +14293,8 @@
 	    });
 
 	    renderGraph(this);
+
+	    this.emit('expand', nodeId);
 	  }
 
 	  collapse(nodeId) {
@@ -14324,6 +14328,8 @@
 	    });
 
 	    renderGraph(this);
+
+	    this.emit('collapse', pkg);
 	  }
 
 	  makeRoot(nodeId) {
