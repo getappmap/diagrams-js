@@ -23,29 +23,38 @@ SVGElement.prototype.getBBox = () => ({x: 0, y: 0, width: 0, height: 0});
 SVGElement.prototype.getScreenCTM = () => (new DOMMatrix());
 
 const model = readJSON('fullModel.json');
-const elem = document.querySelector('#diagram');
-const componentDiagram = new ComponentDiagram(elem);
+let elem,
+  componentDiagram;
+
+const setupDiagram = function(cb) {
+  return function(t) {
+    elem = document.querySelector('#diagram');
+    elem.innerHTML = '';
+    componentDiagram = new ComponentDiagram(elem);
+    componentDiagram.render(model);
+    
+    return cb(t);
+  }
+}
 
 test('component diagram', (t) => {
-  t.test('should be rendered', function (t) {
-    componentDiagram.render(model);
-
+  t.test('should be rendered', setupDiagram((t) => {
     t.equal(elem.querySelectorAll('.appmap__component-diagram').length, 1);
     t.end();
-  });
+  }));
 
-  t.test('should have 17 nodes', function (t) {
+  t.test('should have 17 nodes', setupDiagram((t) => {
     t.equal(elem.querySelectorAll('.nodes g.node').length, 17);
     t.end();
-  });
+  }));
 
-  t.test('node "HTTP" should be expanded', function (t) {
+  t.test('node "HTTP" should be expanded', setupDiagram((t) => {
     t.equal(elem.querySelector('.nodes .node[id="HTTP"]'), null);
     t.equal(elem.querySelectorAll('.nodes .node[id="POST /applications"]').length, 1);
     t.end();
-  });
+  }));
 
-  t.test('node "SQL" should be highlighted', function (t) {
+  t.test('node "SQL" can be highlighted', setupDiagram((t) => {
     const node = elem.querySelector('.nodes .node[id="SQL"]');
 
     t.notEqual(node, null);
@@ -54,5 +63,13 @@ test('component diagram', (t) => {
 
     t.equal(node.classList.contains('highlight'), true);
     t.end();
-  });
+  }));
+
+  t.test('node "SQL" should not be highlighted by default', setupDiagram((t) => {
+    const node = elem.querySelector('.nodes .node[id="SQL"]');
+
+    t.notEqual(node, null);
+    t.notEqual(node.classList.contains('highlight'), true);
+    t.end();
+  }));
 });
