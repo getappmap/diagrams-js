@@ -110,6 +110,11 @@ function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
     }
 
     const newId = subclasses[0];
+
+    if (newId === key) {
+      return;
+    }
+
     diagramCalls[newId] = value;
     delete diagramCalls[key];
 
@@ -487,7 +492,7 @@ export default class ComponentDiagram extends Models.EventSource {
 
   expand(nodeId) {
     const subclasses = new Set(this.currentDiagramModel.package_classes[nodeId]);
-    if (subclasses.size === 0) {
+    if (subclasses.size === 0 || [...subclasses][0] === nodeId) {
       return;
     }
 
