@@ -69,6 +69,53 @@ const diagram = new Appmap.ComponentDiagram('#component-diagram', {
 
 Builder function must accepts one argument with `ComponentDiagram` instance and must return an array of menu item's builder functions.
 
+### Available methods
+- `.render(model)` - renders diagram model
+- `.highlight(nodeId)` - highlights node with provided `nodeId` and inbound/outbound arrows
+- `.clearHighlights()` - clears node highlightning
+- `.focus(nodeId)` - shows arrows relative to node with `nodeId` and hides others
+- `.expand(nodeId)` - expands node with `nodeId` and shows it's children with relations
+- `.collapse(nodeId)` - collapses node with `nodeId` into package
+- `.makeRoot(nodeId)` - sets node with `nodeId` as diagram root
+- `.sourceLocation(nodeId)` - returns URL to file in repository which contains node with `nodeId`
+- `.hasPackage(packageId)` - checks package isset in the diagram model
+
+### Available events
+- `postrender` - this event is fired when diagram has been rendered on the page
+```
+diagram.on('postrender', (nodeId) => {
+  console.log(`diagram has been rendered`);
+});
+```
+- `highlight` - returns highlighted node ID, when no one node is highlighted - returns `null`
+```
+diagram.on('highlight', (nodeId) => {
+  if (nodeId) {
+    console.log(`node ${nodeId} was highlighted`);
+  } else {
+    console.log(`nothing is highlighted`);
+  }
+});
+```
+- `focus` - returns focused node ID
+```
+diagram.on('focus', (nodeId) => {
+  console.log(`node ${nodeId} was focused`);
+});
+```
+- `expand` - returns expanded node ID
+```
+diagram.on('expand', (nodeId) => {
+  console.log(`node ${nodeId} was expanded`);
+});
+```
+- `collapse` - returns collapsed node ID
+```
+diagram.on('collapse', (nodeId) => {
+  console.log(`node ${nodeId} was collapsed`);
+});
+```
+
 ## Flow view
 
 Use this function to aggregate events from `scenarioData` object to `callTree` variable:
