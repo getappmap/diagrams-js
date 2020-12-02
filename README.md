@@ -71,7 +71,7 @@ Builder function must accepts one argument with `ComponentDiagram` instance and 
 
 ### Available methods
 - `.render(model)` - renders diagram model
-- `.highlight(nodeId | [node1, node2])` - highlights node(s) with provided `nodeId` and inbound/outbound arrows
+- `.highlight(nodeId | [node1, node2, ...])` - highlights node(s) with provided `nodeId` and inbound/outbound arrows
 - `.clearHighlights()` - clears node highlightning
 - `.focus(nodeId)` - shows arrows relative to node with `nodeId` and hides others
 - `.expand(nodeId)` - expands node with `nodeId` and shows it's children with relations
