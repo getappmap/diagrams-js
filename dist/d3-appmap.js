@@ -14213,30 +14213,46 @@
 	    this.emit('highlight', null);
 	  }
 
-	  highlight(id) {
+	  highlight(nodes) {
 	    this.clearHighlights();
 
-	    const highligthedNode = this.graph.node(id);
-	    if (!highligthedNode) {
-	      return false;
+	    let nodesIds = [];
+
+	    if (Array.isArray(nodes)) {
+	      nodesIds = nodes;
+	    } else if (typeof nodes === 'string') {
+	      nodesIds = [nodes];
 	    }
-	    highligthedNode.elem.classList.add('highlight');
 
-	    this.graph.nodeEdges(id).forEach((e) => {
-	      const element = this.graph.edge(e).elem;
-	      element.classList.add('highlight');
+	    let wasHighlighted = false;
 
-	      if (id === e.w) {
-	        element.classList.add('highlight--inbound');
+	    nodesIds.forEach((id) => {
+	      const highligthedNode = this.graph.node(id);
+	      if (!highligthedNode) {
+	        return;
 	      }
+	      highligthedNode.elem.classList.add('highlight');
+
+	      this.graph.nodeEdges(id).forEach((e) => {
+	        const element = this.graph.edge(e).elem;
+	        element.classList.add('highlight');
+
+	        if (id === e.w) {
+	          element.classList.add('highlight--inbound');
+	        }
+	      });
+
+	      wasHighlighted = true;
 	    });
 
-	    // Render highlighted connections above non-highlighted connections
-	    d3__default['default'].selectAll('.edgePath.highlight').raise();
+	    if (wasHighlighted) {
+	      // Render highlighted connections above non-highlighted connections
+	      d3__default['default'].selectAll('.edgePath.highlight').raise();
 
-	    this.emit('highlight', id);
+	      this.emit('highlight', nodesIds);
+	    }
 
-	    return true;
+	    return wasHighlighted;
 	  }
 
 	  focus(id) {

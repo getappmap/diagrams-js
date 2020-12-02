@@ -32,7 +32,7 @@ const setupDiagram = function(cb) {
     elem.innerHTML = '';
     componentDiagram = new ComponentDiagram(elem);
     componentDiagram.render(model);
-    
+
     return cb(t);
   }
 }
@@ -70,6 +70,14 @@ test('component diagram', (t) => {
 
     t.notEqual(node, null);
     t.notEqual(node.classList.contains('highlight'), true);
+    t.end();
+  }));
+
+  t.test('multiple nodes should be highlighted', setupDiagram((t) => {
+    componentDiagram.highlight(['POST /applications', 'SQL']);
+    const highlightedNodes = elem.querySelectorAll('.nodes .node.highlight');
+
+    t.equal(highlightedNodes.length, 2);
     t.end();
   }));
 });

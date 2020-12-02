@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0]
+Breaking changes
+- Component diagram `highlight` event listener recieves array of nodes (in `0.2.*` it recieves one node)
+Added
+- Component diagram `highlight` method can accept an array of nodes
+
 ## [0.2.10]
 Fixed
 - Fix issue with removing node which contains one child with the same name as parent
