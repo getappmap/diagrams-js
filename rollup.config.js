@@ -2,6 +2,7 @@ import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import scss from 'rollup-plugin-scss';
 import serve from 'rollup-plugin-serve';
+import { terser } from 'rollup-plugin-terser';
 import * as meta from './package.json';
 
 export default {
@@ -27,5 +28,6 @@ export default {
       ? serve({
         contentBase: ['dist', 'examples'],
       }) : null,
+    !process.env.ROLLUP_WATCH ? terser() : null,
   ],
 };

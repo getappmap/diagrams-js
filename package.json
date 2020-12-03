@@ -1,6 +1,6 @@
 {
   "name": "d3-appmap",
-  "version": "0.2.11",
+  "version": "0.3.0",
   "description": "d3 visualizations of appmap.org data",
   "main": "dist/d3-appmap.js",
   "module": "src/index.js",
@@ -48,6 +48,7 @@
     "rollup": "^2.31.0",
     "rollup-plugin-scss": "^2.6.1",
     "rollup-plugin-serve": "^1.0.4",
+    "rollup-plugin-terser": "^7.0.2",
     "tape": "^5.0.1"
   },
   "type": "module"
