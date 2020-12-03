@@ -10,6 +10,10 @@ Breaking changes
 Added
 - Component diagram `highlight` method can accept an array of nodes
 
+## [0.2.11]
+Changed
+- Use NPM package '@applandinc/appmap-models' instead of git package
+
 ## [0.2.10]
 Fixed
 - Fix issue with removing node which contains one child with the same name as parent
