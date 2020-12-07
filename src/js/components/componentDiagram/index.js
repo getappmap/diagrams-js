@@ -327,6 +327,57 @@ function renderGraph(componentDiagram) {
   componentDiagram.emit('postrender');
 }
 
+function scrollToNodes(componentDiagram, nodes) {
+  const nodesBox = {
+    top: [],
+    left: [],
+    right: [],
+    bottom: [],
+    x: [],
+    y: [],
+  };
+
+  nodes.forEach((id) => {
+    const node = componentDiagram.graph.node(id);
+    if (!node) {
+      return;
+    }
+
+    const nodeBox = node.elem.getBoundingClientRect();
+    nodesBox.top.push(nodeBox.top);
+    nodesBox.left.push(nodeBox.left);
+    nodesBox.right.push(nodeBox.right);
+    nodesBox.bottom.push(nodeBox.bottom);
+    nodesBox.x.push(node.x - nodeBox.width / 2);
+    nodesBox.y.push(node.y - nodeBox.height / 2);
+  });
+
+  nodesBox.top = Math.min(...nodesBox.top);
+  nodesBox.left = Math.min(...nodesBox.left);
+  nodesBox.right = Math.max(...nodesBox.right);
+  nodesBox.bottom = Math.max(...nodesBox.bottom);
+  nodesBox.offsetTop = Math.min(...nodesBox.y);
+  nodesBox.offsetLeft = Math.min(...nodesBox.x);
+
+  nodesBox.width = nodesBox.right - nodesBox.left;
+  nodesBox.height = nodesBox.bottom - nodesBox.top;
+
+  const { containerController } = componentDiagram.container;
+  const containerBox = containerController.element.getBoundingClientRect();
+
+  const xRatio = containerBox.width / nodesBox.width;
+  const yRatio = containerBox.height / nodesBox.height;
+  const scale = (xRatio > 1 && yRatio > 1) ? 1 : Math.min(xRatio, yRatio) - 0.01;
+
+  containerController.scaleTo(scale);
+
+  setTimeout(() => {
+    const x = nodesBox.width / 2 + nodesBox.offsetLeft;
+    const y = nodesBox.height / 2 + nodesBox.offsetTop;
+    containerController.translateTo(x, y);
+  }, 200);
+}
+
 const COMPONENT_OPTIONS = {
   contextMenu(componentDiagram) {
     return [
@@ -504,6 +555,20 @@ export default class ComponentDiagram extends Models.EventSource {
     d3.selectAll('.edgePath.dim').lower();
 
     this.emit('focus', id);
+  }
+
+  scrollTo(nodes) {
+    let nodesIds = [];
+
+    if (Array.isArray(nodes)) {
+      nodesIds = nodes;
+    } else if (typeof nodes === 'string') {
+      nodesIds = [nodes];
+    }
+
+    scrollToNodes(this, nodesIds);
+
+    this.emit('scrollTo', nodesIds);
   }
 
   expand(nodeId) {
