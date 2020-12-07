@@ -84,17 +84,21 @@
 
     .cluster {
       rect {
-        opacity: 0;
-        transition: opacity .6s ease-in-out;
         fill: transparent;
         stroke: $highlight;
         stroke-width: 2;
       }
-      &:hover {
-        rect {
-          opacity: 1;
-          stroke: $highlight;
-        }
+
+      &--package rect {
+        stroke: $package;
+      }
+
+      &--http rect {
+        stroke: $highlight;
+      }
+
+      &--database rect {
+        stroke: $database;
       }
     }
 

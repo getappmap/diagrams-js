@@ -308,6 +308,19 @@ function renderGraph(componentDiagram) {
       data.labelElem = e;
     });
 
+  componentDiagram.element.selectAll('.cluster').nodes().forEach((cluster) => {
+    const parentNode = cluster.getAttribute('id').replace(/-cluster$/g, '');
+    if (componentDiagram.hasPackage(parentNode)) {
+      let clusterType = 'cluster--package';
+      if (parentNode === 'HTTP') {
+        clusterType = 'cluster--http';
+      } else if (parentNode === 'SQL') {
+        clusterType = 'cluster--database';
+      }
+      cluster.classList.add(clusterType);
+    }
+  });
+
   const bbox = componentDiagram.graphGroup.node().getBBox();
   componentDiagram.element
     .attr('width', `${bbox.width}px`)
@@ -512,9 +525,12 @@ export default class ComponentDiagram extends Models.EventSource {
       return;
     }
 
+    const parentNodeType = this.graph.node(nodeId).class;
+
     this.graph.removeNode(nodeId);
 
-    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster' };
+    const clusterId = `${nodeId}-cluster`;
+    const clusterNode = { id: clusterId, type: 'cluster' };
 
     setNode(this.graph, clusterNode);
 
