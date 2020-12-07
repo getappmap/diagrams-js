@@ -74,6 +74,7 @@ Builder function must accepts one argument with `ComponentDiagram` instance and 
 - `.highlight(nodeId | [node1, node2, ...])` - highlights node(s) with provided `nodeId` and inbound/outbound arrows
 - `.clearHighlights()` - clears node highlightning
 - `.focus(nodeId)` - shows arrows relative to node with `nodeId` and hides others
+- `.scrollTo(nodeId | [node1, node2, ...])` - scroll the graph to node or set of nodes
 - `.expand(nodeId)` - expands node with `nodeId` and shows it's children with relations
 - `.collapse(nodeId)` - collapses node with `nodeId` into package
 - `.makeRoot(nodeId)` - sets node with `nodeId` as diagram root
@@ -101,6 +102,12 @@ diagram.on('highlight', (nodeId) => {
 ```
 diagram.on('focus', (nodeId) => {
   console.log(`node ${nodeId} was focused`);
+});
+```
+- `scrollTo` - returns node ID which was centered by `.scrollTo` method
+```
+diagram.on('scrollTo', (nodeId) => {
+  console.log(`graph was scrolled to node ${nodeId}`);
 });
 ```
 - `expand` - returns expanded node ID
