@@ -97,10 +97,14 @@ diagram.on('highlight', (nodeId) => {
   }
 });
 ```
-- `focus` - returns focused node ID
+- `focus` - returns focused node ID, when focus was cleared - returns `null`
 ```
 diagram.on('focus', (nodeId) => {
-  console.log(`node ${nodeId} was focused`);
+  if (nodeId) {
+    console.log(`node ${nodeId} was focused`);
+  } else {
+    console.log(`focus was cleared`);
+  }
 });
 ```
 - `expand` - returns expanded node ID
