@@ -6,6 +6,7 @@ import { getRepositoryUrl } from '../../util.js';
 import { bindShapes } from './componentDiagramShapes.js';
 import Models from '../../models.js';
 import Container from '../../helpers/container/index.js';
+import Geometry from '../../helpers/geometry.js';
 
 export const DEFAULT_TARGET_COUNT = 10;
 const IDEAL_CHILD_COUNT = 3;
@@ -365,6 +366,10 @@ function scrollToNodes(componentDiagram, nodes) {
   const { containerController } = componentDiagram.container;
   const containerBox = containerController.element.getBoundingClientRect();
 
+  if (Geometry.contains(containerBox, nodesBox)) {
+    return false;
+  }
+
   const xRatio = containerBox.width / nodesBox.width;
   const yRatio = containerBox.height / nodesBox.height;
   const scale = (xRatio > 1 && yRatio > 1) ? 1 : Math.min(xRatio, yRatio) - 0.01;
@@ -376,6 +381,8 @@ function scrollToNodes(componentDiagram, nodes) {
     const y = nodesBox.height / 2 + nodesBox.offsetTop;
     containerController.translateTo(x, y);
   }, 200);
+
+  return true;
 }
 
 const COMPONENT_OPTIONS = {
@@ -590,9 +597,9 @@ export default class ComponentDiagram extends Models.EventSource {
       nodesIds = [nodes];
     }
 
-    scrollToNodes(this, nodesIds);
-
-    this.emit('scrollTo', nodesIds);
+    if (scrollToNodes(this, nodesIds)) {
+      this.emit('scrollTo', nodesIds);
+    }
   }
 
   expand(nodeId) {
