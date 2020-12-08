@@ -80,4 +80,25 @@ test('component diagram', (t) => {
     t.equal(highlightedNodes.length, 2);
     t.end();
   }));
+
+  t.test('node "SQL" can be focused', setupDiagram((t) => {
+    const node = elem.querySelector('.nodes .node[id="SQL"]');
+    const nodeOpenssl = elem.querySelector('.nodes .node[id="OpenSSL::Cipher"]');
+
+    t.notEqual(node, null);
+
+    node.dispatchEvent(new window.Event('dblclick'));
+
+    t.notEqual(node.classList.contains('dim'), true);
+    t.equal(nodeOpenssl.classList.contains('dim'), true);
+
+    t.test('focus should not be cleared after click on diagram', (t) => {
+      elem.dispatchEvent(new window.Event('click'));
+
+      t.equal(nodeOpenssl.classList.contains('dim'), true);
+      t.end();
+    });
+
+    t.end();
+  }));
 });

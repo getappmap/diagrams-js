@@ -394,6 +394,10 @@ export default class ComponentDiagram extends Models.EventSource {
         this.container.containerController.contextMenu.close();
       }
     });
+
+    this.container.containerController.element.addEventListener('dblclick', () => {
+      this.clearFocus();
+    });
   }
 
   render(data) {
@@ -422,20 +426,22 @@ export default class ComponentDiagram extends Models.EventSource {
     renderGraph(this);
   }
 
-  clearHighlights() {
-    if (d3.event) {
-      d3.event.stopPropagation();
-    }
-
+  clearHighlights(noEvent = false) {
     this.graphGroup
-      .selectAll('.dim, .highlight, .highlight--inbound')
-      .classed('dim highlight highlight--inbound', false);
+      .selectAll('.highlight, .highlight--inbound')
+      .classed('highlight highlight--inbound', false);
 
-    this.emit('highlight', null);
+    if (!noEvent) {
+      this.emit('highlight', null);
+    }
   }
 
   highlight(nodes) {
-    this.clearHighlights();
+    this.clearHighlights(true);
+
+    if (d3.event) {
+      d3.event.stopPropagation();
+    }
 
     let nodesIds = [];
 
@@ -471,12 +477,26 @@ export default class ComponentDiagram extends Models.EventSource {
       d3.selectAll('.edgePath.highlight').raise();
 
       this.emit('highlight', nodesIds);
+    } else {
+      this.emit('highlight', null);
     }
 
     return wasHighlighted;
   }
 
+  clearFocus() {
+    this.graphGroup
+      .selectAll('.dim')
+      .classed('dim', false);
+
+    this.emit('focus', null);
+  }
+
   focus(id) {
+    if (d3.event) {
+      d3.event.stopPropagation();
+    }
+
     const [visitedNodes, visitedEdges] = findTraversableNodesAndEdges(this.graph, id);
 
     this.graph.nodes().forEach((nodeId) => {
