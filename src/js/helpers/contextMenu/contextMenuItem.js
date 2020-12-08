@@ -1,4 +1,4 @@
-import { EventSource } from '@applandinc/appmap-models';
+import { EventSource } from '@appland/models';
 
 function transformElement(item, element) {
   if (typeof item._transform === 'function') {

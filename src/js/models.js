@@ -4,7 +4,7 @@ import {
   EventInfo,
   EventSource,
   getLabel,
-} from '@applandinc/appmap-models';
+} from '@appland/models';
 
 const Models = {
   CallTree,

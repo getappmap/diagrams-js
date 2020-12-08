@@ -1,9 +1,9 @@
 # Installation
 
-Install package `d3-appmap` from NPM registry.
+Install package `@appland/diagrams` from NPM registry.
 
 ```
-npm install d3-appmap
+npm install @appland/diagrams
 ```
 
 # Usage
@@ -192,13 +192,13 @@ Available options are:
 Clone this repo, install dependencies and serve the code:
 
 ```
-$  git clone https://github.com/applandinc/d3-appmap.git && cd d3-appmap
+$  git clone https://github.com/applandinc/diagrams-js.git && cd diagrams-js
 $  npm install
 $  npm run serve
 ...
 
-http://localhost:10001 -> $HOME/source/appmaporg/d3-appmap/dist
-http://localhost:10001 -> $HOME/source/appmaporg/d3-appmap/examples
+http://localhost:10001 -> $HOME/diagrams-js/dist
+http://localhost:10001 -> $HOME/diagrams-js/examples
 ```
 
 Open the examples page:
