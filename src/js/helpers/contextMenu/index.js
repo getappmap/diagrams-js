@@ -1,4 +1,4 @@
-import { EventSource } from '@applandinc/appmap-models';
+import { EventSource } from '@appland/models';
 
 import ContextMenuItem from './contextMenuItem.js';
 
