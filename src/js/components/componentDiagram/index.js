@@ -527,6 +527,8 @@ export default class ComponentDiagram extends Models.EventSource {
       // Render highlighted connections above non-highlighted connections
       d3.selectAll('.edgePath.highlight').raise();
 
+      this.scrollTo(nodes);
+
       this.emit('highlight', nodesIds);
     } else {
       this.emit('highlight', null);
@@ -573,6 +575,8 @@ export default class ComponentDiagram extends Models.EventSource {
     // Push the dimmed edges down below the rest so they don't cross over at any
     // point
     d3.selectAll('.edgePath.dim').lower();
+
+    this.scrollTo(id);
 
     this.emit('focus', id);
   }
@@ -621,6 +625,8 @@ export default class ComponentDiagram extends Models.EventSource {
 
     renderGraph(this);
 
+    this.scrollTo(Array.from(subclasses));
+
     this.emit('expand', nodeId);
   }
 
@@ -656,6 +662,8 @@ export default class ComponentDiagram extends Models.EventSource {
 
     renderGraph(this);
 
+    this.scrollTo(pkg);
+
     this.emit('collapse', pkg);
   }
 
@@ -685,6 +693,8 @@ export default class ComponentDiagram extends Models.EventSource {
     });
 
     renderGraph(this);
+
+    this.scrollTo(nodeId);
   }
 
   sourceLocation(nodeId) {
