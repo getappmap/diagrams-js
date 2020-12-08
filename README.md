@@ -192,7 +192,7 @@ Available options are:
 Clone this repo, install dependencies and serve the code:
 
 ```
-$  git clone https://github.com/applandinc/d3-appmap.git && cd d3-appmap
+$  git clone https://github.com/applandinc/diagrams-js.git && cd d3-appmap
 $  npm install
 $  npm run serve
 ...
