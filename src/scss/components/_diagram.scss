@@ -29,6 +29,7 @@
     $highlight-inbound: map-get($colors, 'highlight-inbound');
     $labelLight: map-get($colors, 'label-light');
     $labelDark: map-get($colors, 'label-dark');
+    $http: map-get($colors, 'color-http');
     $package: map-get($colors, 'color-package');
     $class: map-get($colors, 'color-class');
     $database: map-get($colors, 'color-database');
@@ -58,12 +59,12 @@
         &.dim > .shape { fill: mix($database, $bg, $weight: $dim-opacity); }
       }
       &.http {
-        fill: $highlight;
-        &.dim { fill: mix($highlight, $bg, $weight: $dim-opacity); }
+        fill: $http;
+        &.dim { fill: mix($http, $bg, $weight: $dim-opacity); }
       }
       &.class[data-parent-type='http']{
-        fill: $highlight;
-        &.dim { fill: mix($highlight, $bg, $weight: $dim-opacity); }
+        fill: $http;
+        &.dim { fill: mix($http, $bg, $weight: $dim-opacity); }
       }
       &.io {
         fill: $io;
@@ -84,17 +85,21 @@
 
     .cluster {
       rect {
-        opacity: 0;
-        transition: opacity .6s ease-in-out;
         fill: transparent;
         stroke: $highlight;
         stroke-width: 2;
       }
-      &:hover {
-        rect {
-          opacity: 1;
-          stroke: $highlight;
-        }
+
+      &--package rect {
+        stroke: $package;
+      }
+
+      &--http rect {
+        stroke: $http;
+      }
+
+      &--database rect {
+        stroke: $database;
       }
     }
 
