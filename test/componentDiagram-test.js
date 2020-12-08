@@ -81,6 +81,25 @@ test('component diagram', (t) => {
     t.end();
   }));
 
+  t.test('node "SQL" can be focused', setupDiagram((t) => {
+    const node = elem.querySelector('.nodes .node[id="SQL"]');
+    const nodeOpenssl = elem.querySelector('.nodes .node[id="OpenSSL::Cipher"]');
+
+    t.notEqual(node, null);
+
+    node.dispatchEvent(new window.Event('dblclick'));
+
+    t.notEqual(node.classList.contains('dim'), true);
+    t.equal(nodeOpenssl.classList.contains('dim'), true);
+
+    t.test('focus should not be cleared after click on diagram', (t) => {
+      elem.dispatchEvent(new window.Event('click'));
+
+      t.equal(nodeOpenssl.classList.contains('dim'), true);
+      t.end();
+    });
+  }));
+
   t.test('graph should be scrolled to node "SQL"', setupDiagram((t) => {
     componentDiagram.on('scrollTo', (nodes) => {
       t.equal(nodes[0], 'SQL');
