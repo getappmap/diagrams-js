@@ -6,6 +6,7 @@ import { getRepositoryUrl } from '../../util.js';
 import { bindShapes } from './componentDiagramShapes.js';
 import Models from '../../models.js';
 import Container from '../../helpers/container/index.js';
+import Geometry from '../../helpers/geometry.js';
 
 export const DEFAULT_TARGET_COUNT = 10;
 const IDEAL_CHILD_COUNT = 3;
@@ -327,6 +328,63 @@ function renderGraph(componentDiagram) {
   componentDiagram.emit('postrender');
 }
 
+function scrollToNodes(componentDiagram, nodes) {
+  const nodesBox = {
+    top: [],
+    left: [],
+    right: [],
+    bottom: [],
+    x: [],
+    y: [],
+  };
+
+  nodes.forEach((id) => {
+    const node = componentDiagram.graph.node(id);
+    if (!node) {
+      return;
+    }
+
+    const nodeBox = node.elem.getBoundingClientRect();
+    nodesBox.top.push(nodeBox.top);
+    nodesBox.left.push(nodeBox.left);
+    nodesBox.right.push(nodeBox.right);
+    nodesBox.bottom.push(nodeBox.bottom);
+    nodesBox.x.push(node.x - nodeBox.width / 2);
+    nodesBox.y.push(node.y - nodeBox.height / 2);
+  });
+
+  nodesBox.top = Math.min(...nodesBox.top);
+  nodesBox.left = Math.min(...nodesBox.left);
+  nodesBox.right = Math.max(...nodesBox.right);
+  nodesBox.bottom = Math.max(...nodesBox.bottom);
+  nodesBox.offsetTop = Math.min(...nodesBox.y);
+  nodesBox.offsetLeft = Math.min(...nodesBox.x);
+
+  nodesBox.width = nodesBox.right - nodesBox.left;
+  nodesBox.height = nodesBox.bottom - nodesBox.top;
+
+  const { containerController } = componentDiagram.container;
+  const containerBox = containerController.element.getBoundingClientRect();
+
+  if (Geometry.contains(containerBox, nodesBox)) {
+    return false;
+  }
+
+  const xRatio = containerBox.width / nodesBox.width;
+  const yRatio = containerBox.height / nodesBox.height;
+  const scale = (xRatio > 1 && yRatio > 1) ? 1 : Math.min(xRatio, yRatio) - 0.01;
+
+  containerController.scaleTo(scale);
+
+  setTimeout(() => {
+    const x = nodesBox.width / 2 + nodesBox.offsetLeft;
+    const y = nodesBox.height / 2 + nodesBox.offsetTop;
+    containerController.translateTo(x, y);
+  }, 200);
+
+  return true;
+}
+
 const COMPONENT_OPTIONS = {
   contextMenu(componentDiagram) {
     return [
@@ -476,6 +534,8 @@ export default class ComponentDiagram extends Models.EventSource {
       // Render highlighted connections above non-highlighted connections
       d3.selectAll('.edgePath.highlight').raise();
 
+      this.scrollTo(nodes);
+
       this.emit('highlight', nodesIds);
     } else {
       this.emit('highlight', null);
@@ -523,7 +583,23 @@ export default class ComponentDiagram extends Models.EventSource {
     // point
     d3.selectAll('.edgePath.dim').lower();
 
+    this.scrollTo(id);
+
     this.emit('focus', id);
+  }
+
+  scrollTo(nodes) {
+    let nodesIds = [];
+
+    if (Array.isArray(nodes)) {
+      nodesIds = nodes;
+    } else if (typeof nodes === 'string') {
+      nodesIds = [nodes];
+    }
+
+    if (scrollToNodes(this, nodesIds)) {
+      this.emit('scrollTo', nodesIds);
+    }
   }
 
   expand(nodeId) {
@@ -555,6 +631,8 @@ export default class ComponentDiagram extends Models.EventSource {
     });
 
     renderGraph(this);
+
+    this.scrollTo(Array.from(subclasses));
 
     this.emit('expand', nodeId);
   }
@@ -591,6 +669,8 @@ export default class ComponentDiagram extends Models.EventSource {
 
     renderGraph(this);
 
+    this.scrollTo(pkg);
+
     this.emit('collapse', pkg);
   }
 
@@ -620,6 +700,8 @@ export default class ComponentDiagram extends Models.EventSource {
     });
 
     renderGraph(this);
+
+    this.scrollTo(nodeId);
   }
 
   sourceLocation(nodeId) {

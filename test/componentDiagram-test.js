@@ -98,6 +98,13 @@ test('component diagram', (t) => {
       t.equal(nodeOpenssl.classList.contains('dim'), true);
       t.end();
     });
+  }));
+
+  t.test('graph should be scrolled to node "SQL"', setupDiagram((t) => {
+    componentDiagram.on('scrollTo', (nodes) => {
+      t.equal(nodes[0], 'SQL');
+    })
+    componentDiagram.scrollTo('SQL');
 
     t.end();
   }));
