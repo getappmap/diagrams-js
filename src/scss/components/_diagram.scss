@@ -133,6 +133,10 @@
       .package {
         fill: $labelDark;
       }
+
+      .label__children-count {
+        fill-opacity: .7;
+      }
     }
   }
 }

@@ -210,6 +210,8 @@ body {
     opacity: 10%; }
   .appmap--theme-dark .appmap__component-diagram .nodeLabels .package {
     fill: #010306; }
+  .appmap--theme-dark .appmap__component-diagram .nodeLabels .label__children-count {
+    fill-opacity: .7; }
 
 .appmap--theme-light .appmap__component-diagram .node.dim .label {
   fill: white; }
@@ -295,6 +297,8 @@ body {
     opacity: 10%; }
   .appmap--theme-light .appmap__component-diagram .nodeLabels .package {
     fill: #ffffff; }
+  .appmap--theme-light .appmap__component-diagram .nodeLabels .label__children-count {
+    fill-opacity: .7; }
 
 .appmap__flow-view > * {
   width: max-content; }
