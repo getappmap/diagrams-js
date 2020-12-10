@@ -312,7 +312,7 @@ function renderGraph(componentDiagram) {
       if (packageClasses && packageClasses.size > 1) {
         const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
         tspan.setAttribute('class', 'label__children-count');
-        tspan.textContent = ` ${packageClasses.size}`;
+        tspan.textContent = ` (${packageClasses.size})`;
         e.querySelector('text').appendChild(tspan);
 
         const tspanWidth = tspan.getBBox().width;
