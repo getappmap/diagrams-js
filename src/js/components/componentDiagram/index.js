@@ -210,6 +210,8 @@ function setNode(graph, node, parent = null) {
     node.label = '';
   }
 
+  node.paddingRight = 25;
+
   graph.setNode(node.id, node);
 
   if ( parent ) {
@@ -305,6 +307,21 @@ function renderGraph(componentDiagram) {
       e.classList.add(data.class);
       e.setAttribute('id', id);
       e.setAttribute('transform', transform);
+
+      const packageClasses = componentDiagram.currentDiagramModel.package_classes[id];
+      if (packageClasses && packageClasses.size > 1) {
+        const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+        tspan.setAttribute('class', 'label__children-count');
+        tspan.textContent = ` (${packageClasses.size})`;
+        e.querySelector('text').appendChild(tspan);
+
+        const tspanWidth = tspan.getBBox().width;
+
+        let [transformOrig, translateX, translateY] = transform.match(/translate\(([0-9\.]+),([0-9\.]+)\)/);
+        translateX = parseFloat(translateX) - tspanWidth / 2;
+
+        e.setAttribute('transform', `translate(${translateX},${translateY})`);
+      }
 
       data.labelElem = e;
     });
