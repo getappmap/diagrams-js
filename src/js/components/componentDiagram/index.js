@@ -222,7 +222,7 @@ function setNode(graph, node, parent = null) {
 }
 
 function setEdge(graph, v, w) {
-  return graph.setEdge(v, w, { curve: d3.curveBasis });
+  return graph.setEdge(v, w, { curve: d3.curveBasis, arrowheadStyle: 'stroke-width:0', class: `nodes---${v}---${w}` });
 }
 
 const render = new dagreD3.render(); // eslint-disable-line new-cap
@@ -345,8 +345,23 @@ function renderGraph(componentDiagram) {
     .attr('height', `${bbox.height}px`)
     .attr('viewBox', `${bbox.x}, ${bbox.y}, ${bbox.width}, ${bbox.height}`);
 
-  // set arrow url with hash (without page url and query params)
   componentDiagram.element.selectAll('.edgePath > path').nodes().forEach((edge) => {
+    // highlight edge on mouse click
+    edge.addEventListener('click', (event) => {
+      event.stopPropagation();
+      componentDiagram.graphGroup
+        .selectAll('.edgePath.highlight, .edgePath.highlight--inbound')
+        .classed('highlight highlight--inbound', false);
+      edge.parentNode.classList.add('highlight');
+      componentDiagram.graphGroup.selectAll('.edgePath.highlight').raise();
+
+      const nodesClass = edge.parentNode.getAttribute('class').split(' ').filter((cls) => /^nodes-/.test(cls))[0];
+      const nodes = nodesClass.split('---');
+      nodes.shift();
+      componentDiagram.emit('edge', nodes);
+    });
+
+    // set arrow url with hash (without page url and query params)
     const markerEnd = edge.getAttribute('marker-end');
     const matchedURL = markerEnd.match(/^url\((.*)\)$/);
     if (markerEnd && matchedURL.length > 1) {
