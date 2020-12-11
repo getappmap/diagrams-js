@@ -1,4 +1,5 @@
 import {
+  ClassMap,
   CallTree,
   Components,
   EventInfo,
@@ -7,6 +8,7 @@ import {
 } from '@appland/models';
 
 const Models = {
+  ClassMap,
   CallTree,
   Components,
   EventInfo,
