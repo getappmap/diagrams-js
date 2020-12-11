@@ -119,7 +119,7 @@ body {
   stroke-width: 4px; }
 
 .appmap__component-diagram .edgePath path {
-  stroke-width: 2px; }
+  stroke-width: 3px; }
 
 .appmap__component-diagram .nodeLabels {
   pointer-events: none; }
@@ -203,6 +203,12 @@ body {
 
 .appmap--theme-dark .appmap__component-diagram .edgePath path {
   stroke: #242C41; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath:not(.highlight):not(.dim):hover path {
+  stroke: #5b6fa3; }
+
+.appmap--theme-dark .appmap__component-diagram .edgePath:not(.highlight):not(.dim):hover marker {
+  fill: #5b6fa3; }
 
 .appmap--theme-dark .appmap__component-diagram .edgePath marker {
   fill: #242C41; }
@@ -293,6 +299,12 @@ body {
 
 .appmap--theme-light .appmap__component-diagram .edgePath path {
   stroke: #889fa5; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath:not(.highlight):not(.dim):hover path {
+  stroke: #dfe5e7; }
+
+.appmap--theme-light .appmap__component-diagram .edgePath:not(.highlight):not(.dim):hover marker {
+  fill: #dfe5e7; }
 
 .appmap--theme-light .appmap__component-diagram .edgePath marker {
   fill: #889fa5; }

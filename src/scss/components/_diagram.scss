@@ -9,7 +9,7 @@
 
   .edgePath {
     path {
-      stroke-width: 2px;
+      stroke-width: 3px;
     }
   }
 
@@ -121,6 +121,16 @@
 
       path {
         stroke: $edge;
+      }
+
+      &:not(.highlight):not(.dim):hover {
+        path {
+          stroke: lighten($edge, 30%);
+        }
+
+        marker {
+          fill: lighten($edge, 30%);
+        }
       }
 
       marker {

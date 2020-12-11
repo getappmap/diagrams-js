@@ -222,7 +222,7 @@ function setNode(graph, node, parent = null) {
 }
 
 function setEdge(graph, v, w) {
-  return graph.setEdge(v, w, { curve: d3.curveBasis });
+  return graph.setEdge(v, w, { curve: d3.curveBasis, arrowheadStyle: 'stroke-width:0', class: `nodes---${v}---${w}` });
 }
 
 const render = new dagreD3.render(); // eslint-disable-line new-cap
@@ -354,6 +354,11 @@ function renderGraph(componentDiagram) {
         .classed('highlight highlight--inbound', false);
       edge.parentNode.classList.add('highlight');
       componentDiagram.graphGroup.selectAll('.edgePath.highlight').raise();
+
+      const nodesClass = edge.parentNode.getAttribute('class').split(' ').filter((cls) => /^nodes-/.test(cls))[0];
+      const nodes = nodesClass.split('---');
+      nodes.shift();
+      componentDiagram.emit('edge', nodes);
     });
 
     // set arrow url with hash (without page url and query params)
