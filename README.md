@@ -133,6 +133,12 @@ diagram.on('collapse', (nodeId) => {
   console.log(`node ${nodeId} was collapsed`);
 });
 ```
+- `edge` - returns node IDs when edge between those nodes was clicked
+```
+diagram.on('edge', (nodes) => {
+  console.log(`edge between ${nodes[0]} and ${nodes[1]} was clicked`);
+});
+```
 
 ## Flow view
 
