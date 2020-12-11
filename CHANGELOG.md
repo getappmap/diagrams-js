@@ -4,12 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0]
+- Add `Models.ClassMap`.
+
 ## [0.4.2]
+- Edit node colors in Component diagram
+- Make container box always visible for expanded nodes
 - Component diagram "collapsed" node indicates how many nodes it will expand to
 
 ## [0.4.1]
-
-Added
 - Add `scrollTo` method to Component Diagram
 
 ## [0.4.0]

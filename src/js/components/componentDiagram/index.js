@@ -326,6 +326,19 @@ function renderGraph(componentDiagram) {
       data.labelElem = e;
     });
 
+  componentDiagram.element.selectAll('.cluster').nodes().forEach((cluster) => {
+    const parentNode = cluster.getAttribute('id').replace(/-cluster$/g, '');
+    if (componentDiagram.hasPackage(parentNode)) {
+      let clusterType = 'cluster--package';
+      if (parentNode === 'HTTP') {
+        clusterType = 'cluster--http';
+      } else if (parentNode === 'SQL') {
+        clusterType = 'cluster--database';
+      }
+      cluster.classList.add(clusterType);
+    }
+  });
+
   const bbox = componentDiagram.graphGroup.node().getBBox();
   componentDiagram.element
     .attr('width', `${bbox.width}px`)

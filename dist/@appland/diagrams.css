@@ -142,21 +142,21 @@ body {
     fill: #080d17; }
 
 .appmap--theme-dark .appmap__component-diagram .node.database {
-  fill: #9C2FBA; }
+  fill: #8E05F8; }
   .appmap--theme-dark .appmap__component-diagram .node.database path {
     stroke: #010306; }
   .appmap--theme-dark .appmap__component-diagram .node.database.dim > .shape {
-    fill: #110718; }
+    fill: #0f031e; }
 
 .appmap--theme-dark .appmap__component-diagram .node.http {
-  fill: #FF07AA; }
+  fill: #C61C3A; }
   .appmap--theme-dark .appmap__component-diagram .node.http.dim {
-    fill: #1a0316; }
+    fill: #15060b; }
 
 .appmap--theme-dark .appmap__component-diagram .node.class[data-parent-type='http'] {
-  fill: #FF07AA; }
+  fill: #C61C3A; }
   .appmap--theme-dark .appmap__component-diagram .node.class[data-parent-type='http'].dim {
-    fill: #1a0316; }
+    fill: #15060b; }
 
 .appmap--theme-dark .appmap__component-diagram .node.io {
   fill: #f92672; }
@@ -170,15 +170,18 @@ body {
   stroke: #FF07AA; }
 
 .appmap--theme-dark .appmap__component-diagram .cluster rect {
-  opacity: 0;
-  transition: opacity .6s ease-in-out;
   fill: transparent;
   stroke: #FF07AA;
   stroke-width: 2; }
 
-.appmap--theme-dark .appmap__component-diagram .cluster:hover rect {
-  opacity: 1;
-  stroke: #FF07AA; }
+.appmap--theme-dark .appmap__component-diagram .cluster--package rect {
+  stroke: #6FDDD6; }
+
+.appmap--theme-dark .appmap__component-diagram .cluster--http rect {
+  stroke: #C61C3A; }
+
+.appmap--theme-dark .appmap__component-diagram .cluster--database rect {
+  stroke: #8E05F8; }
 
 .appmap--theme-dark .appmap__component-diagram .edgePath.highlight path {
   stroke: #FF07AA; }
@@ -229,21 +232,21 @@ body {
     fill: #f4f4f4; }
 
 .appmap--theme-light .appmap__component-diagram .node.database {
-  fill: #474554; }
+  fill: #8E05F8; }
   .appmap--theme-light .appmap__component-diagram .node.database path {
     stroke: #ffffff; }
   .appmap--theme-light .appmap__component-diagram .node.database.dim > .shape {
-    fill: #edecee; }
+    fill: #f4e6fe; }
 
 .appmap--theme-light .appmap__component-diagram .node.http {
-  fill: #474554; }
+  fill: #C61C3A; }
   .appmap--theme-light .appmap__component-diagram .node.http.dim {
-    fill: #edecee; }
+    fill: #f9e8eb; }
 
 .appmap--theme-light .appmap__component-diagram .node.class[data-parent-type='http'] {
-  fill: #474554; }
+  fill: #C61C3A; }
   .appmap--theme-light .appmap__component-diagram .node.class[data-parent-type='http'].dim {
-    fill: #edecee; }
+    fill: #f9e8eb; }
 
 .appmap--theme-light .appmap__component-diagram .node.io {
   fill: #8685ef; }
@@ -257,15 +260,18 @@ body {
   stroke: #474554; }
 
 .appmap--theme-light .appmap__component-diagram .cluster rect {
-  opacity: 0;
-  transition: opacity .6s ease-in-out;
   fill: transparent;
   stroke: #474554;
   stroke-width: 2; }
 
-.appmap--theme-light .appmap__component-diagram .cluster:hover rect {
-  opacity: 1;
-  stroke: #474554; }
+.appmap--theme-light .appmap__component-diagram .cluster--package rect {
+  stroke: #008b69; }
+
+.appmap--theme-light .appmap__component-diagram .cluster--http rect {
+  stroke: #C61C3A; }
+
+.appmap--theme-light .appmap__component-diagram .cluster--database rect {
+  stroke: #8E05F8; }
 
 .appmap--theme-light .appmap__component-diagram .edgePath.highlight path {
   stroke: #474554; }
