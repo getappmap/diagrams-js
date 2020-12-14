@@ -307,6 +307,11 @@ function renderGraph(componentDiagram) {
         clusterType = 'cluster--database';
       }
       cluster.classList.add(clusterType);
+
+      const packageClasses = componentDiagram.currentDiagramModel.package_classes[parentNode];
+      if (packageClasses.size > 1) {
+        cluster.classList.add('cluster--bordered');
+      }
     }
   });
 
@@ -505,7 +510,7 @@ export default class ComponentDiagram extends Models.EventSource {
       if (nodeChildren.size === 1) {
         this.expand(nodeId);
       }
-    })
+    });
   }
 
   clearHighlights(noEvent = false) {
@@ -634,7 +639,7 @@ export default class ComponentDiagram extends Models.EventSource {
 
     this.graph.removeNode(nodeId);
 
-    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster' };
+    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster', className: 'cluster--foobar' };
 
     setNode(this.graph, clusterNode);
 

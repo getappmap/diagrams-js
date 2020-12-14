@@ -87,6 +87,10 @@
       rect {
         fill: transparent;
         stroke: $highlight;
+        stroke-width: 0;
+      }
+
+      &--bordered rect {
         stroke-width: 2;
       }
 

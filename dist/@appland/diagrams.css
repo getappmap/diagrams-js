@@ -172,6 +172,9 @@ body {
 .appmap--theme-dark .appmap__component-diagram .cluster rect {
   fill: transparent;
   stroke: #FF07AA;
+  stroke-width: 0; }
+
+.appmap--theme-dark .appmap__component-diagram .cluster--bordered rect {
   stroke-width: 2; }
 
 .appmap--theme-dark .appmap__component-diagram .cluster--package rect {
@@ -268,6 +271,9 @@ body {
 .appmap--theme-light .appmap__component-diagram .cluster rect {
   fill: transparent;
   stroke: #474554;
+  stroke-width: 0; }
+
+.appmap--theme-light .appmap__component-diagram .cluster--bordered rect {
   stroke-width: 2; }
 
 .appmap--theme-light .appmap__component-diagram .cluster--package rect {
