@@ -51,6 +51,20 @@ test('component diagram', (t) => {
   t.test('node "HTTP" should be expanded', setupDiagram((t) => {
     t.equal(elem.querySelector('.nodes .node[id="HTTP"]'), null);
     t.equal(elem.querySelectorAll('.nodes .node[id="POST /applications"]').length, 1);
+
+    t.test('cluster "HTTP" should not have border', (t) => {
+      t.equal(elem.querySelector('.clusters .cluster[id="HTTP-cluster"]').classList.contains('cluster--bordered'), false);
+      t.end();
+    });
+
+    t.end();
+  }));
+
+  t.test('package "app/controllers" should be expanded and have border', setupDiagram((t) => {
+    componentDiagram.expand('app/controllers');
+
+    t.equal(elem.querySelector('.clusters .cluster[id="app/controllers-cluster"]').classList.contains('cluster--bordered'), true);
+
     t.end();
   }));
 

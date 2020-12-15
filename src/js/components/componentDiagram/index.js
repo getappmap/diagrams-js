@@ -99,35 +99,6 @@ function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
     });
   }
 
-  // expand nodes with 1 child
-  Object.entries(diagramCalls).forEach(([key, value]) => {
-    if (!graphDefinition.package_classes[key]) {
-      return;
-    }
-
-    const subclasses = Array.from(graphDefinition.package_classes[key]);
-    if (subclasses.length !== 1) {
-      return;
-    }
-
-    const newId = subclasses[0];
-
-    if (newId === key) {
-      return;
-    }
-
-    diagramCalls[newId] = value;
-    delete diagramCalls[key];
-
-    Object.entries(diagramCalls).forEach(([k, v]) => {
-      if (v.has(key)) {
-        v.delete(key);
-        v.add(newId);
-      }
-      diagramCalls[k] = v;
-    });
-  });
-
   const entries = Object.entries(diagramCalls).map(([k, vs]) => [k, [...vs]]);
   const edges = entries
     .map(([k, vs]) => vs.map((v) => [k, v]))
@@ -336,6 +307,11 @@ function renderGraph(componentDiagram) {
         clusterType = 'cluster--database';
       }
       cluster.classList.add(clusterType);
+
+      const packageClasses = componentDiagram.currentDiagramModel.package_classes[parentNode];
+      if (packageClasses.size > 1) {
+        cluster.classList.add('cluster--bordered');
+      }
     }
   });
 
@@ -527,6 +503,14 @@ export default class ComponentDiagram extends Models.EventSource {
     });
 
     renderGraph(this);
+
+    // expand nodes with 1 child
+    Object.entries(this.currentDiagramModel.package_classes).forEach(([nodeId, children]) => {
+      const nodeChildren = new Set(children);
+      if (nodeChildren.size === 1) {
+        this.expand(nodeId);
+      }
+    });
   }
 
   clearHighlights(noEvent = false) {
@@ -655,7 +639,7 @@ export default class ComponentDiagram extends Models.EventSource {
 
     this.graph.removeNode(nodeId);
 
-    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster' };
+    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster', className: 'cluster--foobar' };
 
     setNode(this.graph, clusterNode);
 
