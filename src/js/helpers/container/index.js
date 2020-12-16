@@ -134,7 +134,7 @@ export default class Container extends Models.EventSource {
     const { clientWidth, clientHeight } = this.element.parentNode;
     const { minRatio, maxRatio } = this.options.zoom;
     const desiredRatio = Math.min(clientHeight / targetHeight, clientWidth / targetWidth);
-    const initialScale = Math.min(Math.max(desiredRatio, minRatio), maxRatio);
+    const initialScale = Math.max(Math.min(Math.max(desiredRatio, minRatio), maxRatio), 0.8);
     const transformMatrix = d3.zoomIdentity
       .translate(
         (clientWidth - targetWidth * initialScale) * 0.5,

@@ -508,7 +508,7 @@ export default class ComponentDiagram extends Models.EventSource {
     Object.entries(this.currentDiagramModel.package_classes).forEach(([nodeId, children]) => {
       const nodeChildren = new Set(children);
       if (nodeChildren.size === 1) {
-        this.expand(nodeId);
+        this.expand(nodeId, false);
       }
     });
   }
@@ -631,7 +631,7 @@ export default class ComponentDiagram extends Models.EventSource {
     }
   }
 
-  expand(nodeId) {
+  expand(nodeId, scrollToSubclasses = true) {
     const subclasses = new Set(this.currentDiagramModel.package_classes[nodeId]);
     if (subclasses.size === 0 || [...subclasses][0] === nodeId) {
       return;
@@ -661,7 +661,9 @@ export default class ComponentDiagram extends Models.EventSource {
 
     renderGraph(this);
 
-    this.scrollTo(Array.from(subclasses));
+    if (scrollToSubclasses) {
+      this.scrollTo(Array.from(subclasses));
+    }
 
     this.emit('expand', nodeId);
   }
