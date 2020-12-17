@@ -8,8 +8,8 @@ import Models from '../../models.js';
 import Container from '../../helpers/container/index.js';
 import Geometry from '../../helpers/geometry.js';
 
-export const DEFAULT_TARGET_COUNT = 10;
-const IDEAL_CHILD_COUNT = 3;
+export const DEFAULT_TARGET_COUNT = 1;
+const IDEAL_CHILD_COUNT = 1;
 
 function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
   if (!graphDefinition
