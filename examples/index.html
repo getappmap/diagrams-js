@@ -38,7 +38,7 @@
     const eventInfo = new Appmap.Models.EventInfo(classMap);
     const callTree = new Appmap.Models.CallTree(events);
 
-    callTree.rootNode.forEach((e) => {
+    callTree.dataStore.rootEvent.forEach((e) => {
       e.displayName = eventInfo.getName(e.input);
       e.labels = eventInfo.getLabels(e.input);
     });
