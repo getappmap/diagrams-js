@@ -438,6 +438,23 @@ export function selector(value) {
   return element;
 }
 
+export function hashify(obj) {
+  const clone = { ...obj };
+  Object.keys(obj).forEach((key) => {
+    const val = obj[key];
+    if (Array.isArray(val)) {
+      clone[key] = new Set(val);
+    } else if (val instanceof Set) {
+      clone[key] = val;
+    } else if (val && typeof val === 'object') {
+      clone[key] = hashify(val);
+    } else {
+      clone[key] = val;
+    }
+  });
+  return clone;
+}
+
 // Move the minimum amount to put the element into view
 export function lazyPanToElement(viewport, element, padding = 0) {
   if (!element) {

@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import deepmerge from 'deepmerge';
 
-import { getRepositoryUrl } from '../../util.js';
+import { hashify, getRepositoryUrl } from '../../util.js';
 import Models from '../../models.js';
 import Container from '../../helpers/container/index.js';
 import Geometry from '../../helpers/geometry.js';
@@ -129,21 +129,30 @@ function getParentType(id, classPackage) {
   } else return 'none';
 }
 
-function hashify(obj) {
-  const clone = { ...obj };
-  Object.keys(obj).forEach((key) => {
-    const val = obj[key];
-    if (Array.isArray(val)) {
-      clone[key] = new Set(val);
-    } else if (val instanceof Set) {
-      clone[key] = val;
-    } else if (val && typeof val === 'object') {
-      clone[key] = hashify(val);
-    } else {
-      clone[key] = val;
-    }
-  });
-  return clone;
+function getClassConnections(model, cls) {
+  const result = [];
+
+  const classCallers = model.class_callers[cls];
+  if (classCallers) {
+    classCallers.forEach((id) => {
+      result.push({
+        id,
+        type: 'in',
+      });
+    });
+  }
+
+  const classCalls = model.class_calls[cls];
+  if (classCalls) {
+    classCalls.forEach((id) => {
+      result.push({
+        id,
+        type: 'out',
+      });
+    });
+  }
+
+  return result;
 }
 
 function activeNodes(componentDiagram, key, list, fn) {
@@ -163,60 +172,19 @@ function activeNodes(componentDiagram, key, list, fn) {
   }
 }
 
-function prepareNode(node) {
-  node.label = node.label || node.id;
-  node.class = node.class || node.type;
+function bindEvents(componentDiagram) {
+  const svg = componentDiagram.element.node();
 
-  if (node.id === 'HTTP') {
-    node.label = 'HTTP server requests';
-    node.shape = 'http';
-    node.class = 'http';
-  } else if (node.id === 'SQL') {
-    node.label = 'Database';
-    node.shape = 'database';
-    node.class = 'database';
-  }
-  if (node.type === 'cluster') {
-    node.label = '';
-  }
-
-  return node;
-}
-
-function findTraversableNodesAndEdges(graph, id) {
-  const visitedNodes = new Set();
-  const visitedEdges = new Set();
-  const queue = [id];
-
-  // traverse left from id
-  while (queue.length > 0) {
-    const currentId = queue.pop();
-    if (!visitedNodes.has(currentId)) {
-      graph.inEdges(currentId).forEach((e) => {
-        visitedEdges.add(e);
-        queue.push(e.v);
-      });
-
-      visitedNodes.add(currentId);
-    }
-  }
-
-  // traverse right from id
-  queue.push(id);
-  visitedNodes.delete(id);
-
-  while (queue.length > 0) {
-    const currentId = queue.pop();
-    if (!visitedNodes.has(currentId)) {
-      graph.outEdges(currentId).forEach((e) => {
-        visitedEdges.add(e);
-        queue.push(e.w);
-      });
-
-      visitedNodes.add(currentId);
-    }
-  }
-  return [visitedNodes, visitedEdges];
+  svg.querySelectorAll('g.nodes g.node').forEach((node) => {
+    node.addEventListener('click', (event) => {
+      event.stopPropagation();
+      componentDiagram.highlight(node.dataset.id);
+    });
+    node.addEventListener('dblclick', (event) => {
+      event.stopPropagation();
+      componentDiagram.focus(node.dataset.id);
+    });
+  });
 }
 
 function renderGraph(componentDiagram) {
@@ -334,87 +302,30 @@ console.log(componentDiagram.graph.graph().width, componentDiagram.graph.graph()
   componentDiagram.emit('postrender');
 }
 
-function scrollToNodes(componentDiagram, nodes) {
-  const nodesBox = {
-    top: [],
-    left: [],
-    right: [],
-    bottom: [],
-    x: [],
-    y: [],
-  };
-
-  nodes.forEach((id) => {
-    const node = componentDiagram.graph.node(id);
-    if (!node) {
-      return;
-    }
-
-    const nodeBox = node.elem.getBoundingClientRect();
-    nodesBox.top.push(nodeBox.top);
-    nodesBox.left.push(nodeBox.left);
-    nodesBox.right.push(nodeBox.right);
-    nodesBox.bottom.push(nodeBox.bottom);
-    nodesBox.x.push(node.x - nodeBox.width / 2);
-    nodesBox.y.push(node.y - nodeBox.height / 2);
-  });
-
-  nodesBox.top = Math.min(...nodesBox.top);
-  nodesBox.left = Math.min(...nodesBox.left);
-  nodesBox.right = Math.max(...nodesBox.right);
-  nodesBox.bottom = Math.max(...nodesBox.bottom);
-  nodesBox.offsetTop = Math.min(...nodesBox.y);
-  nodesBox.offsetLeft = Math.min(...nodesBox.x);
-
-  nodesBox.width = nodesBox.right - nodesBox.left;
-  nodesBox.height = nodesBox.bottom - nodesBox.top;
-
-  const { containerController } = componentDiagram.container;
-  const containerBox = containerController.element.getBoundingClientRect();
-
-  if (Geometry.contains(containerBox, nodesBox)) {
-    return false;
-  }
-
-  const xRatio = containerBox.width / nodesBox.width;
-  const yRatio = containerBox.height / nodesBox.height;
-  const scale = (xRatio > 1 && yRatio > 1) ? 1 : Math.min(xRatio, yRatio) - 0.01;
-
-  containerController.scaleTo(scale);
-
-  setTimeout(() => {
-    const x = nodesBox.width / 2 + nodesBox.offsetLeft;
-    const y = nodesBox.height / 2 + nodesBox.offsetTop;
-    containerController.translateTo(x, y);
-  }, 200);
-
-  return true;
-}
-
 const COMPONENT_OPTIONS = {
   contextMenu(componentDiagram) {
     return [
       (item) => item
         .text('Set as root')
         .selector('.nodes .node')
-        .transform((e) => e.getAttribute('id'))
+        .transform((e) => e.dataset.id)
         .on('execute', (id) => componentDiagram.makeRoot(id)),
       (item) => item
         .text('Expand')
         .selector('g.node')
-        .transform((e) => e.getAttribute('id'))
+        .transform((e) => e.dataset.id)
         .condition((id) => componentDiagram.hasPackage(id))
         .on('execute', (id) => componentDiagram.expand(id)),
       (item) => item
         .text('Collapse')
         .selector('g.node')
-        .transform((e) => e.getAttribute('id'))
+        .transform((e) => e.dataset.id)
         .condition((id) => !componentDiagram.hasPackage(id))
         .on('execute', (id) => componentDiagram.collapse(id)),
       (item) => item
         .text('View source')
         .selector('g.node.class')
-        .transform((e) => componentDiagram.sourceLocation(e.getAttribute('id')))
+        .transform((e) => componentDiagram.sourceLocation(e.dataset.id))
         .on('execute', (repoUrl) => window.open(repoUrl)),
       (item) => item
         .text('Reset view')
@@ -478,15 +389,16 @@ export default class ComponentDiagram extends Models.EventSource {
     this.graph = new Graph(this.element.node());
 
     const { nodes, edges } = mixedDiagram(this.currentDiagramModel, this.targetCount);
-    nodes.forEach((node) => this.graph.setNode(prepareNode(node)));
-    edges.forEach(([start, end]) => {
-      if (start !== end) {
-        this.graph.setEdge(start, end);
-      }
-    });
+    nodes.forEach((node) => this.graph.setNode(node));
+    edges.forEach(([start, end]) => this.graph.setEdge(start, end));
+
     this.graph.render();
-console.log(this.graph);return;
-    renderGraph(this);
+
+    bindEvents(this);
+
+    console.log(this.graph);
+
+    return;
 
     // expand nodes with 1 child
     /*Object.entries(this.currentDiagramModel.package_classes).forEach(([nodeId, children]) => {
@@ -498,9 +410,7 @@ console.log(this.graph);return;
   }
 
   clearHighlights(noEvent = false) {
-    this.graphGroup
-      .selectAll('.highlight, .highlight--inbound')
-      .classed('highlight highlight--inbound', false);
+    this.graph.clearHighlights();
 
     if (!noEvent) {
       this.emit('highlight', null);
@@ -509,10 +419,6 @@ console.log(this.graph);return;
 
   highlight(nodes) {
     this.clearHighlights(true);
-
-    if (d3.event) {
-      d3.event.stopPropagation();
-    }
 
     let nodesIds = [];
 
@@ -525,30 +431,15 @@ console.log(this.graph);return;
     let wasHighlighted = false;
 
     nodesIds.forEach((id) => {
-      const highligthedNode = this.graph.node(id);
-      if (!highligthedNode) {
+      if (!this.graph.highlightNode(id)) {
         return;
       }
-      highligthedNode.elem.classList.add('highlight');
-
-      this.graph.nodeEdges(id).forEach((e) => {
-        const element = this.graph.edge(e).elem;
-        element.classList.add('highlight');
-
-        if (id === e.w) {
-          element.classList.add('highlight--inbound');
-        }
-      });
 
       wasHighlighted = true;
     });
 
     if (wasHighlighted) {
-      // Render highlighted connections above non-highlighted connections
-      d3.selectAll('.edgePath.highlight').raise();
-
       this.scrollTo(nodes);
-
       this.emit('highlight', nodesIds);
     } else {
       this.emit('highlight', null);
@@ -558,43 +449,14 @@ console.log(this.graph);return;
   }
 
   clearFocus() {
-    this.graphGroup
-      .selectAll('.dim')
-      .classed('dim', false);
+    this.graph.clearFocus();
 
     this.emit('focus', null);
   }
 
   focus(id) {
-    if (d3.event) {
-      d3.event.stopPropagation();
-    }
-
-    const [visitedNodes, visitedEdges] = findTraversableNodesAndEdges(this.graph, id);
-
-    this.graph.nodes().forEach((nodeId) => {
-      if (visitedNodes.has(nodeId)) {
-        return;
-      }
-
-      const data = this.graph.node(nodeId);
-      if (data.type !== 'cluster') {
-        data.elem.classList.add('dim');
-        data.labelElem.classList.add('dim');
-      }
-    });
-
-    this.graph.edges().forEach((edgeId) => {
-      if (visitedEdges.has(edgeId)) {
-        return;
-      }
-
-      this.graph.edge(edgeId).elem.classList.add('dim');
-    });
-
-    // Push the dimmed edges down below the rest so they don't cross over at any
-    // point
-    d3.selectAll('.edgePath.dim').lower();
+    this.graph.clearFocus();
+    this.graph.focus(id);
 
     this.scrollTo(id);
 
@@ -610,27 +472,35 @@ console.log(this.graph);return;
       nodesIds = [nodes];
     }
 
-    if (scrollToNodes(this, nodesIds)) {
+    if (this.graph.scrollToNodes(nodesIds)) {
       this.emit('scrollTo', nodesIds);
     }
   }
 
   expand(nodeId, scrollToSubclasses = true) {
-    const subclasses = new Set(this.currentDiagramModel.package_classes[nodeId]);
-    if (subclasses.size === 0 || [...subclasses][0] === nodeId) {
+    const subclasses = Array.from(new Set(this.currentDiagramModel.package_classes[nodeId]));
+    if (subclasses.length === 0 || subclasses[0] === nodeId) {
       return;
     }
 
-    this.graph.removeNode(nodeId);
+    const clusterId = `${nodeId}-cluster`;
+    const clusterNode = { id: clusterId, type: 'cluster' };
 
-    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster', className: 'cluster--foobar' };
-
-    setNode(this.graph, clusterNode);
-
+    this.graph.setNode(clusterNode);
+console.log(this.currentDiagramModel)
     subclasses.forEach((cls) => {
-      setNode(this.graph, { id: cls, type: 'class' }, clusterNode);
+      //console.log(cls)
+      this.graph.setNode({ id: cls, type: 'class' }, clusterId);
 
-      activeNodes(this, cls, this.currentDiagramModel.class_calls, (id) => {
+      getClassConnections(this.currentDiagramModel, cls).forEach((conn) => {
+        if (conn.type === 'in') {
+          this.graph.setEdge(conn.id, cls);
+        } else if (conn.type === 'out') {
+          this.graph.setEdge(cls, conn.id);
+        }
+      });
+
+      /*activeNodes(this, cls, this.currentDiagramModel.class_calls, (id) => {
         if (cls !== id) {
           setEdge(this.graph, cls, id);
         }
@@ -640,13 +510,13 @@ console.log(this.graph);return;
         if (cls !== id) {
           setEdge(this.graph, id, cls);
         }
-      });
+      });*/
     });
 
-    renderGraph(this);
+    this.graph.expand(nodeId, clusterId);
 
     if (scrollToSubclasses) {
-      this.scrollTo(Array.from(subclasses));
+      this.scrollTo(subclasses);
     }
 
     this.emit('expand', nodeId);
