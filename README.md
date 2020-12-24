@@ -89,11 +89,12 @@ diagram.on('postrender', (nodeId) => {
   console.log(`diagram has been rendered`);
 });
 ```
-- `highlight` - returns highlighted node ID, when no one node is highlighted - returns `null`
+- `highlight` - returns array with highlighted nodes IDs, when no one node is highlighted - returns `null`
+> **Note:** If only one node was highlighted - you'll get an array with only one element
 ```
-diagram.on('highlight', (nodeId) => {
-  if (nodeId) {
-    console.log(`node ${nodeId} was highlighted`);
+diagram.on('highlight', (nodeIds) => {
+  if (nodeIds) {
+    console.log(`nodes ${nodeIds.join(',')} were highlighted`);
   } else {
     console.log(`nothing is highlighted`);
   }
@@ -109,16 +110,11 @@ diagram.on('focus', (nodeId) => {
   }
 });
 ```
-- `scrollTo` - returns node ID which was centered by `.scrollTo` method
+- `scrollTo` - returns array with nodes IDs whose were centered by `.scrollTo` method
+> **Note:** If graph was scrolled to only one node - you'll get an array with only one element
 ```
-diagram.on('scrollTo', (nodeId) => {
-  console.log(`graph was scrolled to node ${nodeId}`);
-});
-```
-- `scrollTo` - returns node ID which was centered by `.scrollTo` method
-```
-diagram.on('scrollTo', (nodeId) => {
-  console.log(`graph was scrolled to node ${nodeId}`);
+diagram.on('scrollTo', (nodeIds) => {
+  console.log(`graph was scrolled to nodes ${nodeIds.join(',')}`);
 });
 ```
 - `expand` - returns expanded node ID
