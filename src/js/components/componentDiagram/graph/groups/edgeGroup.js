@@ -1,29 +1,78 @@
-import { createSVGElement } from '../util';
+import {
+  generateHash,
+  createSVGElement,
+  transformPoints,
+  normalizePoints,
+  getAnimationStep,
+} from '../util.js';
 
-import Path from '../shapes/path';
-import Marker from '../shapes/marker';
+import Path from '../shapes/path.js';
+import Marker from '../shapes/marker.js';
+
+function setPathPoints(edgeGroup, points) {
+  edgeGroup.points = points;
+  edgeGroup.path.setPoints(points);
+}
 
 export default class EdgeGroup {
-  constructor(points, arrowHeadSuffix = '') {
-    this.points = [];
-
-    points.forEach((p) => {
-      this.points.push([p.x, p.y]);
-    });
+  constructor(points, animationOptions = {}) {
+    this.animationOptions = animationOptions;
+    this.points = transformPoints(points);
 
     this.element = createSVGElement('g', 'edgePath');
+    this.path = new Path(this.points);
 
-    const arrowId = `arrowhead${arrowHeadSuffix}`;
-    const path = Path(this.points);
     const defs = createSVGElement('defs');
     const marker = Marker();
 
+    const arrowId = `arrowhead${generateHash()}`;
     marker.setAttribute('id', arrowId);
-    path.setAttribute('marker-end', `url(#${arrowId})`);
+    this.path.element.setAttribute('marker-end', `url(#${arrowId})`);
 
     defs.appendChild(marker);
 
-    this.element.appendChild(path);
+    this.element.appendChild(this.path.element);
     this.element.appendChild(defs);
+  }
+
+  move(points) {
+    if (this.animationOptions && this.animationOptions.enable) {
+      const startPoints = Array.from(this.points);
+      const endPoints = transformPoints(points);
+      normalizePoints(startPoints, endPoints);
+
+      const start = +new Date();
+      const { duration } = this.animationOptions;
+
+      const tick = () => {
+        const now = +new Date();
+        const percent = (now - start) / duration;
+
+        const currentPoints = [];
+
+        startPoints.forEach((item, index) => {
+          currentPoints.push([
+            getAnimationStep(item[0], endPoints[index][0], percent),
+            getAnimationStep(item[1], endPoints[index][1], percent),
+          ]);
+        });
+
+        setPathPoints(this, currentPoints);
+
+        if (percent < 1) {
+          window.requestAnimationFrame(tick);
+        } else {
+          setPathPoints(this, endPoints);
+        }
+      };
+      tick();
+    } else {
+      setPathPoints(this, points);
+    }
+  }
+
+  remove() {
+    const { element } = this;
+    element.parentNode.removeChild(element);
   }
 }

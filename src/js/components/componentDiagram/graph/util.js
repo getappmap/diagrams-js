@@ -1,3 +1,11 @@
+export function generateHash() {
+  return Math.random().toString(16).slice(2, 10);
+}
+
+export function getAnimationStep(from, to, percent) {
+  return percent < 1 ? from + (to - from) * percent : to;
+}
+
 export function createSVGElement(tagName, className = null) {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tagName);
 
@@ -6,6 +14,29 @@ export function createSVGElement(tagName, className = null) {
   }
 
   return el;
+}
+
+export function transformPoints(points) {
+  const result = [];
+
+  points.forEach((p) => {
+    result.push([p.x, p.y]);
+  });
+
+  return result;
+}
+
+export function normalizePoints(points1, points2) {
+  if (points1.length === points2.length) {
+    return;
+  }
+
+  const smaller = points1.length < points2.length ? points1 : points2;
+  const bigger = points2 === smaller ? points1 : points2;
+
+  for (let i = 0, len = bigger.length - smaller.length; i < len; i++) {
+    smaller.splice(0, 0, smaller[0]);
+  }
 }
 
 export function findTraversableNodesAndEdges(graph, id) {

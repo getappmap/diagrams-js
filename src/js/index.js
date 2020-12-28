@@ -1,6 +1,6 @@
 import '../scss/style.scss';
 
-import ComponentDiagram from './components/componentDiagram/index2';
+import ComponentDiagram from './components/componentDiagram';
 import FlowView from './components/flowView';
 import Timeline from './components/timeline';
 import Models from './models';

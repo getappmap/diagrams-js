@@ -1,8 +1,7 @@
-import { createSVGElement } from '../util';
+import { createSVGElement } from '../util.js';
 
 export default class LabelGroup {
   constructor(label, isHidden = false) {
-    this.label = label;
     this.element = createSVGElement('g', 'label');
 
     if (isHidden) {

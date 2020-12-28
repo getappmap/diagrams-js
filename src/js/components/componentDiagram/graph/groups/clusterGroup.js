@@ -1,6 +1,3 @@
-import LabelGroup from './labelGroup.js';
-import Cylinder from '../shapes/cylinder.js';
-import Parallelogram from '../shapes/parallelogram.js';
 import Rect from '../shapes/rect.js';
 import { getAnimationStep, createSVGElement } from '../util.js';
 
@@ -9,34 +6,14 @@ function setElementPosition(nodeGroup, x, y) {
   nodeGroup.position = { x, y };
 }
 
-export default class NodeGroup {
-  constructor(node, parent = null, animationOptions = {}) {
+export default class ClusterGroup {
+  constructor(node) {
     this.element = createSVGElement('g', `node ${node.class}`);
     this.element.dataset.id = node.id;
 
     setElementPosition(this, node.x, node.y);
 
-    this.animationOptions = animationOptions;
-
-    let shape;
-
-    switch (node.shape) {
-      case 'http':
-        shape = Parallelogram(node.width, node.height);
-        break;
-      case 'database':
-        shape = Cylinder(node.width, node.height);
-        break;
-      default:
-        shape = Rect(node.width, node.height);
-        break;
-    }
-
-    this.element.appendChild(shape);
-
-    const labelGroup = new LabelGroup(node.label);
-    labelGroup.element.setAttribute('transform', `translate(-${node.labelWidth / 2},-${node.labelHeight / 2})`);
-    this.element.appendChild(labelGroup.element);
+    this.element.appendChild(Rect(node.width, node.height));
   }
 
   move(x, y) {

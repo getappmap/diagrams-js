@@ -1,4 +1,4 @@
-import { createSVGElement } from '../util';
+import { createSVGElement } from '../util.js';
 
 export default function Cylinder(width, height) {
   const path = createSVGElement('path');

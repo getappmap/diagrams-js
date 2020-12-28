@@ -1,24 +1,36 @@
 import dagre from 'dagre';
+import deepmerge from 'deepmerge';
 
-import { createSVGElement, findTraversableNodesAndEdges, prepareNode } from './util';
-import NodeGroup from './groups/nodeGroup';
-import LabelGroup from './groups/labelGroup';
-import EdgeGroup from './groups/edgeGroup';
+import Geometry from '../../../helpers/geometry.js';
+
+import { createSVGElement, findTraversableNodesAndEdges, prepareNode } from './util.js';
+import ClusterGroup from './groups/clusterGroup.js';
+import NodeGroup from './groups/nodeGroup.js';
+import LabelGroup from './groups/labelGroup.js';
+import EdgeGroup from './groups/edgeGroup.js';
 
 const NODE_PADDING_HORIZONTAL = 15;
 const NODE_PADDING_VERTICAL = 10;
 
+const DEFAULT_OPTIONS = {
+  animation: {
+    enable: true,
+    duration: 300,
+  },
+};
+
 export default class Graph {
   constructor(element, options = {}) {
     this.element = element;
+    this.options = deepmerge(DEFAULT_OPTIONS, options);
 
     this.outputGroup = createSVGElement('g', 'output');
     this.edgesGroup = createSVGElement('g', 'edgePaths');
     this.clustersGroup = createSVGElement('g', 'clusters');
     this.nodesGroup = createSVGElement('g', 'nodes');
 
-    this.outputGroup.appendChild(this.edgesGroup);
     this.outputGroup.appendChild(this.clustersGroup);
+    this.outputGroup.appendChild(this.edgesGroup);
     this.outputGroup.appendChild(this.nodesGroup);
 
     this.element.innerHTML = '';
@@ -29,7 +41,7 @@ export default class Graph {
 
   setNode(data, parentId = null) {
     const node = prepareNode(data);
-    // create dummy <g class="node"> with label to detect label width
+    // create dummy <g class="node"> with label to determine label width
     const dummyNodeGroup = createSVGElement('g', 'node');
     const labelGroup = new LabelGroup(node.label, true);
     dummyNodeGroup.appendChild(labelGroup.element);
@@ -49,9 +61,34 @@ export default class Graph {
     }
   }
 
+  removeNode(id) {
+    const edges = this.graph.nodeEdges(id);
+    const node = this.graph.node(id);
+
+    if (edges) {
+      edges.forEach(({ v, w }) => {
+        const edge = this.graph.edge(v, w);
+        if (edge.group) {
+          edge.group.remove();
+        }
+        this.graph.removeEdge(v, w);
+      });
+    }
+
+    node.group.remove();
+    this.graph.removeNode(id);
+  }
+
   setEdge(start, end) {
-    console.log(start, end);
     if (start !== end) {
+      if (!this.graph.node(start)) {
+        this.setNode({ id: start, type: 'class' });
+      }
+
+      if (!this.graph.node(end)) {
+        this.setNode({ id: end, type: 'class' });
+      }
+
       this.graph.setEdge(start, end);
     }
   }
@@ -59,26 +96,46 @@ export default class Graph {
   render() {
     dagre.layout(this.graph);
 
-    this.element.setAttribute('width', this.graph.graph().width);
-    this.element.setAttribute('height', this.graph.graph().height);
-
     this.graph.nodes().forEach((id) => {
       const node = this.graph.node(id);
-      const nodeGroup = new NodeGroup(node);
 
-      node.element = nodeGroup.element;
+      if (node.group) {
+        node.group.move(node.x, node.y);
+        return;
+      }
 
-      this.nodesGroup.appendChild(nodeGroup.element);
+      if (node.type === 'cluster') {
+        const clusterGroup = new ClusterGroup(node);
+        node.group = clusterGroup;
+        this.clustersGroup.appendChild(clusterGroup.element);
+      } else {
+        const nodeGroup = new NodeGroup(node, this.options.animation);
+
+        node.group = nodeGroup;
+        node.element = nodeGroup.element;
+
+        this.nodesGroup.appendChild(nodeGroup.element);
+      }
     });
 
-    this.graph.edges().forEach(({ v, w }, index) => {
+    this.graph.edges().forEach(({ v, w }) => {
       const edge = this.graph.edge(v, w);
-      const edgeGroup = new EdgeGroup(edge.points, index);
-      edge.element = edgeGroup.element;
-      this.edgesGroup.appendChild(edgeGroup.element);
+
+      if (edge.group) {
+        edge.group.move(edge.points);
+      } else {
+        const edgeGroup = new EdgeGroup(edge.points, this.options.animation);
+        edgeGroup.element.classList.add(`nodes---${v}---${w}`);
+
+        edge.group = edgeGroup;
+        edge.element = edgeGroup.element;
+
+        this.edgesGroup.appendChild(edgeGroup.element);
+      }
     });
 
-    console.log(this.graph);
+    this.element.setAttribute('width', this.graph.graph().width);
+    this.element.setAttribute('height', this.graph.graph().height);
   }
 
   clearHighlights() {
@@ -150,33 +207,26 @@ export default class Graph {
   }
 
   expand(id) {
-    console.log(`Graph: expand(${id})`);
-
-    dagre.layout(this.graph);
-
-    this.element.setAttribute('width', this.graph.graph().width);
-    this.element.setAttribute('height', this.graph.graph().height);
-
-    this.graph.nodes().forEach((id) => {
-      const node = this.graph.node(id);
-      console.log(id, node);
-      const nodeGroup = new NodeGroup(node);
-
-      node.element = nodeGroup.element;
-
-      this.nodesGroup.appendChild(nodeGroup.element);
+    this.graph.edges().forEach(({ v, w }) => {
+      if (v === id || w === id) {
+        const edge = this.graph.edge(v, w);
+        if (edge.group) {
+          edge.group.remove();
+          this.graph.removeEdge(v, w);
+        }
+      }
     });
 
-    this.graph.edges().forEach(({ v, w }, index) => {
-      const edge = this.graph.edge(v, w);
-      const edgeGroup = new EdgeGroup(edge.points, index);
-      edge.element = edgeGroup.element;
-      this.edgesGroup.appendChild(edgeGroup.element);
-    });
+    this.removeNode(id);
+
+    this.render();
   }
 
-  scrollToNodes(nodes) {
-    return;
+  collapse(pkg) {
+    this.render();
+  }
+
+  scrollToNodes(container, nodes) {
     const nodesBox = {
       top: [],
       left: [],
@@ -211,8 +261,7 @@ export default class Graph {
     nodesBox.width = nodesBox.right - nodesBox.left;
     nodesBox.height = nodesBox.bottom - nodesBox.top;
 
-    const { containerController } = componentDiagram.container;
-    const containerBox = containerController.element.getBoundingClientRect();
+    const containerBox = container.getBoundingClientRect();
 
     if (Geometry.contains(containerBox, nodesBox)) {
       return false;
@@ -222,14 +271,38 @@ export default class Graph {
     const yRatio = containerBox.height / nodesBox.height;
     const scale = (xRatio > 1 && yRatio > 1) ? 1 : Math.min(xRatio, yRatio) - 0.01;
 
-    containerController.scaleTo(scale);
+    return {
+      scale,
+      x: nodesBox.width / 2 + nodesBox.offsetLeft,
+      y: nodesBox.height / 2 + nodesBox.offsetTop,
+    };
+  }
 
-    setTimeout(() => {
-      const x = nodesBox.width / 2 + nodesBox.offsetLeft;
-      const y = nodesBox.height / 2 + nodesBox.offsetTop;
-      containerController.translateTo(x, y);
-    }, 200);
+  makeRoot(id) {
+    const visitedNodes = new Set();
+    const visitedEdges = new Set();
+    const queue = [id];
 
-    return true;
+    while (queue.length > 0) {
+      const currentId = queue.pop();
+      if (!visitedNodes.has(currentId)) {
+        this.graph.outEdges(currentId).forEach((e) => {
+          visitedEdges.add(e);
+          queue.push(e.w);
+        });
+
+        visitedNodes.add(currentId);
+      }
+    }
+
+    // cleanup non traversable nodes
+    this.graph.nodes().forEach((node) => {
+      if (visitedNodes.has(node)) {
+        return;
+      }
+      this.removeNode(node);
+    });
+
+    this.render();
   }
 }

@@ -1,4 +1,4 @@
-import { createSVGElement } from '../util';
+import { createSVGElement } from '../util.js';
 
 export default function Rect(width, height) {
   const rect = createSVGElement('rect');

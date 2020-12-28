@@ -512,6 +512,21 @@ export function panToNode(viewport, node) {
   viewport.translateTo(node.offsetLeft, node.offsetTop, target);
 }
 
+export function getEventTarget(target, container = document, selector = '') {
+  const selectedElements = Array.from(container.querySelectorAll(selector));
+  let el = target;
+
+  while (el) {
+    if (selectedElements.includes(el)) {
+      break;
+    }
+
+    el = el.parentNode;
+  }
+
+  return el;
+}
+
 export {
   capitalizeString,
   color,
