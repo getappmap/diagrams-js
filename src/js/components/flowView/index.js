@@ -145,8 +145,15 @@ function eventToBehavior(e) {
     exceptions: [],
     x: 0,
     y: 0,
-    data: e,
   };
+
+  // Backward cyclic references shall not be enumerable
+  Object.defineProperty(behavior, 'data', {
+    enumerable: false,
+    writable: true,
+  });
+
+  behavior.data = e;
 
   // add a reverse lookup as well
   e.behavior = behavior;
