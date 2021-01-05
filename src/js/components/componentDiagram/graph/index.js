@@ -125,7 +125,8 @@ export default class Graph {
         edge.group.move(edge.points);
       } else {
         const edgeGroup = new EdgeGroup(edge.points, this.options.animation);
-        edgeGroup.element.classList.add(`nodes---${v}---${w}`);
+        edgeGroup.element.dataset.from = v;
+        edgeGroup.element.dataset.to = w;
 
         edge.group = edgeGroup;
         edge.element = edgeGroup.element;

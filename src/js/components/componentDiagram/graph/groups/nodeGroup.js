@@ -10,7 +10,7 @@ function setElementPosition(nodeGroup, x, y) {
 }
 
 export default class NodeGroup {
-  constructor(node, parent = null, animationOptions = {}) {
+  constructor(node, animationOptions = {}) {
     this.element = createSVGElement('g', `node ${node.class}`);
     this.element.dataset.id = node.id;
 
