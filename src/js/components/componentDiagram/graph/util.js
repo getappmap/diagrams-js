@@ -16,6 +16,7 @@ export function createSVGElement(tagName, className = null) {
   return el;
 }
 
+// transform 'dagre' points into simple array which will be passed to 'd3-line' helper
 export function transformPoints(points) {
   const result = [];
 
@@ -26,6 +27,7 @@ export function transformPoints(points) {
   return result;
 }
 
+// when we need to transition between 2 edges with different points length - fill smaller array with copies of it's first point
 export function normalizePoints(points1, points2) {
   if (points1.length === points2.length) {
     return;
