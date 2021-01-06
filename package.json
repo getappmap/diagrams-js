@@ -1,6 +1,6 @@
 {
   "name": "@appland/diagrams",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "Diagrams for visualizations of appland.org data",
   "main": "dist/@appland/diagrams.umd.js",
   "module": "dist/@appland/diagrams.esm.js",
