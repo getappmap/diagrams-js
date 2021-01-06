@@ -13,6 +13,7 @@ export default class NodeGroup {
   constructor(node, animationOptions = {}) {
     this.element = createSVGElement('g', `node ${node.class}`);
     this.element.dataset.id = node.id;
+    this.element.setAttribute('opacity', 0);
 
     setElementPosition(this, node.x, node.y);
 
@@ -37,6 +38,29 @@ export default class NodeGroup {
     const labelGroup = new LabelGroup(node.label);
     labelGroup.element.setAttribute('transform', `translate(-${node.labelWidth / 2},-${node.labelHeight / 2})`);
     this.element.appendChild(labelGroup.element);
+  }
+
+  show() {
+    if (this.animationOptions && this.animationOptions.enable) {
+      const start = +new Date();
+      const { duration } = this.animationOptions;
+
+      const tick = () => {
+        const now = +new Date();
+        const percent = (now - start) / duration;
+
+        this.element.setAttribute('opacity', percent);
+
+        if (percent < 1) {
+          window.requestAnimationFrame(tick);
+        } else {
+          this.element.setAttribute('opacity', 1);
+        }
+      };
+      tick();
+    } else {
+      this.element.setAttribute('opacity', 1);
+    }
   }
 
   move(x, y) {

@@ -20,6 +20,7 @@ export default class EdgeGroup {
     this.points = transformPoints(points);
 
     this.element = createSVGElement('g', 'edgePath');
+    this.element.setAttribute('opacity', 0);
     this.path = new Path(this.points);
 
     const defs = createSVGElement('defs');
@@ -33,6 +34,29 @@ export default class EdgeGroup {
 
     this.element.appendChild(this.path.element);
     this.element.appendChild(defs);
+  }
+
+  show() {
+    if (this.animationOptions && this.animationOptions.enable) {
+      const start = +new Date();
+      const { duration } = this.animationOptions;
+
+      const tick = () => {
+        const now = +new Date();
+        const percent = (now - start) / duration;
+
+        this.element.setAttribute('opacity', percent);
+
+        if (percent < 1) {
+          window.requestAnimationFrame(tick);
+        } else {
+          this.element.setAttribute('opacity', 1);
+        }
+      };
+      tick();
+    } else {
+      this.element.setAttribute('opacity', 1);
+    }
   }
 
   move(points) {

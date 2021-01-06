@@ -120,6 +120,8 @@ export default class Graph {
         node.element = nodeGroup.element;
 
         this.nodesGroup.appendChild(nodeGroup.element);
+
+        nodeGroup.show();
       }
     });
 
@@ -137,6 +139,8 @@ export default class Graph {
         edge.element = edgeGroup.element;
 
         this.edgesGroup.appendChild(edgeGroup.element);
+
+        edgeGroup.show();
       }
     });
 
