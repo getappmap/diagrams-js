@@ -2,8 +2,8 @@
   "name": "@appland/diagrams",
   "version": "0.5.5",
   "description": "Diagrams for visualizations of appland.org data",
-  "main": "dist/@appland/diagrams.js",
-  "module": "src/index.js",
+  "main": "dist/@appland/diagrams.umd.js",
+  "module": "dist/@appland/diagrams.esm.js",
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "serve": "rollup -c rollup.config.js --watch",

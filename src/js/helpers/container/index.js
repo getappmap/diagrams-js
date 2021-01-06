@@ -1,4 +1,4 @@
-import d3 from 'd3';
+import * as d3 from 'd3';
 import deepmerge from 'deepmerge';
 
 import momentum from '../momentum/index.js';

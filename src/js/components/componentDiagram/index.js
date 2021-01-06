@@ -1,5 +1,5 @@
 import dagreD3 from 'dagre-d3';
-import d3 from 'd3';
+import * as d3 from 'd3';
 import deepmerge from 'deepmerge';
 
 import { getRepositoryUrl } from '../../util.js';
