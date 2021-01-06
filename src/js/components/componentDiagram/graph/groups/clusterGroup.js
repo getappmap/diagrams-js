@@ -8,7 +8,16 @@ function setElementPosition(nodeGroup, x, y) {
 
 export default class ClusterGroup {
   constructor(node) {
-    this.element = createSVGElement('g', `node ${node.class}`);
+    let clusterType = 'cluster--package';
+    if (node.id === 'HTTP-cluster') {
+      clusterType = 'cluster--http';
+    } else if (node.id === 'SQL-cluster') {
+      clusterType = 'cluster--database';
+    }
+
+    const classBordered = node.children > 1 ? 'cluster--bordered' : '';
+
+    this.element = createSVGElement('g', `node ${node.class} ${clusterType} ${classBordered}`);
     this.element.dataset.id = node.id;
 
     setElementPosition(this, node.x, node.y);

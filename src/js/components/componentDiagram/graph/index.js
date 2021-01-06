@@ -54,6 +54,11 @@ export default class Graph {
     node.width = labelBBox.width + NODE_PADDING_HORIZONTAL * 2;
     node.height = labelBBox.height + NODE_PADDING_VERTICAL * 2;
 
+    const parent = this.graph.node(parentId);
+    if (parent && parent.id === 'HTTP-cluster') {
+      node.class = 'http';
+    }
+
     this.graph.setNode(node.id, node);
 
     if (parentId) {
