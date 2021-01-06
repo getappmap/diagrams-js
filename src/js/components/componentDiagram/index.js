@@ -173,29 +173,6 @@ function bindEvents(componentDiagram) {
     d3.select(svg).selectAll('.edgePath.highlight').raise();
 
     componentDiagram.emit('edge', [edge.parentNode.dataset.from, edge.parentNode.dataset.to]);
-<<<<<<< HEAD
-=======
-  });
-}
-
-function renderGraph(componentDiagram) {
-  componentDiagram.element.selectAll('.cluster').nodes().forEach((cluster) => {
-    const parentNode = cluster.getAttribute('id').replace(/-cluster$/g, '');
-    if (componentDiagram.hasPackage(parentNode)) {
-      let clusterType = 'cluster--package';
-      if (parentNode === 'HTTP') {
-        clusterType = 'cluster--http';
-      } else if (parentNode === 'SQL') {
-        clusterType = 'cluster--database';
-      }
-      cluster.classList.add(clusterType);
-
-      const packageClasses = componentDiagram.currentDiagramModel.package_classes[parentNode];
-      if (packageClasses.size > 1) {
-        cluster.classList.add('cluster--bordered');
-      }
-    }
->>>>>>> 39d16c1... Remove unused NodeGroup parameter, store connecting node names in edge dataset
   });
 }
 
