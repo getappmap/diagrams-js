@@ -34,18 +34,6 @@
 
 
 <script type="text/javascript">
-  function aggregateEvents(events, classMap) {
-    const eventInfo = new Appmap.Models.EventInfo(classMap);
-    const callTree = new Appmap.Models.CallTree(events);
-
-    callTree.dataStore.rootEvent.forEach((e) => {
-      e.displayName = eventInfo.getName(e.input);
-      e.labels = eventInfo.getLabels(e.input);
-    });
-
-    return callTree;
-  }
-
   function onLoad() {
     {
       var diagram = new Appmap.ComponentDiagram('#component-diagram', {
@@ -59,8 +47,7 @@
       window.diagram = diagram;
     }
     {
-      const callTree = aggregateEvents(window.scenarioData.data.events,
-        window.scenarioData.data.classMap);
+      const callTree = new Appmap.Models.CallTree(window.scenarioData.data.events);
 
       var flowView = new Appmap.FlowView('#flow-view', {
         theme: 'dark',
