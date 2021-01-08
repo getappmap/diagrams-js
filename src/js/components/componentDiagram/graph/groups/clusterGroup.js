@@ -53,6 +53,14 @@ export default class ClusterGroup {
     }
   }
 
+  resize(width, height) {
+    const rect = this.element.querySelector('rect');
+    rect.setAttribute('x', -(width / 2));
+    rect.setAttribute('y', -(height / 2));
+    rect.setAttribute('width', width);
+    rect.setAttribute('height', height);
+  }
+
   remove() {
     const { element } = this;
     element.parentNode.removeChild(element);

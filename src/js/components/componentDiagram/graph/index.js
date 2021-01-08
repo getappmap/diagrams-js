@@ -106,6 +106,11 @@ export default class Graph {
 
       if (node.group) {
         node.group.move(node.x, node.y);
+
+        if (node.type === 'cluster') {
+          node.group.resize(node.width, node.height);
+        }
+
         return;
       }
 
