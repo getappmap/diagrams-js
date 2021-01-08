@@ -12,6 +12,7 @@ export default {
       file: `dist/${meta.name}.js`,
       name: 'Appmap',
       format: 'umd',
+      sourcemap: true,
       globals: {
         d3: 'd3',
       },

@@ -171,7 +171,7 @@ function eventToBehavior(e) {
     });
   }
 
-  if (has.call(input, 'parameters')) {
+  if (has.call(input, 'parameters') && Array.isArray(input.parameters)) {
     input.parameters.forEach((p) => {
       behavior.in.push({
         name: formatIdentifier(p.name),
