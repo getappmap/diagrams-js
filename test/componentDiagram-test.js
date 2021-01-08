@@ -43,8 +43,8 @@ test('component diagram', (t) => {
     t.end();
   }));
 
-  t.test('should have 17 nodes', setupDiagram((t) => {
-    t.equal(elem.querySelectorAll('.nodes g.node').length, 17);
+  t.test('does not expand too many nodes', setupDiagram((t) => {
+    t.equal(elem.querySelectorAll('.nodes g.node').length, 6);
     t.end();
   }));
 
