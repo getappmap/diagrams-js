@@ -523,7 +523,7 @@ export default class ComponentDiagram extends Models.EventSource {
     }
   }
 
-  highlight(nodes) {
+  highlight(nodes, emit = true) {
     this.clearHighlights(true);
 
     if (d3.event) {
@@ -565,8 +565,10 @@ export default class ComponentDiagram extends Models.EventSource {
 
       this.scrollTo(nodes);
 
-      this.emit('highlight', nodesIds);
-    } else {
+      if (emit) {
+        this.emit('highlight', nodesIds);
+      }
+    } else if (emit) {
       this.emit('highlight', null);
     }
 
