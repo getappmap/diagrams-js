@@ -193,7 +193,7 @@ function setNode(graph, node, parent = null) {
 }
 
 function setEdge(graph, v, w) {
-  return graph.setEdge(v, w, { curve: d3.curveBasis, arrowheadStyle: 'stroke-width:0', class: `nodes---${v}---${w}` });
+  return graph.setEdge(v, w, { curve: d3.curveBasis, arrowheadStyle: 'stroke-width:0', class: `nodes---${window.encodeURI(v)}---${window.encodeURI(w)}` });
 }
 
 const render = new dagreD3.render(); // eslint-disable-line new-cap
@@ -332,7 +332,7 @@ function renderGraph(componentDiagram) {
       componentDiagram.graphGroup.selectAll('.edgePath.highlight').raise();
 
       const nodesClass = edge.parentNode.getAttribute('class').split(' ').filter((cls) => /^nodes-/.test(cls))[0];
-      const nodes = nodesClass.split('---');
+      const nodes = nodesClass.split('---').map((i) => window.decodeURI(i));
       nodes.shift();
       componentDiagram.emit('edge', nodes);
     });
