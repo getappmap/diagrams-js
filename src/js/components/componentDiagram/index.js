@@ -1,12 +1,10 @@
-import * as dagreD3 from 'dagre-d3';
 import * as d3 from 'd3';
 import deepmerge from 'deepmerge';
 
-import { getRepositoryUrl } from '../../util.js';
-import { bindShapes } from './componentDiagramShapes.js';
+import { hashify, getRepositoryUrl, getEventTarget } from '../../util.js';
 import Models from '../../models.js';
 import Container from '../../helpers/container/index.js';
-import Geometry from '../../helpers/geometry.js';
+import Graph from './graph/index.js';
 
 export const DEFAULT_TARGET_COUNT = 1;
 const IDEAL_CHILD_COUNT = 1;
@@ -109,301 +107,73 @@ function mixedDiagram(graphDefinition, targetNodeCount = DEFAULT_TARGET_COUNT) {
       id,
       type: packages.has(id) ? 'package' : 'class',
     };
+    setChildrenCount(obj[id], graphDefinition);
     return obj;
   }, {}));
 
   return { edges, nodes };
 }
 
-/// helper function to get value for data-parent-type attr
-function getParentType(id, classPackage) {
-  let parent = classPackage[id];
-  if (parent) {
-    parent = parent.toLowerCase();
-    switch (parent) {
-      case 'http':
-      case 'sql':
-        return parent;
-      default:
-        return 'package';
-    }
-  } else return 'none';
+function setChildrenCount(obj, model) {
+  const childrenCount = new Set(model.package_classes[obj.id]).size;
+  if (childrenCount && childrenCount > 1) {
+    obj.label = `${obj.id} (${childrenCount})`;
+  }
 }
 
-function hashify(obj) {
-  const clone = { ...obj };
-  Object.keys(obj).forEach((key) => {
-    const val = obj[key];
-    if (Array.isArray(val)) {
-      clone[key] = new Set(val);
-    } else if (val instanceof Set) {
-      clone[key] = val;
-    } else if (val && typeof val === 'object') {
-      clone[key] = hashify(val);
-    } else {
-      clone[key] = val;
-    }
-  });
-  return clone;
-}
-
-function activeNodes(componentDiagram, key, list, fn) {
-  const relevantArray = list[key];
-  if (relevantArray) {
-    relevantArray.forEach((classId) => {
-      if (componentDiagram.graph.node(classId)) {
+function activeNodes(graph, model, list, fn) {
+  if (list) {
+    list.forEach((classId) => {
+      if (graph.node(classId)) {
         fn(classId);
         return;
       }
 
-      const classPackage = componentDiagram.currentDiagramModel.class_package[classId];
-      if (componentDiagram.graph.node(classPackage)) {
+      const classPackage = model.class_package[classId];
+      if (graph.node(classPackage)) {
         fn(classPackage);
       }
     });
   }
 }
 
-function setNode(graph, node, parent = null) {
-  node.label = node.label || node.id;
-  node.class = node.class || node.type;
+function bindEvents(componentDiagram) {
+  const svg = componentDiagram.element.node();
 
-  if (node.id === 'HTTP') {
-    node.label = 'HTTP server requests';
-    node.shape = 'http';
-    node.class = 'http';
-  } else if (node.id === 'SQL') {
-    node.label = 'Database';
-    node.shape = 'database';
-    node.class = 'database';
-  }
-  if (node.type === 'cluster') {
-    node.label = '';
-  }
-
-  node.paddingRight = 25;
-
-  graph.setNode(node.id, node);
-
-  if ( parent ) {
-    graph.setParent(node.id, parent.id);
-  }
-
-  return graph;
-}
-
-function setEdge(graph, v, w) {
-  return graph.setEdge(v, w, { curve: d3.curveBasis, arrowheadStyle: 'stroke-width:0', class: `nodes---${v}---${w}` });
-}
-
-const render = new dagreD3.render(); // eslint-disable-line new-cap
-bindShapes(render);
-
-function findTraversableNodesAndEdges(graph, id) {
-  const visitedNodes = new Set();
-  const visitedEdges = new Set();
-  const queue = [id];
-
-  // traverse left from id
-  while (queue.length > 0) {
-    const currentId = queue.pop();
-    if (!visitedNodes.has(currentId)) {
-      graph.inEdges(currentId).forEach((e) => {
-        visitedEdges.add(e);
-        queue.push(e.v);
-      });
-
-      visitedNodes.add(currentId);
-    }
-  }
-
-  // traverse right from id
-  queue.push(id);
-  visitedNodes.delete(id);
-
-  while (queue.length > 0) {
-    const currentId = queue.pop();
-    if (!visitedNodes.has(currentId)) {
-      graph.outEdges(currentId).forEach((e) => {
-        visitedEdges.add(e);
-        queue.push(e.w);
-      });
-
-      visitedNodes.add(currentId);
-    }
-  }
-  return [visitedNodes, visitedEdges];
-}
-
-function renderGraph(componentDiagram) {
-  // Clear any old state
-  componentDiagram.element.html('');
-
-  render(componentDiagram.element, componentDiagram.graph);
-
-  componentDiagram.graphGroup = componentDiagram.element.select('g.output');
-  componentDiagram.graphGroup
-    .selectAll('g.node')
-    .on('click', (id) => componentDiagram.highlight(id))
-    .on('dblclick', (id) => componentDiagram.focus(id));
-
-  componentDiagram.labelGroup = componentDiagram.graphGroup
-    .append('g')
-    .attr('class', 'nodeLabels');
-
-  // HACK:
-  // dagre-d3 adds node labels directly within node groups and doesn't
-  // provide a way to change this behavior. Eventually we'll want to drop
-  // dagre-d3 and write the d3 rendering ourselves. Until then, orphan the
-  // label elements and reattach them in the nodeLabels group. This is an
-  // optimization. Keeping the labels in a single group allows them to be
-  // animated in a more performant manner.
-  componentDiagram.graphGroup
-    .node()
-    .querySelectorAll('g.nodes g.label')
-    .forEach((e) => {
-      const id = e.parentElement.getAttribute('id');
-      const transform = e.parentElement.getAttribute('transform');
-      const data = componentDiagram.graph.node(id);
-
-      // TODO:
-      // find a better and more consistent way to pass attributes
-      // to rendered element from corresponding node
-
-      // set parent-type data attribute
-      e.parentElement.setAttribute('data-parent-type', getParentType(id, componentDiagram.currentDiagramModel.class_package));
-      e.parentElement.removeChild(e);
-      componentDiagram.labelGroup.node().appendChild(e);
-
-      e.classList.add(data.class);
-      e.setAttribute('id', id);
-      e.setAttribute('transform', transform);
-
-      const packageClasses = componentDiagram.currentDiagramModel.package_classes[id];
-      if (packageClasses && packageClasses.size > 1) {
-        const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-        tspan.setAttribute('class', 'label__children-count');
-        tspan.textContent = ` (${packageClasses.size})`;
-        e.querySelector('text').appendChild(tspan);
-
-        const tspanWidth = tspan.getBBox().width;
-
-        let [transformOrig, translateX, translateY] = transform.match(/translate\(([0-9\.]+),([0-9\.]+)\)/);
-        translateX = parseFloat(translateX) - tspanWidth / 2;
-
-        e.setAttribute('transform', `translate(${translateX},${translateY})`);
-      }
-
-      data.labelElem = e;
-    });
-
-  componentDiagram.element.selectAll('.cluster').nodes().forEach((cluster) => {
-    const parentNode = cluster.getAttribute('id').replace(/-cluster$/g, '');
-    if (componentDiagram.hasPackage(parentNode)) {
-      let clusterType = 'cluster--package';
-      if (parentNode === 'HTTP') {
-        clusterType = 'cluster--http';
-      } else if (parentNode === 'SQL') {
-        clusterType = 'cluster--database';
-      }
-      cluster.classList.add(clusterType);
-
-      const packageClasses = componentDiagram.currentDiagramModel.package_classes[parentNode];
-      if (packageClasses.size > 1) {
-        cluster.classList.add('cluster--bordered');
-      }
-    }
-  });
-
-  const bbox = componentDiagram.graphGroup.node().getBBox();
-  componentDiagram.element
-    .attr('width', `${bbox.width}px`)
-    .attr('height', `${bbox.height}px`)
-    .attr('viewBox', `${bbox.x}, ${bbox.y}, ${bbox.width}, ${bbox.height}`);
-
-  componentDiagram.element.selectAll('.edgePath > path').nodes().forEach((edge) => {
-    // highlight edge on mouse click
-    edge.addEventListener('click', (event) => {
-      event.stopPropagation();
-      componentDiagram.graphGroup
-        .selectAll('.edgePath.highlight, .edgePath.highlight--inbound')
-        .classed('highlight highlight--inbound', false);
-      edge.parentNode.classList.add('highlight');
-      componentDiagram.graphGroup.selectAll('.edgePath.highlight').raise();
-
-      const nodesClass = edge.parentNode.getAttribute('class').split(' ').filter((cls) => /^nodes-/.test(cls))[0];
-      const nodes = nodesClass.split('---');
-      nodes.shift();
-      componentDiagram.emit('edge', nodes);
-    });
-
-    // set arrow url with hash (without page url and query params)
-    const markerEnd = edge.getAttribute('marker-end');
-    const matchedURL = markerEnd.match(/^url\((.*)\)$/);
-    if (markerEnd && matchedURL.length > 1) {
-      const url = new URL(matchedURL[1]);
-      edge.setAttribute('marker-end', `url(${url.hash})`);
-    }
-  });
-
-  componentDiagram.emit('postrender');
-}
-
-function scrollToNodes(componentDiagram, nodes) {
-  const nodesBox = {
-    top: [],
-    left: [],
-    right: [],
-    bottom: [],
-    x: [],
-    y: [],
-  };
-
-  nodes.forEach((id) => {
-    const node = componentDiagram.graph.node(id);
+  svg.addEventListener('click', (event) => {
+    const node = getEventTarget(event.target, svg, 'g.nodes g.node');
     if (!node) {
       return;
     }
 
-    const nodeBox = node.elem.getBoundingClientRect();
-    nodesBox.top.push(nodeBox.top);
-    nodesBox.left.push(nodeBox.left);
-    nodesBox.right.push(nodeBox.right);
-    nodesBox.bottom.push(nodeBox.bottom);
-    nodesBox.x.push(node.x - nodeBox.width / 2);
-    nodesBox.y.push(node.y - nodeBox.height / 2);
+    event.stopPropagation();
+    componentDiagram.highlight(node.dataset.id);
   });
 
-  nodesBox.top = Math.min(...nodesBox.top);
-  nodesBox.left = Math.min(...nodesBox.left);
-  nodesBox.right = Math.max(...nodesBox.right);
-  nodesBox.bottom = Math.max(...nodesBox.bottom);
-  nodesBox.offsetTop = Math.min(...nodesBox.y);
-  nodesBox.offsetLeft = Math.min(...nodesBox.x);
+  svg.addEventListener('dblclick', (event) => {
+    const node = getEventTarget(event.target, svg, 'g.nodes g.node');
+    if (!node) {
+      return;
+    }
 
-  nodesBox.width = nodesBox.right - nodesBox.left;
-  nodesBox.height = nodesBox.bottom - nodesBox.top;
+    event.stopPropagation();
+    componentDiagram.focus(node.dataset.id);
+  });
 
-  const { containerController } = componentDiagram.container;
-  const containerBox = containerController.element.getBoundingClientRect();
+  svg.addEventListener('click', (event) => {
+    const edge = getEventTarget(event.target, svg, '.edgePath > path');
+    if (!edge) {
+      return;
+    }
 
-  if (Geometry.contains(containerBox, nodesBox)) {
-    return false;
-  }
+    event.stopPropagation();
+    componentDiagram.clearHighlights(true);
 
-  const xRatio = containerBox.width / nodesBox.width;
-  const yRatio = containerBox.height / nodesBox.height;
-  const scale = (xRatio > 1 && yRatio > 1) ? 1 : Math.min(xRatio, yRatio) - 0.01;
+    edge.parentNode.classList.add('highlight');
+    d3.select(svg).selectAll('.edgePath.highlight').raise();
 
-  containerController.scaleTo(scale);
-
-  setTimeout(() => {
-    const x = nodesBox.width / 2 + nodesBox.offsetLeft;
-    const y = nodesBox.height / 2 + nodesBox.offsetTop;
-    containerController.translateTo(x, y);
-  }, 200);
-
-  return true;
+    componentDiagram.emit('edge', [edge.parentNode.dataset.from, edge.parentNode.dataset.to]);
+  });
 }
 
 const COMPONENT_OPTIONS = {
@@ -412,24 +182,24 @@ const COMPONENT_OPTIONS = {
       (item) => item
         .text('Set as root')
         .selector('.nodes .node')
-        .transform((e) => e.getAttribute('id'))
+        .transform((e) => e.dataset.id)
         .on('execute', (id) => componentDiagram.makeRoot(id)),
       (item) => item
         .text('Expand')
         .selector('g.node')
-        .transform((e) => e.getAttribute('id'))
+        .transform((e) => e.dataset.id)
         .condition((id) => componentDiagram.hasPackage(id))
         .on('execute', (id) => componentDiagram.expand(id)),
       (item) => item
         .text('Collapse')
         .selector('g.node')
-        .transform((e) => e.getAttribute('id'))
+        .transform((e) => e.dataset.id)
         .condition((id) => !componentDiagram.hasPackage(id))
         .on('execute', (id) => componentDiagram.collapse(id)),
       (item) => item
         .text('View source')
         .selector('g.node.class')
-        .transform((e) => componentDiagram.sourceLocation(e.getAttribute('id')))
+        .transform((e) => componentDiagram.sourceLocation(e.dataset.id))
         .on('execute', (repoUrl) => window.open(repoUrl)),
       (item) => item
         .text('Reset view')
@@ -490,19 +260,21 @@ export default class ComponentDiagram extends Models.EventSource {
 
     this.currentDiagramModel = hashify(data);
 
-    this.graph = new dagreD3.graphlib.Graph({ compound: true })
-      .setGraph({ rankdir: 'LR' })
-      .setDefaultEdgeLabel(function() { return {}; });
-
-    const { nodes, edges } = mixedDiagram(this.currentDiagramModel, this.targetCount);
-    nodes.forEach((node) => setNode(this.graph, node));
-    edges.forEach(([start, end]) => {
-      if (start !== end) {
-        setEdge(this.graph, start, end);
-      }
+    this.graph = new Graph(this.element.node(), {
+      animation: {
+        duration: 600,
+      },
     });
 
-    renderGraph(this);
+    const { nodes, edges } = mixedDiagram(this.currentDiagramModel, this.targetCount);
+    nodes.forEach((node) => {
+      this.graph.setNode(node);
+    });
+    edges.forEach(([start, end]) => this.graph.setEdge(start, end));
+
+    this.graph.render();
+
+    bindEvents(this);
 
     // expand nodes with 1 child
     Object.entries(this.currentDiagramModel.package_classes).forEach(([nodeId, children]) => {
@@ -511,12 +283,12 @@ export default class ComponentDiagram extends Models.EventSource {
         this.expand(nodeId, false);
       }
     });
+
+    this.emit('postrender');
   }
 
   clearHighlights(noEvent = false) {
-    this.graphGroup
-      .selectAll('.highlight, .highlight--inbound')
-      .classed('highlight highlight--inbound', false);
+    this.graph.clearHighlights();
 
     if (!noEvent) {
       this.emit('highlight', null);
@@ -525,10 +297,6 @@ export default class ComponentDiagram extends Models.EventSource {
 
   highlight(nodes) {
     this.clearHighlights(true);
-
-    if (d3.event) {
-      d3.event.stopPropagation();
-    }
 
     let nodesIds = [];
 
@@ -541,30 +309,15 @@ export default class ComponentDiagram extends Models.EventSource {
     let wasHighlighted = false;
 
     nodesIds.forEach((id) => {
-      const highligthedNode = this.graph.node(id);
-      if (!highligthedNode) {
+      if (!this.graph.highlightNode(id)) {
         return;
       }
-      highligthedNode.elem.classList.add('highlight');
-
-      this.graph.nodeEdges(id).forEach((e) => {
-        const element = this.graph.edge(e).elem;
-        element.classList.add('highlight');
-
-        if (id === e.w) {
-          element.classList.add('highlight--inbound');
-        }
-      });
 
       wasHighlighted = true;
     });
 
     if (wasHighlighted) {
-      // Render highlighted connections above non-highlighted connections
-      d3.selectAll('.edgePath.highlight').raise();
-
       this.scrollTo(nodes);
-
       this.emit('highlight', nodesIds);
     } else {
       this.emit('highlight', null);
@@ -574,43 +327,14 @@ export default class ComponentDiagram extends Models.EventSource {
   }
 
   clearFocus() {
-    this.graphGroup
-      .selectAll('.dim')
-      .classed('dim', false);
+    this.graph.clearFocus();
 
     this.emit('focus', null);
   }
 
   focus(id) {
-    if (d3.event) {
-      d3.event.stopPropagation();
-    }
-
-    const [visitedNodes, visitedEdges] = findTraversableNodesAndEdges(this.graph, id);
-
-    this.graph.nodes().forEach((nodeId) => {
-      if (visitedNodes.has(nodeId)) {
-        return;
-      }
-
-      const data = this.graph.node(nodeId);
-      if (data.type !== 'cluster') {
-        data.elem.classList.add('dim');
-        data.labelElem.classList.add('dim');
-      }
-    });
-
-    this.graph.edges().forEach((edgeId) => {
-      if (visitedEdges.has(edgeId)) {
-        return;
-      }
-
-      this.graph.edge(edgeId).elem.classList.add('dim');
-    });
-
-    // Push the dimmed edges down below the rest so they don't cross over at any
-    // point
-    d3.selectAll('.edgePath.dim').lower();
+    this.graph.clearFocus();
+    this.graph.focus(id);
 
     this.scrollTo(id);
 
@@ -626,49 +350,59 @@ export default class ComponentDiagram extends Models.EventSource {
       nodesIds = [nodes];
     }
 
-    if (scrollToNodes(this, nodesIds)) {
+    const { containerController } = this.container;
+
+    const scrollOptions = this.graph.scrollToNodes(containerController.element, nodesIds);
+
+    if (scrollOptions) {
+      containerController.scaleTo(scrollOptions.scale);
+
+      setTimeout(() => {
+        containerController.translateTo(scrollOptions.x, scrollOptions.y);
+      }, 200);
+
       this.emit('scrollTo', nodesIds);
     }
   }
 
   expand(nodeId, scrollToSubclasses = true) {
-    const subclasses = new Set(this.currentDiagramModel.package_classes[nodeId]);
-    if (subclasses.size === 0 || [...subclasses][0] === nodeId) {
+    const subclasses = Array.from(new Set(this.currentDiagramModel.package_classes[nodeId]));
+    if (subclasses.length === 0 || subclasses[0] === nodeId) {
       return;
     }
 
-    this.graph.removeNode(nodeId);
+    const clusterId = `${nodeId}-cluster`;
+    const clusterNode = { id: clusterId, type: 'cluster', children: subclasses.length };
 
-    const clusterNode = { id: `${nodeId}-cluster`, type: 'cluster', className: 'cluster--foobar' };
-
-    setNode(this.graph, clusterNode);
+    this.graph.setNode(clusterNode);
 
     subclasses.forEach((cls) => {
-      setNode(this.graph, { id: cls, type: 'class' }, clusterNode);
+      this.graph.setNode({ id: cls, type: 'class' }, clusterId);
 
-      activeNodes(this, cls, this.currentDiagramModel.class_calls, (id) => {
+      const model = this.currentDiagramModel;
+      activeNodes(this.graph.graph, model, model.class_calls[cls], (id) => {
         if (cls !== id) {
-          setEdge(this.graph, cls, id);
+          this.graph.setEdge(cls, id);
         }
       });
 
-      activeNodes(this, cls, this.currentDiagramModel.class_callers, (id) => {
+      activeNodes(this.graph.graph, model, model.class_callers[cls], (id) => {
         if (cls !== id) {
-          setEdge(this.graph, id, cls);
+          this.graph.setEdge(id, cls);
         }
       });
     });
 
-    renderGraph(this);
+    this.graph.expand(nodeId, clusterId);
 
     if (scrollToSubclasses) {
-      this.scrollTo(Array.from(subclasses));
+      this.scrollTo(subclasses);
     }
 
     this.emit('expand', nodeId);
   }
 
-  collapse(nodeId) {
+  collapse(nodeId, scrollToPackage = true) {
     const pkg = this.currentDiagramModel.class_package[nodeId];
     if (!pkg) {
       return;
@@ -681,57 +415,38 @@ export default class ComponentDiagram extends Models.EventSource {
 
     this.graph.removeNode(`${pkg}-cluster`);
 
-    setNode(this.graph, { id: pkg, type: 'package' });
+    const obj = { id: pkg, type: 'package' };
+    setChildrenCount(obj, this.currentDiagramModel);
+    this.graph.setNode(obj);
+
     pkgClasses.forEach((id) => {
       this.graph.removeNode(id);
 
-      activeNodes(this, id, this.currentDiagramModel.class_calls, (cls) => {
+      const model = this.currentDiagramModel;
+      activeNodes(this.graph.graph, model, model.class_calls[id], (cls) => {
         if (cls !== pkg) {
-          setEdge(this.graph, pkg, cls);
+          this.graph.setEdge(pkg, cls);
         }
       });
 
-      activeNodes(this, id, this.currentDiagramModel.class_callers, (cls) => {
+      activeNodes(this.graph.graph, model, model.class_callers[id], (cls) => {
         if (cls !== pkg) {
-          setEdge(this.graph, cls, pkg);
+          this.graph.setEdge(cls, pkg);
         }
       });
     });
 
-    renderGraph(this);
+    this.graph.collapse(pkg);
 
-    this.scrollTo(pkg);
+    if (scrollToPackage) {
+      this.scrollTo(pkg);
+    }
 
     this.emit('collapse', pkg);
   }
 
   makeRoot(nodeId) {
-    const visitedNodes = new Set();
-    const visitedEdges = new Set();
-    const queue = [nodeId];
-
-    while (queue.length > 0) {
-      const currentId = queue.pop();
-      if (!visitedNodes.has(currentId)) {
-        this.graph.outEdges(currentId).forEach((e) => {
-          visitedEdges.add(e);
-          queue.push(e.w);
-        });
-
-        visitedNodes.add(currentId);
-      }
-    }
-
-    // cleanup non traversable nodes
-    this.graph.nodes().forEach((node) => {
-      if (visitedNodes.has(node)) {
-        return;
-      }
-      this.graph.removeNode(node);
-    });
-
-    renderGraph(this);
-
+    this.graph.makeRoot(nodeId);
     this.scrollTo(nodeId);
   }
 

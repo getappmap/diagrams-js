@@ -438,6 +438,23 @@ export function selector(value) {
   return element;
 }
 
+export function hashify(obj) {
+  const clone = { ...obj };
+  Object.keys(obj).forEach((key) => {
+    const val = obj[key];
+    if (Array.isArray(val)) {
+      clone[key] = new Set(val);
+    } else if (val instanceof Set) {
+      clone[key] = val;
+    } else if (val && typeof val === 'object') {
+      clone[key] = hashify(val);
+    } else {
+      clone[key] = val;
+    }
+  });
+  return clone;
+}
+
 // Move the minimum amount to put the element into view
 export function lazyPanToElement(viewport, element, padding = 0) {
   if (!element) {
@@ -493,6 +510,21 @@ export function panToNode(viewport, node) {
   }
 
   viewport.translateTo(node.offsetLeft, node.offsetTop, target);
+}
+
+export function getEventTarget(target, container = document, selector = '') {
+  const selectedElements = Array.from(container.querySelectorAll(selector));
+  let el = target;
+
+  while (el) {
+    if (selectedElements.includes(el)) {
+      break;
+    }
+
+    el = el.parentNode;
+  }
+
+  return el;
 }
 
 export {
