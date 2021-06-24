@@ -1,9 +1,9 @@
 # Installation
 
-Install package `@appland/diagrams` from NPM registry.
+Install package `@appland/diagrams-old` from NPM registry.
 
 ```
-npm install @appland/diagrams
+npm install @appland/diagrams-old
 ```
 
 # Usage

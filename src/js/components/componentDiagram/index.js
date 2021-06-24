@@ -484,6 +484,20 @@ export default class ComponentDiagram extends Models.EventSource {
       return;
     }
 
+    ['class_callers', 'class_calls', 'class_package', 'package_calls', 'package_classes'].forEach((key) => {
+      if (Object.keys(data[key]).includes('')) {
+        delete data[key][''];
+      }
+    });
+
+    ['class_callers', 'class_calls', 'package_calls'].forEach((k) => {
+      Object.entries(data[k]).forEach(([key, value]) => {
+        if (Array.isArray(value) && value.includes(null)) {
+          value.splice(value.indexOf(null), 1);
+        }
+      });
+    });
+
     if (!this.initialModel) {
       this.initialModel = { ...data };
     }
